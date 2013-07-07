@@ -1,0 +1,45 @@
+# Set prefix to C-a
+# Turns out much nicer to call the command mode ( C-a ':' )
+set -g prefix C-a
+# Make C-a C-a print C-a, remove the unneeded C-b C-b binding
+bind C-a send-prefix
+unbind C-b
+
+# start window numbering at 1
+set -g base-index 1
+
+# vi-style controls for copy mode
+setw -g mode-keys vi
+
+# vi-style pane selection
+bind  -r h select-pane -L
+bind  -r j select-pane -D
+bind  -r k select-pane -U
+bind  -r l select-pane -R
+
+bind-key \ kill-session
+
+
+# I don't really know why this is required like this.
+# without the if statement it doesn't change once open
+
+# This works, but only kind of - the first terminal is always named
+# screen, but every terminal after that is determined by this
+# With the '-g' any console tmux session overrides all Xterm sessions and
+# default-terminal is 'screen' for them all. But it stops the first pane
+# of new sessions going to default (as it would without the '-g'.
+if '[ -n "$DISPLAY" ]' 'set-option -g default-terminal screen-256color'
+if '[ -z "$DISPLAY" ]' 'set-option -g default-terminal screen'
+#
+# Other options I'm thinking of trying
+#set-option -g default-terminal screen-256color
+
+#Reload source file
+bind-key R source-file ~/.tmux.conf \; display-message "source-file done"
+
+
+# The foreground borders don't show as the font I use doesn't show utf-8
+# set-option pane-active-border-fg green
+# set-option pane-active-border-bg green
+# set-option pane-border-fg green
+# set-option pane-border-bg green

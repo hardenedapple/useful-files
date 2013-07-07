@@ -1,0 +1,98 @@
+#!/bin/bash
+#
+# ~/.xinitrc
+#
+# remove uneeded path from xset, add extra ones for terminus font.
+xset -fp /usr/share/fonts/OTF/
+xset +fp /usr/share/fonts/local/
+xset +fp /usr/share/fonts/artwiz-fonts/
+xset fp rehash
+
+# Executed by startx (run your window manager from here)
+
+if [ -d /etc/X11/xinit/xinitrc.d ]; then
+  for f in /etc/X11/xinit/xinitrc.d/*; do
+    [ -x "$f" ] && . "$f"
+  done
+  unset f
+fi
+
+
+# Default is awesome - I get much more work done there
+# to get pekwm etc, have to run with xinitrc, not startx
+# don't think the full paths are needed for ratpoison and jwm, but the
+# wiki has that as the example and I haven't checked yet.
+
+# Some window managers have a startup script some don't
+# so I've loaded my compensation for broken key here for those.
+
+/usr/lib/systemd/systemd --user &
+
+
+# Loads the non-colour  xresources, the colours are chosen based on wm
+xrdb -load ~/xresources/base_resources
+
+case $1 in
+    "jwm")        xrdb -merge ~/xresources/awesome_personal_resources
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec /usr/bin/jwm
+                  ;;
+
+    "pek_woman")  xrdb -merge ~/xresources/standard_but_calmer 
+                  feh --bg-fill ~/.config/wallpapers/multiimage_woman.jpg &
+                  exec pekwm --config ~/.config/pekwm/config
+                  ;;
+
+    "pek_build")  xrdb -merge ~/xresources/standard_but_calmer 
+                  feh --bg-fill ~/.config/wallpapers/skippin___skool_by_ether.jpg &
+                  exec pekwm --config ~/.config/pekwm/config
+                  ;;
+
+     "pek_pier") xrdb -merge ~/xresources/awesome_personal_resources
+                 feh --bg-fill ~/.config/wallpapers/pier_house.jpg &
+                 exec pekwm --config ~/.config/pekwm/windmill
+                 ;;
+
+    "pek_windmill") xrdb -merge ~/xresources/vinyl
+                 feh --bg-fill ~/.config/wallpapers/windmill_sillhouette.jpg &
+                 exec pekwm --config ~/.config/pekwm/windmill
+                 ;;
+
+    "subtle_new") xrdb -merge ~/xresources/awesome_personal_resources
+                  feh --bg-fill ~/.config/wallpapers/earthrise_1.jpg
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec subtle
+                  ;;
+
+    "subtle_orig") xrdb -merge ~/xresources/subtle_initial_resources
+                  feh --bg-fill ~/.config/wallpapers/block_colours_woman_sunglasses.jpg
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec subtle
+                  ;;
+
+    "ratpoison")  xrdb -merge ~/xresources/awesome_personal_resources
+                  feh --bg-fill ~/.config/wallpapers/earthrise_1.jpg
+                  xmodmap ~/xmodmaps/xmodmap_control
+              exec /usr/bin/ratpoison -f ~/.config/ratpoison/ratpoisonrc
+                  ;;
+
+    "dust")       xrdb -merge ~/xresources/vinyl
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec awesome -c ~/.config/awesome/alt_rcs/dustrc.lua
+                  ;;
+
+    "tree")       xrdb -merge ~/xresources/awesome_tree_resources
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec awesome -c ~/.config/awesome/alt_rcs/treerc.lua
+                  ;;
+
+    "muted")      xrdb -merge ~/xresources/awesome_muted_resources
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec awesome -c ~/.config/awesome/alt_rcs/muterc.lua
+                  ;;
+
+    *)            xrdb -merge ~/xresources/awesome_personal_resources
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec awesome
+                  ;;
+esac

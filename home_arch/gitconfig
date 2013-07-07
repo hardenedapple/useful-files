@@ -1,0 +1,9 @@
+[user]
+    name = Apple
+    email = Apple@server.fake
+[credential]
+    helper = cache
+[push]
+    default = simple
+[color]
+    ui = true

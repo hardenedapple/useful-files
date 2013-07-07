@@ -1,0 +1,140 @@
+Import the better version from home, but use this version for anything I find today
+
+    Working in C:
+        
+        Save error files in a file (e.g. error_file)
+        open error file with   vim -q error_file
+        vim will open the file that the error ocurred in, at the position of the error
+        use :cn  and :cN  to go to next and previous error respectively
+
+        Also:
+            in vim, enter    :make
+            vim will run "make" in the shell, then open code at the first error
+            if not using a makefile:
+                :set makeprg=gcc\ test.c
+            and use the :make command, which will then call the program gcc
+
+    Autocomplete:
+        
+        Not only can vim autocomplete words, but can only look for filenames:
+            Ctrl-X Ctrl-F will look for filenames in the current directory.
+            ../ Ctrl-X Ctrl-F    will look for filenames in the above directory
+
+        gd  goto declaration
+        gD  goto global declaration
+
+    Indent control
+        see www.stackoverflow.com   question how do i indent multiple lines quickly in vi
+        noteably:  in INSERT mode    Ctrl-D and Ctrl-T decrease and increase indentation of the line you're on
+
+
+    To remember:
+        I seem to not be able to remember the commands to create a scratch file
+        so I'm writing them down here:
+            setlocal buftype=nofile
+            setlocal bufhidden=hide
+            setlocal noswapfile
+
+    Switch the desert color scheme definitions, cterm and gui
+
+
+    Folding:
+        Find a way to add the foldcolumn to files that already have the view saved
+        Figure out foldmethod=expr:
+            Do I need a plugin? (use ~/.vim/after/ftplugin/markdown/folding.vim to fold markdown files)
+            See vimcasts.org/episodes/writing-a-custom-fold-expression/
+            I think I should be able to create these custom files without any addition, but it's not working at the moment
+            Problem: the automatic C plugin doesn't allow an extra plugin after - though cpp does
+                     Has a bit of a problem with saving the view - though automatic folding should help with that
+                     Need to look at the line below and the line above
+            Look at vim regex - want to match a line that has no characters (even whitespace) before a { or }
+
+
+    Plugins:
+        If filetype plugin  is on then vim searches the "runtimepath" for a ftplugin folder
+        runtimepath=~/.vim, /usr/share/vim/vimfiles, /usr/share/vim/vim73, /usr/share/vim/vimfiles/after. ~/.vim/after
+        It then reads the files in the ftplugin folder and depending on the filetype runs the files
+            e.g. for a c++ file runs cpp.vim in the ftplugin folder
+
+        Problem:
+            Running the files in folders at the start of the runtimepath influence those later on
+                Many of the files in the vim73/ftplugin folder have a line that stops loading any other plugin file
+            Having the autocommand mkview and loadview upon entering and leaving the buffer means the folding things aren't done well
+
+
+    Colour scheme:
+        Add a new syntax group in cpp.vim in the syntax folder
+            matches any word before a ( whose line starts without spaces ? - maybe a better definition required.
+        Many different colorschemes, I like gvim: default, desert and zenburn
+            I think I'll decide on a different color scheme depending
+            on filetype, but don't know which as yet
+            Also, have a bit of a problem getting ftplugins to work, so can't as yet
+
+        Convert vim colorscheme to a gvim colorscheme:
+            http://www.miek.nl/blog/archives/2011/12/24/convert_vim_colors_to_gvim_colors/
+            Can just use :highlight <group> which will print out the settings at the moment.
+
+        Would like to change the colour a little depending on focus
+            e.g. the vim window without focus has no cursorcolumn
+            and cursorline highlight
+            don't think that's possible - may be, can't find it at the moment
+
+        I have only a placeholder colour for the following:
+            StatusLine(NC)
+            Pmenu (and all related)
+            FoldColumn
+            Folded (in tty only)
+
+        May want to change whats displayed:
+            StatusLine
+
+    Commands to learn about:
+        Tabs:
+            Can open multiple files as tabs in Vim.
+            Add tab                :tabe  (tab edit)
+            Switch between tabs    gt gT :tabn :tabp
+            Close tabs             :wq :q
+        Buffer Commands:
+            Can open multiple files seperately.
+            Switch beteen          :next :previous :b <filename>  :b# (previously open)
+            close                  :wq :q :bd :bw (bw clears variables etc on top of closing the buffer)
+                           Can use :ls to show buffers and then :1bw  or  :1,2 dw to close buffer 1 or buffer 1-2 respectively
+                           How do I close all buffers? - think should just use :q but would be nice if there were alternate option
+            Open another file      :e <filename>
+            There are some other options I'm a little confused about
+            Ability to change buffer without writing the existing buffer
+            set hidden
+            Ability to make a scratch file (not associated to any real file)
+            
+        Splitscreen:
+            Can have files in splitscreen
+            Open                   sp <filename> Ctrl-W (s or v  horizontal or vertical)
+            Switch between         Ctrl-W (up down j k (or left right h l if split vertically) w W)
+            Close                  :wq :q  Ctrl-W c (close this window)  Ctrl-W o (close all windows other than this)
+        Args:
+            Open - vim <file1> <file2> <file3>
+            Seems to work with many of the same commands as Buffers
+            Also have       :argadd <filename>  :argdelete <filename>  :argedit <filename>
+            Can add multiple files at the same time with this command
+                e.g.        :argadd <file1> <file2> <file3>
+            
+        Read command:
+            :r(ead) <textfile>   insert text from file into the current buffer
+            :r ! <command>       insert output from shell command into the current buffer
+        Search between lines n, N: /\%><n>l\%<<N>l<search-pattern>
+
+        Apply command to all open buffers: bufdo (see help)
+
+        "Global command"  :g/something/something_else
+
+    Commands I don't use a lot but want to remember:
+        open buffer in new vertical split (right, left resp.)
+            :vert belowright sv <buffer>  and   :vert sb <buffer>
+        :shell      puts user into a shell, Ctrl-D to exit back into vim
+        Ctrl+G      shows filename
+        in INSERT mode  <Ctrl-r>%  inserts filename
+        :read !date inserts date (add some options to define format)
+
+
+    Viminfo files:
+        Why are there quite a few in my home folder (viminfx.tmp, viminfz.tmp, etc)? how to stop them appearing?
