@@ -1,0 +1,65 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[ -z "$PS1" ] && return
+
+# don't put duplicate lines or lines starting with space in the history.
+HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite
+shopt -s histappend
+
+#Stop less saving my search commands
+export LESSHISTFILE="/dev/null"
+
+# Pretty colours for ls and grep
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$( dircolors -b ~/.dircolors)" || eval "$( dircolors -b )"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+fi
+
+# Make ll append an indicator to each entry
+alias ll='ls -F'
+
+# Nicer command prompt
+if [ $( id -u ) -eq 0 ]; then
+    PS1='\[\e[0;31m\]TODO # \[\e[m\]'
+else
+    PS1='\[\e[0;36m\]TODO $ \[\e[m\]'
+fi
+
+# Making the default editor vim as many programs that enter the EDITOR
+# env are on the console and I prefer to have them open vim
+export EDITOR=vim
+
+
+# Make default editor vim
+# if in xterm (i.e. running X) default is gvim
+#if [[ $TERM == xterm-256color ]]
+#then
+#   export EDITOR=gvim
+#else
+#   export EDITOR=vim
+#fi
+
+# Let pacman tell me where to find a command if I type unknown command
+#source /usr/share/doc/pkgfile/command-not-found.bash
+# Takes a while (I think this may be something to do with having yaourt
+# and it searching the entire AUR repo)
+
+# get the prompt to accept vi commands
+set -o vi
+
+# Give title of terminal in X as Apples_Terminal when up
+# and Minimised_Terminal when minimised
+if [ $TERM == "xterm-256color" ]
+then
+    export PROMPT_COMMAND='echo -ne "\033]0;Apples_Terminal\007"; echo -ne "\033]1;Minimised_Terminal\007"'
+fi
+
+# Add bash autocomplete when using sudo
+complete -cf sudo
+alias git_graph='git log --abbrev-commit --all --graph --decorate --color'

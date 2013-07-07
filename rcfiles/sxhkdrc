@@ -1,0 +1,40 @@
+# Have removed all keychains as they were interfering with gvim and
+# firefox 'save' pop-up
+
+# general
+control + shift + t
+    toggle_xcmp.sh
+
+XF86AudioRaiseVolume
+    amixer set Master 5%+
+
+XF86AudioLowerVolume
+    amixer set Master 5%-
+
+# music
+control + super + {period,comma,slash}
+    mpc {next,prev,toggle}
+
+# Open programs
+# control + super +o; {space,g}
+    # {firefox,gvim}
+
+# Transparency
+super + {Next,Prior}
+    transset-df --actual {--dec,--inc} 0.05
+
+control + super + {Next,Prior}
+    transset-df --actual -x 0.6 { , }
+
+# the geometry part is there for pekwm, awesome and subtle ignore it
+# the name part is there for subtle tags
+# the font part is there so that those apps that need a utf8 font get one
+# control + super + o ; {l,b,n,i}
+    # xterm -geometry 78x22 -name {rtorrent -e rtorrent,ranger -e ranger,testterm -e tmux new-session,irssi -e irssi}
+
+# control + super + o; {m,v}
+    # xterm -font -*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-* -geometry 78x22 -name {ncmpcpp -e 'ncmpcpp -c ~/.config/ncmpcpp/config', alsamixer -e alsamixer}
+
+shift + super + Return
+    xterm -font -*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-* -geometry 78x22 -name testterm
+

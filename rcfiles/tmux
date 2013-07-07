@@ -12,10 +12,10 @@ set -g base-index 1
 setw -g mode-keys vi
 
 # vi-style pane selection
-bind  -r h select-pane -L
-bind  -r j select-pane -D
-bind  -r k select-pane -U
-bind  -r l select-pane -R
+bind  h select-pane -L
+bind  j select-pane -D
+bind  k select-pane -U
+bind  l select-pane -R
 
 bind-key \ kill-session
 
@@ -39,7 +39,7 @@ bind-key R source-file ~/.tmux.conf \; display-message "source-file done"
 
 
 # The foreground borders don't show as the font I use doesn't show utf-8
-# set-option pane-active-border-fg green
-# set-option pane-active-border-bg green
-# set-option pane-border-fg green
+set-option pane-active-border-fg white
+# set-option pane-active-border-bg white
+set-option pane-border-fg green
 # set-option pane-border-bg green

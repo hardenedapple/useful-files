@@ -1,0 +1,50 @@
+[ui]
+username = malcomso <not_telling@fake.com>
+# merge = gvimdiff
+
+[hostfingerprints]
+bitbucket.org = 24:9c:45:8b:9c:aa:ba:55:4e:01:6d:58:ff:e4:28:7d:2a:14:ae:3b
+
+[extensions]
+color =
+extdiff =
+graphlog =
+histedit =
+mq =
+purge =
+rebase =
+record =
+
+# change the default color to not be bold (for status output)
+# to add bold, add the word bold to the end of these lines
+[color]
+status.deleted  = cyan
+status.modified = blue
+status.added    = green
+status.removed  = red
+status.unknown  = magenta
+
+[mq]
+secret = true
+
+[merge-patterns]
+** = gvimmerge
+
+# Want to add vimdiff for those times when don't have X server
+# figure out how later
+
+[merge-tools]
+gvimmerge.executable = /usr/bin/gvimdiff
+gvimmerge.args = $local $other
+gvimmerge.premerge = true
+gvimmerge.binary = false
+gvimmerge.checkchanged = true
+gvimmerge.gui = true
+
+
+vimmerge.executable = /usr/bin/vimdiff
+vimmerge.args = $local $other
+vimmerge.premerge = true
+vimmerge.binary = true
+vimmerge.checkprompt = true
+vimmerge.gui = false

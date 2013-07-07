@@ -294,6 +294,7 @@ gravity :ranger_low,     [   0,  60, 100,  40 ]
 gravity :music_player,   [   60,   0,  40,  50 ]
 gravity :free_term,      [   2,   5,  55,  50 ]
 gravity :testoutterm,    [   55, 64,  43,  34 ]
+gravity :alsahover,      [   2, 5,  38,  36 ]
 
 #
 # == Grabs
@@ -484,7 +485,7 @@ grab "W-S-q", [ :free_term ]
 # Exec programs
 grab "W-Return", "xterm -e tmux new-session"
 grab "W-C-Return", "xterm"
-grab "W-C-n", "xterm -name testterm -e tmux new-session"
+# grab "W-C-n", "xterm -name testterm -e tmux new-session"
 # grab "W-C-S-g", "gvim"
 
 # Run Ruby lambdas
@@ -661,6 +662,11 @@ end
 # Simple tags
 tag "browser", "uzbl|opera|firefox|navigator"
 
+tag "fullflash" do
+  match :instance => "plugin-container"
+  float true
+end
+
 # create a tag to put a terminal in the bottom right corner of firefox
 # hence can have a terminal to test thing in while browsing internet
 
@@ -687,8 +693,9 @@ end
 
 tag "alsamixer" do
   match :instance => "alsamixer"
-  float true
-  geometry [5, 40, 600, 320]
+  gravity :alsahover
+  # float true
+  # geometry [5, 40, 600, 320]
   resize true
 end
 
@@ -796,7 +803,7 @@ end
 # Idea is to create a grab to make a terminal with the tag "testterm"
 # then use that when I need a terminal above firefox
 view "terms", "terms|default"
-view "www",   "browser|testterm|alsamixer"
+view "www",   "browser|testterm|alsamixer|fullflash"
 view "irc", "irssi"
 view "mpd", "ncmpcpp|alsamixer"
 view "rtorrent", "rtorrent"

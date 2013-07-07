@@ -26,7 +26,7 @@ fi
 # Some window managers have a startup script some don't
 # so I've loaded my compensation for broken key here for those.
 
-/usr/lib/systemd/systemd --user &
+/usr/lib/systemctl --user is-active default.target || /usr/lib/systemd/systemd --user &
 
 
 # Loads the non-colour  xresources, the colours are chosen based on wm
@@ -74,6 +74,11 @@ case $1 in
                   feh --bg-fill ~/.config/wallpapers/earthrise_1.jpg
                   xmodmap ~/xmodmaps/xmodmap_control
               exec /usr/bin/ratpoison -f ~/.config/ratpoison/ratpoisonrc
+                  ;;
+
+    "shifty")     xrdb -merge ~/xresources/awesome_personal_resources
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec awesome -c ~/.config/awesome/alt_rcs/shifty.lua
                   ;;
 
     "dust")       xrdb -merge ~/xresources/vinyl

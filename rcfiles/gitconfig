@@ -1,0 +1,14 @@
+[user]
+	name = Apple
+	email = Apple@server.fake
+[credential]
+	helper = cache
+[push]
+	default = simple
+[color]
+	ui = true
+[alias]
+    vimdiff = difftool -t vimdiff
+    graph = log --abbrev-commit --all --graph --decorate --color
+[difftool "vimdiff"]
+    cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
