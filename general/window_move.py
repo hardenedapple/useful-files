@@ -50,12 +50,22 @@ def snap_to(position):
     dsp.flush()
 
 
+def readoneline(infile):
+    """
+    Use the blocking open of a fifo to blockingly read one line only
+
+    This means I don't have a loop going over and over again - I have a loop
+    that waits for a signal
+    """
+    with open(infile) as blckread:
+        return blckread.readline()
+
+
 def follow(myfile):
-    """similar to tail -f, comes fom www.dabeaz.com/generators/"""
+    """similar to tail -f, mainly comes fom www.dabeaz.com/generators/"""
     while True:
-        retline = myfile.readline()
+        retline = readoneline(myfile)
         if not retline:
-            time.sleep(0.1)
             continue
         yield retline.strip()
 
@@ -73,13 +83,12 @@ if __name__ == "__main__":
     os.mkfifo('snap_file')
     validpos = ['tr', 'tl', 'bl', 'br']
     sizes = {'small': small_dict, 'medium': medium_dict}
-    with open('snap_file') as inp:
-        for line in follow(inp):
-            if line in validpos:
-                current_pos = line
-            elif line in sizes:
-                position_dict = sizes[line]
-            else:
-                break
-            snap_to(current_pos)
+    for line in follow('snap_file'):
+        if line in validpos:
+            current_pos = line
+        elif line in sizes:
+            position_dict = sizes[line]
+        else:
+            break
+        snap_to(current_pos)
     os.remove('snap_file')
