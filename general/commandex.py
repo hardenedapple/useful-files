@@ -53,6 +53,7 @@ class OpenApp:
                                 'ncmpcpp -c ~/.config/ncmpcpp/config'],
                           'a': ['nothing', 'much'],
                           # For some reason can't get tmux to work with Popen
+                          # have also tried 'tmux', 'new-session'
                           # 't': ['-name', 'testterm', '-e', 'tmux new-session'],
                           't': ['-name', 'testterm'],
                           'v': ['-name', 'alsamixer', '-e', 'alsamixer'],

@@ -6,6 +6,7 @@ define possible positions in 'position_dict', execute them in 'snap_to'
 
 from Xlib import display
 import socket
+from select import select
 
 # TODO: To generalise the script: find the desktop size and use fractions of
 #       that size.
@@ -76,21 +77,20 @@ if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', 8732))
     s.listen(4)
-    # At the moment this loses the main benefits of using a socket over a fifo
-    # Benefits:
-    #       Possible two-way communication (not required for me)
-    #       Client distinguishability - (probably not important for this)
-    #
-    # Will profile later to see how the speed goes
+    readsocks = [s]
+    # Will profile later to see how the speed goes compared to fifo
     while True:
-        conn, addr = s.accept()
-        change_func(conn.recv(1024))
-        # I shutdown repeatedly so I can use 'nc' to send a message and let it
-        # automatically stop straight away>
-        # I assume this adds a lot of overhead to just reading from the socket
-        # Also stops the possibility of two-way communication (if I ever need
-        # it)
-        # should be some way to tell nc: "quit after sending message"
-        # don't know how at the moment
-        conn.shutdown(socket.SHUT_RDWR)
-        conn.close()
+        # Don't want to write anything at the moment
+        readables, writeables, exceptions = select(readsocks, [], [])
+        for sock in readables:
+            if s is sock:
+                newconn, newaddr = sock.accept()
+                readsocks.append(newconn)
+                continue
+            data = sock.recv(10)
+            if not data:
+                readsocks.remove(sock)
+                sock.shutdown(socket.SHUT_RDWR)
+                sock.close()
+                continue
+            change_func(data)
