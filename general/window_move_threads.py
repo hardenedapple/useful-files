@@ -7,13 +7,14 @@ This uses sockets to accept commands/messages, it allows future expansion
 (though for what I don't know), at the expense of a slightly more complicated
 command sending method.
 
-This version uses 'select' to multiplex the server and accept connections this
-gives a nice solution to the 'end' message.
+This version (with threads) is not very good - the requirement to stop the process
+with a message has made me put a not-nice interrupt_main call.
 """
 
 from Xlib import display
 import socket
-from select import select
+import threading
+import thread
 
 # TODO: To generalise the script: find the desktop size and use fractions of
 #       that size.
@@ -59,7 +60,7 @@ def snap_to(position):
 
 def change_func(inp):
     """Handle the input and call relevant snap_to position"""
-    global current_pos, position_dict
+    global current_pos, position_dict, validpos, sizes
     pos = inp.decode('utf-8').strip()
     if pos in validpos:
         current_pos = pos
@@ -70,31 +71,27 @@ def change_func(inp):
     snap_to(current_pos)
 
 
-def clearup(readers):
-    """Close all sockets (when multiplexing)"""
-    for sock in readers:
-        sock.shutdown(socket.SHUT_RDWR)
-        sock.close()
-
-
-def handle_socks():
-    """Function to handle selection of sockets when multiplexing"""
-    # global readsocks
-    for sock in readables:
-        if s is sock:
-            newconn, _ = sock.accept()
-            readsocks.append(newconn)
-            continue
+def client_thread(sock):
+    """Thread function: runs a single connection"""
+    # NOTE: If this function is blocking, it has a connection, so no problem
+    #       waiting for it
+    while not myevent.is_set():
+        # largest valid command is 'small'
         data = sock.recv(10).strip()
         if not data:
-            readsocks.remove(sock)
-            sock.shutdown(socket.SHUT_RDWR)
-            sock.close()
-            continue
+            # connection has been closed by other end
+            break
         elif data == 'end':
-            return False
+            myevent.set()
+            break
         change_func(data)
-    return True
+    # Have to check how this acts in case of multiple connections
+    # (I assume two threads can reach this at the same time and neither raise
+    # the interrupt, could the same happen but both raise?)
+    if myevent.is_set() and threading.active_count() == 2:
+        thread.interrupt_main()
+    sock.shutdown(socket.SHUT_RDWR)
+    sock.close()
 
 
 if __name__ == "__main__":
@@ -112,11 +109,15 @@ if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', 8732))
     s.listen(4)
-    readsocks = [s]
     # Will profile later to see how the speed goes compared to fifo
-    while True:
-        # Don't want to write anything at the moment
-        readables, writeables, exceptions = select(readsocks, [], [])
-        if not handle_socks():
-            clearup(readables)
-            break
+    myevent = threading.Event()
+    while not myevent.is_set():
+        # This blocks - so I need a keyboard interrupt to break it
+        # (which is why the 'select' method is the best
+        conn, addr = s.accept()
+        threading.Thread(target=client_thread, args=(conn,)).start()
+
+    for th in threading.enumerate():
+        # if th.ident != threading.get_ident():
+        if th != threading.current_thread():
+            th.join()
