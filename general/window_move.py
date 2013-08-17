@@ -5,12 +5,18 @@ define possible positions in 'position_dict', execute them in 'snap_to'
 
 This version uses a fifo, it seems the best method for this simple use, but if
 I ever find a reason to extend it, I'll want to switch to sockets.
+
+As this version will only ever be used as a script, I'm using global variables
+that I can change manually If I ever want to.
+
+If I ever intend to import some of these functions, get those from
+window_move_sockets.py - they're more general.
 """
 
-import math
-import os
 from Xlib import display
 import atexit
+import math
+import os
 
 # TODO: Add option to take specific geometries from the fifo and move the
 #       window to that. e.g. if line matches a regex, interpret it as a
@@ -28,38 +34,55 @@ import atexit
 #
 #       Convert Xlib to python3 - will take a long time before I know what's
 #                                 happening let alone be able to modify it.
+
+borders = {'top': 0.006,
+           'side': 0.004}
+
 taskbarheight = 15
+
+position_dict = {'tl': lambda g: (edges['top'], edges['left']),
+                 'tr': lambda g: (edges['top'], edges['right'] - g.width),
+                 'bl': lambda g: (edges['bottom'] - g.height, edges['left']),
+                 'br': lambda g: (edges['bottom'] - g.height,
+                                  edges['right'] - g.width)
+                 }
+
+abstract_sizes = {'small': (0.35, 0.5),
+                  'normal': (0.45, 0.47),
+                  'long': (0.3, 0.995)}
 
 
 #
 # Functions to move/resize
 #
-def snap_to(pos_func, disp):
+def snap_to(position):
     """Given 'position' function, move focussed client accordingly"""
-    window = disp.get_input_focus().focus
+    # dsp, and position_dict are global variables
+    window = dsp.get_input_focus().focus
     geometrynow = window.get_geometry()
-    ypos, xpos = pos_func(geometrynow)
+    ypos, xpos = position_dict[position](geometrynow)
     window.configure(x=xpos, y=ypos)
-    disp.flush()
+    dsp.flush()
 
 
-def resize(size, disp, edgepos):
+def resize(size):
     """Given a 'size', resize client accordingly"""
-    window = disp.get_input_focus().focus
-    height, width = size
+    # dsp, and position_dict are global variables
+    window = dsp.get_input_focus().focus
+    height, width = sizes[size]
     geom = find_geom(window)
     window.configure(height=height, width=width)
-    if geom.x + width > edgepos['right'] or geom.y + height > edgepos['bot']:
-        geom.x -= max(geom.x + width - edgepos['right'], 0)
-        geom.y -= max(geom.y + height - edgepos['bot'], 0)
+    if geom.x + width > edges['right'] or geom.y + height > edges['bottom']:
+        geom.x -= max(geom.x + width - edges['right'], 0)
+        geom.y -= max(geom.y + height - edges['bottom'], 0)
         window.configure(x=geom.x, y=geom.y)
-    disp.flush()
+    dsp.flush()
 
 
 #
 # Functions to convert percentage values to pixel values
 #
-def find_edges_in_pixels(scr, borders):
+def find_edges_in_pixels(scr):
     """Convert the hard-coded borders to edges scaled to screen size"""
     # Assume want symmetry - if don't code it different later
     # Only partially accounted for status bar here (not accounted in SIZE of
@@ -68,17 +91,17 @@ def find_edges_in_pixels(scr, borders):
     bottom = scr.height_in_pixels - top
     left = math.floor(scr.width_in_pixels * borders['side'])
     right = scr.width_in_pixels - left
-    return {'top': top + taskbarheight, 'bot': bottom,
+    return {'top': top + taskbarheight, 'bottom': bottom,
             'left': left, 'right': right}
 
 
-def create_actual_sizes(scr, abs_sizes):
+def create_actual_sizes(scr):
     """Convert the hard-coded sizes into sizes scaled to screen size"""
     def conv(tup):
         """Convert percentages to pixels"""
         return (math.floor(tup[0] * scr.height_in_pixels),
                 math.floor(tup[1] * scr.width_in_pixels))
-    return {key: conv(val) for key, val in abs_sizes.iteritems()}
+    return {key: conv(val) for key, val in abstract_sizes.iteritems()}
 
 
 def find_geom(win):
@@ -112,47 +135,25 @@ def follow(myfile):
         yield retline.strip()
 
 
-#
-# Main
-#
-def main():
-    """Create display object, define position functions and edges, start the
-    main loop"""
-    dsp = display.Display()
-    scre = dsp.screen()
-    # Note sure if I'd prefer global variables and not passing as many
-    # variables to functions.
-    #
-    # Think I'd prefer it that way for the script as it is, but if I ever want
-    # to use it in a larger project, the more general functions are better
-    myborders = {'top': 0.006,
-                 'side': 0.004}
+# More global variables
+dsp = display.Display()
+scre = dsp.screen()
+edges = find_edges_in_pixels(scre)
+sizes = create_actual_sizes(scre)
 
-    position_dict = {'tl': lambda g: (edges['top'], edges['left']),
-                     'tr': lambda g: (edges['top'], edges['right'] - g.width),
-                     'bl': lambda g: (edges['bot'] - g.height, edges['left']),
-                     'br': lambda g: (edges['bot'] - g.height,
-                                      edges['right'] - g.width)
-                     }
-
-    abstract_sizes = {'small': (0.35, 0.5),
-                      'normal': (0.45, 0.47),
-                      'long': (0.3, 0.995)}
-
-    edges = find_edges_in_pixels(scre, myborders)
-    sizes = create_actual_sizes(scre, abstract_sizes)
+if __name__ == "__main__":
+    # Initialise the starting positions
+    # Want a function that finds the current position.
+    # Problem is get_geometry always gives 0, 0 for position
+    # something to do with reparenting?
     os.mkfifo('snap_file')
     # In case of some error somewhere
     atexit.register(os.remove, 'snap_file')
     for line in follow('snap_file'):
         if line in position_dict:
-            snap_to(position_dict[line], dsp)
+            snap_to(line)
         elif line in sizes:
-            resize(sizes[line], dsp, edges)
-        elif line == 'end':
+            resize(line)
+        else:
             break
         # just leave all other words alone
-
-
-if __name__ == "__main__":
-    main()

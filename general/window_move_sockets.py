@@ -11,10 +11,10 @@ This version uses 'select' to multiplex the server and accept connections this
 gives a nice solution to the 'end' message.
 """
 
-import math
 from Xlib import display
-import socket
 from select import select
+import math
+import socket
 
 # TODO: Add option to take specific geometries from the fifo and move the
 #       window to that. e.g. if line matches a regex, interpret it as a
@@ -32,55 +32,38 @@ from select import select
 #
 #       Convert Xlib to python3 - will take a long time before I know what's
 #                                 happening let alone be able to modify it.
-
-borders = {'top': 0.006,
-           'side': 0.004}
-
 taskbarheight = 15
-
-position_dict = {'tl': lambda g: (edges['top'], edges['left']),
-                 'tr': lambda g: (edges['top'], edges['right'] - g.width),
-                 'bl': lambda g: (edges['bottom'] - g.height, edges['left']),
-                 'br': lambda g: (edges['bottom'] - g.height,
-                                  edges['right'] - g.width)
-                 }
-
-abstract_sizes = {'small': (0.35, 0.5),
-                  'normal': (0.45, 0.47),
-                  'long': (0.3, 0.995)}
 
 
 #
 # Functions to move/resize given position
 #
-def snap_to(position):
-    """Given 'position' key, move focussed client to that position"""
-    # dsp, and position_dict are global variables
-    window = dsp.get_input_focus().focus
+def snap_to(pos_func, disp):
+    """Given 'position' function, move focussed client accordingly"""
+    window = disp.get_input_focus().focus
     geometrynow = window.get_geometry()
-    ypos, xpos = position_dict[position](geometrynow)
+    ypos, xpos = pos_func(geometrynow)
     window.configure(x=xpos, y=ypos)
-    dsp.flush()
+    disp.flush()
 
 
-def resize(size):
+def resize(size, disp, edgepos):
     """Given a 'size', resize client accordingly"""
-    # dsp, and position_dict are global variables
-    window = dsp.get_input_focus().focus
-    height, width = sizes[size]
+    window = disp.get_input_focus().focus
+    height, width = size
     geom = find_geom(window)
     window.configure(height=height, width=width)
-    if geom.x + width > edges['right'] or geom.y + height > edges['bottom']:
-        geom.x -= max(geom.x + width - edges['right'], 0)
-        geom.y -= max(geom.y + height - edges['bottom'], 0)
+    if geom.x + width > edgepos['right'] or geom.y + height > edgepos['bot']:
+        geom.x -= max(geom.x + width - edgepos['right'], 0)
+        geom.y -= max(geom.y + height - edgepos['bot'], 0)
         window.configure(x=geom.x, y=geom.y)
-    dsp.flush()
+    disp.flush()
 
 
 #
 # Functions to convert percentage values to pixel values
 #
-def find_edges_in_pixels(scr):
+def find_edges_in_pixels(scr, borders):
     """Convert the hard-coded borders to edges scaled to screen size"""
     # Assume want symmetry - if don't code it different later
     # Only partially accounted for status bar here (not accounted in SIZE of
@@ -89,17 +72,17 @@ def find_edges_in_pixels(scr):
     bottom = scr.height_in_pixels - top
     left = math.floor(scr.width_in_pixels * borders['side'])
     right = scr.width_in_pixels - left
-    return {'top': top + taskbarheight, 'bottom': bottom,
+    return {'top': top + taskbarheight, 'bot': bottom,
             'left': left, 'right': right}
 
 
-def create_actual_sizes(scr):
+def create_actual_sizes(scr, abs_sizes):
     """Convert the hard-coded sizes into sizes scaled to screen size"""
     def conv(tup):
         """Convert percentages to pixels"""
         return (math.floor(tup[0] * scr.height_in_pixels),
                 math.floor(tup[1] * scr.width_in_pixels))
-    return {key: conv(val) for key, val in abstract_sizes.iteritems()}
+    return {key: conv(val) for key, val in abs_sizes.iteritems()}
 
 
 def find_geom(win):
@@ -113,15 +96,6 @@ def find_geom(win):
 #
 # Functions to get/use input
 #
-def change_func(inp):
-    """Handle the input and call relevant snap_to position"""
-    pos = inp.decode('utf-8').strip()
-    if pos in position_dict:
-        snap_to(pos)
-    elif pos in sizes:
-        resize(pos)
-
-
 def clearup(readers):
     """Close all sockets (when multiplexing)"""
     for sock in readers:
@@ -129,43 +103,71 @@ def clearup(readers):
         sock.close()
 
 
-def handle_socks():
+def handle_socks(server, avail_now, tot_list, action):
     """Function to handle selection of sockets when multiplexing"""
-    # global readsocks
-    for sock in readables:
-        if s is sock:
+    for sock in avail_now:
+        if sock is server:
             newconn, _ = sock.accept()
-            readsocks.append(newconn)
+            tot_list.append(newconn)
             continue
         data = sock.recv(10).strip()
         if not data:
-            readsocks.remove(sock)
+            tot_list.remove(sock)
             sock.shutdown(socket.SHUT_RDWR)
             sock.close()
             continue
         elif data == 'end':
             return False
-        change_func(data)
+        action(data)
     return True
 
 
 #
 # Main
 #
-if __name__ == "__main__":
+def main():
+    """Create display object, define position functions and edges, start main
+    loop"""
     dsp = display.Display()
     scre = dsp.screen()
-    root = scre.root
-    edges = find_edges_in_pixels(scre)
-    sizes = create_actual_sizes(scre)
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('', 8732))
-    s.listen(4)
-    readsocks = [s]
+
+    myborders = {'top': 0.006,
+                 'side': 0.004}
+
+    abstract_sizes = {'small': (0.35, 0.5),
+                      'normal': (0.45, 0.47),
+                      'long': (0.3, 0.995)}
+
+    edges = find_edges_in_pixels(scre, myborders)
+    sizes = create_actual_sizes(scre, abstract_sizes)
+
+    position_dict = {'tl': lambda g: (edges['top'], edges['left']),
+                     'tr': lambda g: (edges['top'], edges['right'] - g.width),
+                     'bl': lambda g: (edges['bot'] - g.height, edges['left']),
+                     'br': lambda g: (edges['bot'] - g.height,
+                                      edges['right'] - g.width)
+                     }
+
+    def change_func(inp):
+        """Handle the input and call relevant snap_to position"""
+        pos = inp.decode('utf-8').strip()
+        if pos in position_dict:
+            snap_to(position_dict[pos], dsp)
+        elif pos in sizes:
+            resize(sizes[pos], dsp, edges)
+
+    serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serv.bind(('', 8732))
+    serv.listen(4)
+    readsocks = [serv]
     # Will profile later to see how the speed goes compared to fifo
     while True:
         # Don't want to write anything at the moment
-        readables, writeables, exceptions = select(readsocks, [], [])
-        if not handle_socks():
+        readables, _, _ = select(readsocks, [], [])
+        if not handle_socks(serv, readables, readsocks, change_func):
             clearup(readables)
             break
+
+
+if __name__ == "__main__":
+    main()
