@@ -26,6 +26,10 @@ super + {Next,Prior}
 control + super + {Next,Prior}
     transset-df --actual -x 0.6 { , }
 
+# My pop-up
+super + control + o
+    /home/apple/bin/commandex.py
+
 # the geometry part is there for pekwm, awesome and subtle ignore it
 # the name part is there for subtle tags
 # the font part is there so that those apps that need a utf8 font get one
@@ -36,5 +40,5 @@ control + super + {Next,Prior}
     # xterm -font -*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-* -geometry 78x22 -name {ncmpcpp -e 'ncmpcpp -c ~/.config/ncmpcpp/config', alsamixer -e alsamixer}
 
 shift + super + Return
-    xterm -font -*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-* -geometry 78x22 -name testterm
+    xterm -font '-*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-*' -geometry 78x22 -name testterm
 

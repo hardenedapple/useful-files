@@ -74,7 +74,7 @@ def change_func(inp):
 def client_thread(sock):
     """Thread function: runs a single connection"""
     # NOTE: If this function is blocking, it has a connection, so no problem
-    #       waiting for it
+    #       waiting for one last command.
     while not myevent.is_set():
         # largest valid command is 'small'
         data = sock.recv(10).strip()
@@ -88,6 +88,7 @@ def client_thread(sock):
     # Have to check how this acts in case of multiple connections
     # (I assume two threads can reach this at the same time and neither raise
     # the interrupt, could the same happen but both raise?)
+    # Does the whole GIL only letting one thread execute at a time stop this?
     if myevent.is_set() and threading.active_count() == 2:
         thread.interrupt_main()
     sock.shutdown(socket.SHUT_RDWR)
@@ -114,10 +115,14 @@ if __name__ == "__main__":
     while not myevent.is_set():
         # This blocks - so I need a keyboard interrupt to break it
         # (which is why the 'select' method is the best
-        conn, addr = s.accept()
+        try:
+            conn, addr = s.accept()
+        except KeyboardInterrupt:
+            break
         threading.Thread(target=client_thread, args=(conn,)).start()
 
     for th in threading.enumerate():
-        # if th.ident != threading.get_ident():
+        # Wait for threads to finish (don't need this, but nice to see when
+        # the program finishes, everything is cleared up)
         if th != threading.current_thread():
             th.join()

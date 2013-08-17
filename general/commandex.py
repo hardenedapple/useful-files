@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 A simple pop-up app that takes a command and runs it.
 Includes shortcuts to programs I run often.
@@ -9,9 +11,6 @@ import tkinter as tk
 from subprocess import Popen
 
 # To Add:
-#       Make the window open in the middle of the screen
-#           Don't know why the 'center_window' function isn't working
-#           Have to test more comparing scripts to ipython
 #       Make alternate program that can combine with sxhkd to open programs
 #           See ProgrammingTODO.txt file
 #
@@ -21,14 +20,15 @@ from subprocess import Popen
 
 def center_window(win):
     """Given a window, put it into the center of the screen it's on"""
-    print(win.geometry())
     wid = win.winfo_screenwidth()
     hgt = win.winfo_screenheight()
-    rootsize = tuple(int(_) for _ in win.geometry().split('+')[0].split('x'))
-    xpos = wid/2 - rootsize[0]/2
-    ypos = hgt/2 - rootsize[1]/2
-    print(rootsize, xpos, ypos)
-    # win.geometry("%dx%d+%d+%d" % (rootsize + (x, y)))
+    # rootsize = tuple(int(_) for _ in win.geometry().split('+')[0].split('x'))
+    # I know the size of the window I'm opening
+    winwid = 246
+    winhgt = 20
+    xpos = wid/2 - winwid/2
+    ypos = hgt/2 - winhgt/2
+    win.geometry("%dx%d+%d+%d" % (winwid, winhgt, xpos, ypos))
 
 
 class OpenApp:
@@ -52,16 +52,13 @@ class OpenApp:
         self.shortcuts = {'m': ['-name', 'ncmpcpp', '-e',
                                 'ncmpcpp -c ~/.config/ncmpcpp/config'],
                           'a': ['nothing', 'much'],
-                          # For some reason can't get tmux to work with Popen
-                          # have also tried 'tmux', 'new-session'
-                          # 't': ['-name', 'testterm', '-e', 'tmux new-session'],
-                          't': ['-name', 'testterm'],
+                          't': ['-name', 'testterm', '-e', 'tmux new-session'],
+                          # 't': ['-name', 'testterm'],
                           'v': ['-name', 'alsamixer', '-e', 'alsamixer'],
                           'i': ['-name', 'irssi', '-e', 'irssi'],
                           'f': ['-name', 'ranger', '-e', 'ranger'],
                           'd': ['-name', 'rtorrent', '-e', 'rtorrent']}
-        # Add Label and entry
-        # tk.Label(master, text='Enter a command').pack(side=tk.TOP)
+        # Add Entry
         self.entry = tk.Entry(self.master, width=30)
         # Add bindings
         self.entry.bind('<Return>', self.runcom)
@@ -71,7 +68,7 @@ class OpenApp:
         self.entry.focus()
 
     def closeall(self, event):
-        """ Workaround to close window on 'ESC'"""
+        """Workaround to close window on 'ESC'"""
         self.master.destroy()
 
     def parse(self, command):
@@ -106,15 +103,12 @@ class OpenApp:
         for command in commands:
             if not len(command) < 1:
                 popenargs = self.parse(command)
-                # print(popenargs)
                 Popen(popenargs)
         self.master.destroy()
 
 
 if __name__ == '__main__':
     root = tk.Tk()
-    # Not working
-    center_window(root)
     app = OpenApp(root, title='Enter Command')
-    # Don't know why this always comes out with size of 1x1
+    center_window(root)
     root.mainloop()

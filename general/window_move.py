@@ -4,15 +4,16 @@ Script to move a client to different position on the screen.
 define possible positions in 'position_dict', execute them in 'snap_to'
 """
 
+import math
 import os
 from Xlib import display
 
-# TODO: To generalise the script: find the desktop size and use fractions of
-#       that size.
-#
-#       Add option to take specific geometries from the fifo and move the
+# TODO: Add option to take specific geometries from the fifo and move the
 #       window to that. e.g. if line matches a regex, interpret it as a
 #       geometry and snap to that.
+#
+#       Make resize check that the resizing doesn't send the window off the
+#       screen
 #
 #       Could also add option to move a bit at a time (+5/-5)
 #       etc. Though it's not much of a benefit - this could allow batch files
@@ -22,27 +23,39 @@ from Xlib import display
 #       Convert Xlib to python3 - will take a long time before I know what's
 #                                 happening let alone be able to modify it.
 
-medium_dict = {'tr': (709, 20, 644, 364),
-               'tl': (9, 20, 644, 364),
-               'bl': (9, 400, 644, 364),
-               'br': (709, 400, 644, 364)}
+borders = {'top': 0.006,
+           'side': 0.004}
 
-small_dict = {'tr': (675, 20, 683, 263),
-              'tl': (9, 20, 683, 263),
-              'bl': (9, 497, 683, 263),
-              'br': (675, 497, 683, 263)}
+taskbarheight = 15
+
+position_dict = {'tl': lambda g: (edges['top'], edges['left']),
+                 'tr': lambda g: (edges['top'], edges['right'] - g.width),
+                 'bl': lambda g: (edges['bottom'] - g.height, edges['left']),
+                 'br': lambda g: (edges['bottom'] - g.height,
+                                  edges['right'] - g.width)
+                 }
+
+abstract_sizes = {'small': (0.35, 0.5),
+                  'normal': (0.48, 0.47),
+                  'long': (0.3, 1)}
 
 
 def snap_to(position):
     """Given 'position' key, move focussed client to that position"""
     # dsp, and position_dict are global variables
     window = dsp.get_input_focus().focus
-    # Change function to accept a geometry, then add another function between
-    # the call and this to find geometry (other function would use screen size
-    # and get percentage positions).
-    # geometrynow = window.get_geometry()
-    xpos, ypos, width, height = position_dict[position]
-    window.configure(x=xpos, y=ypos, width=width, height=height)
+    geometrynow = window.get_geometry()
+    ypos, xpos = position_dict[position](geometrynow)
+    window.configure(x=xpos, y=ypos)
+    dsp.flush()
+
+
+def resize(size):
+    """Given a 'size', resize client accordingly"""
+    # dsp, and position_dict are global variables
+    window = dsp.get_input_focus().focus
+    height, width = sizes[size]
+    window.configure(height=height, width=width)
     dsp.flush()
 
 
@@ -66,25 +79,44 @@ def follow(myfile):
         yield retline.strip()
 
 
+def find_edges_in_pixels(scr):
+    """Convert the hard-coded borders to edges scaled to screen size"""
+    # Assume want symmetry - if don't code it different later
+    # Haven't accounted for status bar here - assume small enough that it
+    # doesn't matter.
+    top = math.floor(scr.height_in_pixels * borders['top'])
+    bottom = scr.height_in_pixels - top
+    left = math.floor(scr.width_in_pixels * borders['side'])
+    right = scr.width_in_pixels - left
+    # Remember to account for taskbar
+    return {'top': top + taskbarheight, 'bottom': bottom, 'left': left, 'right': right}
+
+
+def create_actual_sizes(scr):
+    """Convert the hard-coded sizes into sizes scaled to screen size"""
+    def conv(tup):
+        """Convert percentages to pixels"""
+        return (math.floor(tup[0] * scr.height_in_pixels),
+                math.floor(tup[1] * scr.width_in_pixels))
+    return {key: conv(val) for key, val in abstract_sizes.iteritems()}
+
+
 if __name__ == "__main__":
     dsp = display.Display()
-    root = dsp.screen().root
+    scre = dsp.screen()
+    root = scre.root
+    edges = find_edges_in_pixels(scre)
+    sizes = create_actual_sizes(scre)
     # Initialise the starting positions
     # Want a function that finds the current position.
     # Problem is get_geometry always gives 0, 0 for position
-    current_pos = 'tr'
-    # Finding original size not a problem - will implement when am finding
-    # original position.
-    position_dict = medium_dict
+    # something to do with reparenting?
     os.mkfifo('snap_file')
-    validpos = ['tr', 'tl', 'bl', 'br']
-    sizes = {'small': small_dict, 'medium': medium_dict}
     for line in follow('snap_file'):
-        if line in validpos:
-            current_pos = line
+        if line in position_dict:
+            snap_to(line)
         elif line in sizes:
-            position_dict = sizes[line]
+            resize(line)
         else:
             break
-        snap_to(current_pos)
     os.remove('snap_file')
