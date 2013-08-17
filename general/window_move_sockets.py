@@ -9,6 +9,8 @@ command sending method.
 
 This version uses 'select' to multiplex the server and accept connections this
 gives a nice solution to the 'end' message.
+
+This version is ready for extension and for importing specific functions.
 """
 
 from Xlib import display
@@ -32,8 +34,6 @@ import socket
 #
 #       Convert Xlib to python3 - will take a long time before I know what's
 #                                 happening let alone be able to modify it.
-taskbarheight = 15
-
 
 #
 # Functions to move/resize given position
@@ -170,4 +170,5 @@ def main():
 
 
 if __name__ == "__main__":
+    taskbarheight = 15
     main()

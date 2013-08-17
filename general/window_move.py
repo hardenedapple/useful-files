@@ -9,6 +9,10 @@ I ever find a reason to extend it, I'll want to switch to sockets.
 As this version will only ever be used as a script, I'm using global variables
 that I can change manually If I ever want to.
 
+If you want to run this as a systemd daemon, simply add an service file like
+~/.config/systemd/user/snap_to.service      and run
+systemctl --user enable snap_to.service
+
 If I ever intend to import some of these functions, get those from
 window_move_sockets.py - they're more general.
 """
@@ -142,18 +146,23 @@ edges = find_edges_in_pixels(scre)
 sizes = create_actual_sizes(scre)
 
 if __name__ == "__main__":
-    # Initialise the starting positions
-    # Want a function that finds the current position.
-    # Problem is get_geometry always gives 0, 0 for position
-    # something to do with reparenting?
-    os.mkfifo('snap_file')
+    # Don't bother with try/except here - just let the exception raise
+    try:
+        if sys.argv[1] == 'stop':
+            with open('/tmp/snap_file', 'w') as fif:
+                fif.write('stop')
+    except IndexError:
+        pass
+    else:
+        sys.exit(0)
+    os.mkfifo('/tmp/snap_file')
     # In case of some error somewhere
-    atexit.register(os.remove, 'snap_file')
-    for line in follow('snap_file'):
+    atexit.register(os.remove, '/tmp/snap_file')
+    for line in follow('/tmp/snap_file'):
         if line in position_dict:
             snap_to(line)
         elif line in sizes:
             resize(line)
-        else:
+        elif line == 'stop':
             break
         # just leave all other words alone

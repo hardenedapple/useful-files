@@ -15,6 +15,13 @@ XF86AudioLowerVolume
 control + super + {period,comma,slash}
     mpc {next,prev,toggle}
 
+# Snap to motion
+super + {q,e,z,c}
+    [[ -p /tmp/snap_file ]] && echo {"tl","tr","bl","br"} > /tmp/snap_file
+
+super + control + {e,x,c}
+    [[ -p /tmp/snap_file ]] && echo {"normal","long","small"} > /tmp/snap_file
+
 # Open programs
 # control + super +o; {space,g}
     # {firefox,gvim}
