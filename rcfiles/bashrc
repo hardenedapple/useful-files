@@ -14,52 +14,66 @@ shopt -s histappend
 #Stop less saving my search commands
 export LESSHISTFILE="/dev/null"
 
-# Pretty colours for ls and grep
+#make ls give the nice colours to me
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$( dircolors -b ~/.dircolors)" || eval "$( dircolors -b )"
     alias ls='ls --color=auto'
     alias grep='grep --color=auto'
 fi
 
-# Make ll append an indicator to each entry
+#make ll append an indicator to each entry
 alias ll='ls -F'
 
-# Nicer command prompt
+#make a nice command prompt
 if [ $( id -u ) -eq 0 ]; then
     PS1='\[\e[0;31m\]TODO # \[\e[m\]'
 else
     PS1='\[\e[0;36m\]TODO $ \[\e[m\]'
 fi
 
-# Making the default editor vim as many programs that enter the EDITOR
-# env are on the console and I prefer to have them open vim
+#Default editor vim
 export EDITOR=vim
 
+#add $HOME/bin to $PATH
+if [ -d "$HOME/bin" ]; then
+    PATH="$PATH:$HOME/bin"
+fi
+if [ -d "$HOME/.gem/ruby/2.0.0/bin" ]; then
+    PATH="$PATH:$HOME/.gem/ruby/2.0.0/bin"
+fi
 
-# Make default editor vim
-# if in xterm (i.e. running X) default is gvim
-#if [[ $TERM == xterm-256color ]]
-#then
-#   export EDITOR=gvim
-#else
-#   export EDITOR=vim
-#fi
-
-# Let pacman tell me where to find a command if I type unknown command
-#source /usr/share/doc/pkgfile/command-not-found.bash
-# Takes a while (I think this may be something to do with having yaourt
-# and it searching the entire AUR repo)
-
-# get the prompt to accept vi commands
+#set command line to accept vi commands
 set -o vi
 
-# Give title of terminal in X as Apples_Terminal when up
-# and Minimised_Terminal when minimised
+#Make the title of the terminal Apples_Terminal when up
+#and Minimised_Terminal when down
 if [ $TERM == "xterm-256color" ]
 then
     export PROMPT_COMMAND='echo -ne "\033]0;Apples_Terminal\007"; echo -ne "\033]1;Minimised_Terminal\007"'
 fi
 
-# Add bash autocomplete when using sudo
+
+# Remove the key codes ^S and ^Q to avoid clash with rtorrent
+stty stop undef
+stty start undef
+
+# Add bash complete when using sudo
 complete -cf sudo
+
+
+# Give a message suggesting a package when given a command not found
+#source /usr/share/doc/pkgfile/command-not-found.bash
+
+
+#If want a limited autocorrect for cd directory
+#shopt -s cdspell
+
+
+# Add an alias to git
 alias git_graph='git log --abbrev-commit --all --graph --decorate --color'
+
+# mpd doesn't automatically search .config for config file
+# neither doesn ncmpcpp
+alias mympd='mpd ~/.config/mpd/mpd.conf'
+alias myncmpcpp='ncmpcpp -c ~/.config/ncmpcpp/config'
+alias killmybar='pkill conky; pkill tilda; pkill tint2'
