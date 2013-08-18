@@ -26,11 +26,6 @@ import os
 #       window to that. e.g. if line matches a regex, interpret it as a
 #       geometry and snap to that.
 #
-#       Add option to daemonize
-#
-#       Make resize check that the resizing doesn't send the window off the
-#       screen
-#
 #       Could also add option to move a bit at a time (+5/-5)
 #       etc. Though it's not much of a benefit - this could allow batch files
 #       to be cat'ed into the fifo as a set of motions to make (which seems

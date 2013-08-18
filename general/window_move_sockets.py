@@ -8,24 +8,22 @@ This uses sockets to accept commands/messages, it allows future expansion
 command sending method.
 
 This version uses 'select' to multiplex the server and accept connections this
-gives a nice solution to the 'end' message.
+gives a nice solution to the 'stop' message.
 
 This version is ready for extension and for importing specific functions.
 """
 
 from Xlib import display
 from select import select
+import atexit
 import math
+import os
 import socket
+import sys
 
 # TODO: Add option to take specific geometries from the fifo and move the
 #       window to that. e.g. if line matches a regex, interpret it as a
 #       geometry and snap to that.
-#
-#       Add option to daemonize
-#
-#       Make resize check that the resizing doesn't send the window off the
-#       screen
 #
 #       Could also add option to move a bit at a time (+5/-5)
 #       etc. Though it's not much of a benefit - this could allow batch files
@@ -34,6 +32,7 @@ import socket
 #
 #       Convert Xlib to python3 - will take a long time before I know what's
 #                                 happening let alone be able to modify it.
+
 
 #
 # Functions to move/resize given position
@@ -116,18 +115,93 @@ def handle_socks(server, avail_now, tot_list, action):
             sock.shutdown(socket.SHUT_RDWR)
             sock.close()
             continue
-        elif data == 'end':
+        elif data == 'stop':
             return False
         action(data)
     return True
 
 
 #
+# If I want to make a daemon
+#
+def close():
+    # Could do this with the pid file, but seems simpler to use the command I
+    # implemented for conveniance while debugging
+    """Sends a 'stop' signal to an open socket"""
+    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        soc.connect(('', 8732))
+    except socket.error as err:
+        # If no existing socket, don't need to do anything
+        if err.errno == 111:
+            return
+        raise
+    else:
+        soc.send('stop\n')
+    finally:
+        soc.close()
+
+
+def createdaemon(pidfile='/tmp/snap_pid'):
+    """Implement UNIX double-fork procedure, see
+    http://code.activestate.com/recipes/278731/"""
+    # os._exit() is like sys.exit() but doesn't call registered signal
+    # handlers or flush stdio buffers etc
+    #
+    # Check to see if there is already a running instance
+    try:
+        with open(pidfile, 'r') as pidf:
+            pid = int(pidf.read().strip())
+    except IOError:
+        pid = None
+    else:
+        sys.stderr.write('Pid file exists - check if Daemon is running')
+        sys.exit(1)
+
+    # If os.fork doesn't work - leave the exceptions to raise themselves
+    pid = os.fork()
+    if pid > 0:
+        # parent:- kill
+        os._exit(0)
+
+    # child:- decouple
+    os.chdir('/')
+    os.setsid()
+    os.umask(0)
+    pid = os.fork()
+
+    if pid > 0:
+        #parent:- kill
+        os._exit(0)
+
+    # Redirect standard file descriptors
+    sys.stdout.flush()
+    sys.stdin.flush()
+    stdi = open(os.devnull, 'r')
+    stdo = open(os.devnull, 'a+')
+    stde = open(os.devnull, 'a+')
+
+    os.dup2(stdi.fileno(), sys.stdin.fileno())
+    os.dup2(stdo.fileno(), sys.stdout.fileno())
+    os.dup2(stde.fileno(), sys.stderr.fileno())
+
+    # make sure to remove pidfile when exiting
+    atexit.register(os.remove, pidfile)
+
+    with open(pidfile, 'a') as pidf:
+        pidf.write(str(os.getpid()) + '\n')
+
+
+#
 # Main
 #
-def main():
+def main(daemon=False, pidfile='/tmp/snap_pid'):
     """Create display object, define position functions and edges, start main
     loop"""
+
+    if daemon:
+        createdaemon(pidfile)
+
     dsp = display.Display()
     scre = dsp.screen()
 
@@ -170,5 +244,19 @@ def main():
 
 
 if __name__ == "__main__":
+    # Check to see if we've been asked to halt
     taskbarheight = 15
-    main()
+    try:
+        # try to close if have argument
+        if sys.argv[1] == 'stop':
+            close()
+        elif sys.argv[1] == 'daemon':
+            main(daemon=True)
+        else:
+            sys.stderr.write('Unknown command line argument\n')
+            sys.exit(1)
+    except IndexError:
+        main()
+
+
+# pymode:lint_ignore=W0212,C901

@@ -15,17 +15,6 @@ XF86AudioLowerVolume
 control + super + {period,comma,slash}
     mpc {next,prev,toggle}
 
-# Snap to motion
-super + {q,e,z,c}
-    [[ -p /tmp/snap_file ]] && echo {"tl","tr","bl","br"} > /tmp/snap_file
-
-super + control + {e,x,c}
-    [[ -p /tmp/snap_file ]] && echo {"normal","long","small"} > /tmp/snap_file
-
-# Open programs
-# control + super +o; {space,g}
-    # {firefox,gvim}
-
 # Transparency
 super + {Next,Prior}
     transset-df --actual {--dec,--inc} 0.05
@@ -37,6 +26,26 @@ control + super + {Next,Prior}
 super + control + o
     /home/apple/bin/commandex.py
 
+# Start terminual with a font that can show some unicode characters
+shift + super + Return
+    xterm -font '-*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-*' -geometry 78x22 -name testterm
+
+
+
+# Snap to motion
+# Can't think of keys that would work for all my WM's - so have WM
+# specific controls defined in the config files.
+# super + {q,e,z,c}
+    # [[ -p /tmp/snap_file ]] && echo {"tl","tr","bl","br"} > /tmp/snap_file
+
+# super + control + {e,x,c}
+    # [[ -p /tmp/snap_file ]] && echo {"normal","long","small"} > /tmp/snap_file
+
+
+# Open programs
+# control + super +o; {space,g}
+    # {firefox,gvim}
+
 # the geometry part is there for pekwm, awesome and subtle ignore it
 # the name part is there for subtle tags
 # the font part is there so that those apps that need a utf8 font get one
@@ -45,7 +54,3 @@ super + control + o
 
 # control + super + o; {m,v}
     # xterm -font -*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-* -geometry 78x22 -name {ncmpcpp -e 'ncmpcpp -c ~/.config/ncmpcpp/config', alsamixer -e alsamixer}
-
-shift + super + Return
-    xterm -font '-*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-*' -geometry 78x22 -name testterm
-
