@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 """
 Script to move a client to different position on the screen.
 
@@ -21,6 +23,8 @@ from Xlib import display
 import atexit
 import math
 import os
+import stat
+import sys
 
 # TODO: Add option to take specific geometries from the fifo and move the
 #       window to that. e.g. if line matches a regex, interpret it as a
@@ -143,12 +147,14 @@ sizes = create_actual_sizes(scre)
 if __name__ == "__main__":
     # Don't bother with try/except here - just let the exception raise
     try:
-        if sys.argv[1] == 'stop':
+        if sys.argv[1] == 'stop' and \
+           stat.S_ISDIR(os.stat('/tmp/snap_file').st_mode):
             with open('/tmp/snap_file', 'w') as fif:
                 fif.write('stop')
     except IndexError:
         pass
     else:
+        # An other command line arguments are ignored
         sys.exit(0)
     os.mkfifo('/tmp/snap_file')
     # In case of some error somewhere
