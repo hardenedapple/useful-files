@@ -667,6 +667,13 @@ tag "fullflash" do
   float true
 end
 
+# Add a tag to make my pop up start floating
+tag "commandex" do
+  match :name => "Enter_Command"
+  float true
+  stick true
+end
+
 # create a tag to put a terminal in the bottom right corner of firefox
 # hence can have a terminal to test thing in while browsing internet
 

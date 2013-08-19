@@ -32,12 +32,10 @@ fi
 # Loads the non-colour  xresources, the colours are chosen based on wm
 xrdb -load ~/xresources/base_resources
 
-case $1 in
-    "jwm")        xrdb -merge ~/xresources/awesome_personal_resources
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec /usr/bin/jwm
-                  ;;
+# run unclutter - remove mouse after a while
+# exec unclutter -idle 1 -jitter 2 -root
 
+case $1 in
     "pek_woman")  xrdb -merge ~/xresources/standard_but_calmer 
                   feh --bg-fill ~/.config/wallpapers/multiimage_woman.jpg &
                   exec pekwm --config ~/.config/pekwm/config
@@ -86,9 +84,9 @@ case $1 in
                   exec awesome -c ~/.config/awesome/alt_rcs/dustrc.lua
                   ;;
 
-    "tree")       xrdb -merge ~/xresources/awesome_tree_resources
+    "steamburn")  xrdb -merge ~/xresources/steamburn
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/treerc.lua
+                  exec awesome -c ~/.config/awesome/alt_rcs/steamburn.lua
                   ;;
 
     "muted")      xrdb -merge ~/xresources/awesome_muted_resources

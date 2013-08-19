@@ -8,6 +8,7 @@ This is really for use with subtle as I can't find the equivalent in that WM
 """
 
 import tkinter as tk
+import tkinter.font as tkfont
 from subprocess import Popen
 
 # To Add:
@@ -39,13 +40,14 @@ class OpenApp:
     Includes keybinding shortcuts to commonly used programs
     """
 
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, title='Enter_Command',
+                 infont='-*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-*'):
         """
         Start the app up
         """
         # Define class variables
         self.master = master
-        self.master.wm_title(kwargs['title'])
+        self.master.wm_title(title)
         self.xtmargs = ['xterm', '-geometry', '78x22']
         self.ufont = ['-font',
                       '-*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-*']
@@ -59,7 +61,8 @@ class OpenApp:
                           'f': ['-name', 'ranger', '-e', 'ranger'],
                           'd': ['-name', 'rtorrent', '-e', 'rtorrent']}
         # Add Entry
-        self.entry = tk.Entry(self.master, width=30)
+        myfont = tkfont.Font(self.master, infont)
+        self.entry = tk.Entry(self.master, width=30, font=myfont)
         # Add bindings
         self.entry.bind('<Return>', self.runcom)
         self.entry.bind('<Escape>', self.closeall)
@@ -109,6 +112,6 @@ class OpenApp:
 
 if __name__ == '__main__':
     root = tk.Tk()
-    app = OpenApp(root, title='Enter Command')
+    app = OpenApp(root, title='Enter_Command')
     center_window(root)
     root.mainloop()

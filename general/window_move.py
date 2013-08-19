@@ -5,6 +5,10 @@ Script to move a client to different position on the screen.
 
 define possible positions in 'position_dict', execute them in 'snap_to'
 
+Assumes you have a taskbar on the top of the screen.
+If not positions will be off a little - I'm looking into it but not too hard
+as it works for me at the moment.
+
 This version uses a fifo, it seems the best method for this simple use, but if
 I ever find a reason to extend it, I'll want to switch to sockets.
 
@@ -62,7 +66,7 @@ def snap_to(position):
     """Given 'position' function, move focussed client accordingly"""
     # dsp, and position_dict are global variables
     window = dsp.get_input_focus().focus
-    geometrynow = window.get_geometry()
+    geometrynow = find_geom(window)
     ypos, xpos = position_dict[position](geometrynow)
     window.configure(x=xpos, y=ypos)
     dsp.flush()
@@ -109,9 +113,12 @@ def create_actual_sizes(scr):
 
 def find_geom(win):
     """Find position of window, account for reparenting window managers"""
-    # y position will always be greater that 0 because of the taskbar
-    while win.get_geometry().y == 0:
-        win = win.query_tree().parent
+    # taskbar stops the window reaching the top of the screen.
+    # can't use y position - in case of titlebars - use height.
+    win2 = win.query_tree().parent
+    while win2.get_geometry().height < scre.height_in_pixels:
+        win = win2
+        win2 = win2.query_tree().parent
     return win.get_geometry()
 
 

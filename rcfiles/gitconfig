@@ -8,7 +8,6 @@
 [color]
 	ui = true
 [alias]
-    vimdiff = difftool -t vimdiff
     graph = log --abbrev-commit --all --graph --decorate --color
 [difftool "vimdiff"]
     cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
