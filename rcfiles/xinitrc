@@ -84,6 +84,11 @@ case $1 in
                   exec awesome -c ~/.config/awesome/alt_rcs/dustrc.lua
                   ;;
 
+    "multicolor")  xrdb -merge ~/xresources/dremora
+                  xmodmap ~/xmodmaps/xmodmap_super
+                  exec awesome -c ~/.config/awesome/alt_rcs/multicolor.lua
+                  ;;
+
     "steamburn")  xrdb -merge ~/xresources/steamburn
                   xmodmap ~/xmodmaps/xmodmap_super
                   exec awesome -c ~/.config/awesome/alt_rcs/steamburn.lua

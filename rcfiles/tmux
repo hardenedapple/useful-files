@@ -1,13 +1,26 @@
 # Set prefix to C-a
-# Turns out much nicer to call the command mode ( C-a ':' )
-set -g prefix C-a
-# Make C-a C-a print C-a, remove the unneeded C-b C-b binding
-bind C-a send-prefix
 unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+# Toggle statusbar
+bind-key b set-option status
+
+# Listen for activity on all windows
+set -g bell-action any
+
+#Reload source file
+bind-key R source-file ~/.tmux.conf \; display-message "source-file done"
 
 # start window numbering at 1
 set -g base-index 1
 
+# Move between windows easily
+bind-key -n C-left previous-window
+bind-key -n C-right next-window
+
+# Clock style
+setw -g clock-mode-style 24
 # vi-style controls for copy mode
 setw -g mode-keys vi
 
@@ -19,10 +32,10 @@ bind l select-pane -R
 
 bind-key \ kill-session
 
+# Term size only constrained when two windows are viewing it
+setw -g aggressive-resize on
 
-#Reload source file
-bind-key R source-file ~/.tmux.conf \; display-message "source-file done"
-
+setw -g utf8 on
 
 # The foreground borders don't show as the font I use doesn't show utf-8
 set-option pane-active-border-fg white
@@ -32,6 +45,23 @@ set-option pane-border-fg green
 
 
 set-option -g default-shell /usr/bin/zsh
+
+# Quick view of processes
+unbind p
+bind p split-window -v "exec htop"
+
+# Quick music
+unbind n
+unbind C-n
+bind n split-window -v "exec ncmpcpp"
+bind C-n split-window -h "exec ncmpcpp"
+
+# Quick file-manager
+unbind f
+unbind C-f
+bind f split-window -v "exec ranger"
+bind C-f split-window -h "exec ranger"
+
 
 # This works, but only kind of - the first terminal is always named
 # screen, but every terminal after that is determined by this

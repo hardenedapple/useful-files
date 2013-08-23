@@ -102,6 +102,42 @@ setprompt() {
 setprompt
 # }}}
 
+# {{{ Cat, Sed, Awk, Grep, Less Syntax Highlighting
+
+cat sed awk grep() {
+  syntax=""
+  type highlight > /dev/null 2>&1
+  if [[ $? -eq 0 ]]; then
+    for file in $@; do
+      if [ -f $file ]; then
+        case $file in
+          *.java) syntax="java";;
+          *.php) syntax="php";;
+          *.py) syntax="python";;
+          *.diff) syntax="diff";;
+          *.awk) syntax="awk";;
+          *.c) syntax="c";;
+          *.css) syntax="css";;
+          *.js) syntax="js";;
+          *.jsp) syntax="jsp";;
+          *.xml) syntax="xml";;
+          *.sql) syntax="sql";;
+          *.pl) syntax="pl";;
+          *.rb) syntax="rb";;
+          /etc/apache*/*) syntax="httpd";;
+        esac
+      fi
+    done
+  fi
+  if [[ $syntax != "" ]]; then
+    command $0 $@ | highlight -O ansi --syntax=$syntax
+  else
+    command $0 $@
+  fi
+}
+
+# }}}
+
 # Remove C-s and C-q {{{
 # Can have problems in Rtorrent with these commands, run this if needs be
 # stty stop undef

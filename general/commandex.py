@@ -49,8 +49,8 @@ class OpenApp:
         self.master = master
         self.master.wm_title(title)
         self.xtmargs = ['xterm', '-geometry', '78x22']
-        self.ufont = ['-font',
-                      '-*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-*']
+        self.sfont = ['-font',
+                      '-*-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1']
         self.shortcuts = {'m': ['-name', 'ncmpcpp', '-e',
                                 'ncmpcpp -c ~/.config/ncmpcpp/config'],
                           'a': ['nothing', 'much'],
@@ -83,8 +83,8 @@ class OpenApp:
         if command[0] == '/':
             args = self.xtmargs
             try:
-                if command[1] == 'u':
-                    args = args + self.ufont
+                if command[1] == 's':
+                    args = args + self.sfont
             except IndexError:
                 # Just have a '/' - open terminal only
                 return args
