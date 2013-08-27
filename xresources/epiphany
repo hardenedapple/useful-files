@@ -1,0 +1,29 @@
+XTerm*background:       #2C2C2C
+XTerm*foreground:       #CAC7B4
+
+!black
+XTerm*color8:           #656565
+XTerm*color0:           #565656
+!red
+XTerm*color1:           #AC4F4F
+XTerm*color9:           #E85555
+!green
+XTerm*color2:           #88AB77
+XTerm*color10:          #8CCD6C
+!yellow
+XTerm*color3:           #D0D9AD
+XTerm*color11:          #C5D67D
+!blue
+XTerm*color4:           #677088
+XTerm*color12:          #647396
+!magenta
+XTerm*color5:           #CDCDB4
+XTerm*color13:          #CDB4C9
+!cyan
+XTerm*color6:           #445362
+XTerm*color14:          #505B6C
+!white
+XTerm*color7:           #FFFFFF
+XTerm*color15:          #C0C0C0
+
+! vim: filetype=xdefaults:

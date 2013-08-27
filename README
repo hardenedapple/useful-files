@@ -1,3 +1,8 @@
 These are my personalisation files from home and work laptops.
 
 There are also some scripts in the 'general' directory.
+
+The xresources directory contains a whole load of colorschemes I've copied
+from someplace or another. A lot are from copycat-killer/dots on github,
+hybrid comes from a link on w0ng/vim-hybrid, multicolored comes from 'The
+Immoral Pheonix' on deviantart.com
