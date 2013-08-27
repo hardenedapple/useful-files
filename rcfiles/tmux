@@ -16,8 +16,9 @@ bind-key R source-file ~/.tmux.conf \; display-message "source-file done"
 set -g base-index 1
 
 # Move between windows easily
-bind-key -n C-left previous-window
-bind-key -n C-right next-window
+# C-h doesn't work for some reason - use j, k instead of h, l
+bind-key -n C-j previous-window
+bind-key -n C-k next-window
 
 # Clock style
 setw -g clock-mode-style 24

@@ -28,7 +28,7 @@ super + control + o
 
 # Start terminual with a font that can show some unicode characters
 shift + super + Return
-    xterm -font '-*-terminus-medium-r-normal-*-*-*-*-*-*-*-iso10646-*' -geometry 78x22 -name testterm
+    xterm -font '-*-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso10646-*' -geometry 78x22 -name testterm
 
 
 

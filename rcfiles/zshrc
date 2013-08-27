@@ -102,7 +102,7 @@ setprompt() {
 setprompt
 # }}}
 
-# {{{ Cat, Sed, Awk, Grep, Less Syntax Highlighting
+# {{{ Syntax highlighting for man, cat etc
 
 cat sed awk grep() {
   syntax=""
@@ -136,6 +136,18 @@ cat sed awk grep() {
   fi
 }
 
+# {{{ Man page colors
+man() {
+    env LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+	LESS_TERMCAP_md=$(printf "\e[1;31m") \
+	LESS_TERMCAP_me=$(printf "\e[0m") \
+	LESS_TERMCAP_se=$(printf "\e[0m") \
+	LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+	LESS_TERMCAP_ue=$(printf "\e[0m") \
+	LESS_TERMCAP_us=$(printf "\e[1;32m") \
+	man "$@"
+}
+# }}}
 # }}}
 
 # Remove C-s and C-q {{{
@@ -153,8 +165,6 @@ if [ -x /usr/bin/dircolors ]; then
     alias grep='grep --color=auto'
 fi
 alias ll='ls -F'
-# add alias for git
-alias git_graph='git log --abbrev-commit --all --graph --decorate --color'
 alias mympd='mpd ~/.config/mpd/mpd.conf'
 alias myncmpcpp='ncmpcpp -c ~/.config/ncmpcpp/config'
 alias killmybar='pkill conky; pkill tilda; pkill tint2'

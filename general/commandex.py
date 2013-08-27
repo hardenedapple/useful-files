@@ -48,18 +48,18 @@ class OpenApp:
         # Define class variables
         self.master = master
         self.master.wm_title(title)
-        self.xtmargs = ['xterm', '-geometry', '78x22']
-        self.sfont = ['-font',
-                      '-*-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1']
-        self.shortcuts = {'m': ['-name', 'ncmpcpp', '-e',
-                                'ncmpcpp -c ~/.config/ncmpcpp/config'],
-                          'a': ['nothing', 'much'],
-                          't': ['-name', 'testterm', '-e', 'tmux new-session'],
-                          # 't': ['-name', 'testterm'],
-                          'v': ['-name', 'alsamixer', '-e', 'alsamixer'],
-                          'i': ['-name', 'irssi', '-e', 'irssi'],
-                          'f': ['-name', 'ranger', '-e', 'ranger'],
-                          'd': ['-name', 'rtorrent', '-e', 'rtorrent']}
+        self.xtmargs = ('xterm', '-geometry', '78x22')
+        self.sfont = ('-font',
+                      '-*-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1')
+        self.shortcuts = {'m': ('-name', 'ncmpcpp', '-e',
+                                'ncmpcpp -c ~/.config/ncmpcpp/config'),
+                          'a': ('nothing', 'much'),
+                          't': ('-name', 'testterm', '-e', 'tmux new-session'),
+                          # 't': ('-name', 'testterm'),
+                          'v': ('-name', 'alsamixer', '-e', 'alsamixer'),
+                          'i': ('-name', 'irssi', '-e', 'irssi'),
+                          'f': ('-name', 'ranger', '-e', 'ranger'),
+                          'd': ('-name', 'rtorrent', '-e', 'rtorrent')}
         # Add Entry
         myfont = tkfont.Font(self.master, infont)
         self.entry = tk.Entry(self.master, width=30, font=myfont)
@@ -80,6 +80,7 @@ class OpenApp:
         if command.find('rm') != -1:
             # Will have to make an alert pop-up here
             self.master.destroy()
+        # Shortcut options
         if command[0] == '/':
             args = self.xtmargs
             try:
@@ -91,10 +92,10 @@ class OpenApp:
             try:
                 end = self.shortcuts[command[-1]]
             except KeyError:
-                end = []
+                end = ()
             # Join parts of the command into one list
             return args + end
-        # split by space
+        # if not a shortcut option, just split by space
         return command.split()
 
     def runcom(self, event):
@@ -102,7 +103,7 @@ class OpenApp:
         Take the string, parse it for any evil commands, execute the command.
         """
         mystr = self.entry.get()
-        commands = [s.strip() for s in mystr.split(';')]
+        commands = (s.strip() for s in mystr.split(';'))
         for command in commands:
             if not len(command) < 1:
                 popenargs = self.parse(command)

@@ -20,12 +20,12 @@ fi
 
 # Default is awesome - I get much more work done there
 # to get pekwm etc, have to run with xinitrc, not startx
-# don't think the full paths are needed for ratpoison and jwm, but the
-# wiki has that as the example and I haven't checked yet.
 
 # Some window managers have a startup script some don't
 # so I've loaded my compensation for broken key here for those.
 
+# Really need to figure out how to neaten this up - want some to start on
+# boot, and some to start/finish when entering/leaving X
 /usr/lib/systemctl --user is-active default.target || /usr/lib/systemd/systemd --user &
 
 
@@ -48,7 +48,7 @@ case $1 in
 
      "pek_pier") xrdb -merge ~/xresources/awesome_personal_resources
                  feh --bg-fill ~/.config/wallpapers/pier_house.jpg &
-                 exec pekwm --config ~/.config/pekwm/windmill
+                 exec pekwm --config ~/.config/pekwm/windmil
                  ;;
 
     "pek_windmill") xrdb -merge ~/xresources/vinyl
@@ -59,13 +59,13 @@ case $1 in
     "subtle_new") xrdb -merge ~/xresources/awesome_personal_resources
                   feh --bg-fill ~/.config/wallpapers/earthrise_1.jpg
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec subtle
+                  exec subtle >> ~/.cache/subtle/stdout 2>> ~/.cache/subtle/stderr
                   ;;
 
     "subtle_orig") xrdb -merge ~/xresources/subtle_initial_resources
                   feh --bg-fill ~/.config/wallpapers/block_colours_woman_sunglasses.jpg
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec subtle
+                  exec subtle >> ~/.cache/subtle/stdout 2>> ~/.cache/subtle/stderr
                   ;;
 
     "ratpoison")  xrdb -merge ~/xresources/awesome_personal_resources
@@ -76,31 +76,31 @@ case $1 in
 
     "shifty")     xrdb -merge ~/xresources/awesome_personal_resources
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/shifty.lua
+                  exec awesome -c ~/.config/awesome/alt_rcs/shifty.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
                   ;;
 
     "dust")       xrdb -merge ~/xresources/vinyl
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/dustrc.lua
+                  exec awesome -c ~/.config/awesome/alt_rcs/dustrc.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
                   ;;
 
     "multicolor")  xrdb -merge ~/xresources/dremora
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/multicolor.lua
+                  exec awesome -c ~/.config/awesome/alt_rcs/multicolor.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
                   ;;
 
     "steamburn")  xrdb -merge ~/xresources/steamburn
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/steamburn.lua
+                  exec awesome -c ~/.config/awesome/alt_rcs/steamburn.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
                   ;;
 
     "muted")      xrdb -merge ~/xresources/awesome_muted_resources
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/muterc.lua
+                  exec awesome -c ~/.config/awesome/alt_rcs/muterc.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
                   ;;
 
     *)            xrdb -merge ~/xresources/awesome_personal_resources
                   xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome
+                  exec awesome >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
                   ;;
 esac

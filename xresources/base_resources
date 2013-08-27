@@ -1,7 +1,7 @@
 XTerm*termName:   xterm-256color
 ! I like the terminal font more, but it doesnt have a lot of utf characters
-XTerm*font:       -misc-tamsyn-medium-r-normal-*-15-*-*-*-*-*-iso8859-1
-XTerm*boldFont:   -misc-tamsyn-bold-r-normal-*-15-*-*-*-*-*-iso8859-1
+XTerm*font:       -misc-tamsyn-medium-r-normal-*-14-*-*-*-*-*-iso8859-1
+XTerm*boldFont:   -misc-tamsyn-bold-r-normal-*-14-*-*-*-*-*-iso8859-1
 XTerm*iconName:   Apples_Terminal
 XTerm*title:      Apples_Terminal
 XTerm*utf8:       2

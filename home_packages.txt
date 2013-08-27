@@ -98,6 +98,8 @@ gdk-pixbuf2
 gettext
 giblib
 giflib
+girara-common
+girara-gtk2
 git
 glamor-egl
 glib2
@@ -148,7 +150,6 @@ jasper
 jfsutils
 js
 json-c
-jwm
 kbd
 kbproto
 keyutils
@@ -191,7 +192,6 @@ libffi
 libfontenc
 libftdi
 libgcrypt
-libglade
 libgpg-error
 libgssglue
 libgusb
@@ -283,7 +283,6 @@ logrotate
 lsof
 lua
 lua-lgi
-lua51
 lvm2
 lzo2
 m4
@@ -298,6 +297,7 @@ mesa-libgl
 mime-types
 mkinitcpio
 mkinitcpio-busybox
+moreutils
 mozilla-common
 mpc
 mpd
@@ -326,6 +326,7 @@ opus
 orc
 os-prober
 p11-kit
+p7zip
 pacgraph
 package-query
 pacman
@@ -351,9 +352,13 @@ perl-http-daemon
 perl-http-date
 perl-http-message
 perl-http-negotiate
+perl-io-tty
+perl-ipc-run
 perl-libwww
 perl-lwp-mediatypes
 perl-net-http
+perl-time-duration
+perl-timedate
 perl-uri
 perl-www-robotrules
 pinentry
@@ -363,6 +368,8 @@ pkgfile
 pkgstats
 pkgtools
 polkit
+poppler
+poppler-glib
 popt
 ppp
 pptpclient
@@ -372,7 +379,6 @@ psmisc
 pth
 pyalpm
 python
-python-distribute
 python-ipdb
 python-jinja
 python-logilab-astng
@@ -382,10 +388,10 @@ python-numpy
 python-pyelftools
 python-pylint
 python-pyzmq
+python-setuptools
 python-tornado
 python2
 python2-beaker
-python2-distribute
 python2-eyed3
 python2-jinja
 python2-logilab-astng
@@ -393,6 +399,7 @@ python2-logilab-common
 python2-mako
 python2-markupsafe
 python2-pylint
+python2-setuptools
 python2-xdg
 python2-xlib
 quilt
@@ -432,6 +439,7 @@ systemd
 systemd-sysvcompat
 sysvinit-tools
 taglib
+tamsyn-font
 tar
 tcl
 terminus-font
@@ -470,7 +478,6 @@ vim-taglist
 vim-unimpaired-git
 vim-workspace
 vorbis-tools
-vte
 vte-common
 vte3
 w3m
@@ -551,6 +558,8 @@ xvidcore
 xz
 yajl
 yaourt
+zathura
+zathura-pdf-poppler
 zeromq
 zip
 zlib
