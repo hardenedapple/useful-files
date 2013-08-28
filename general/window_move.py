@@ -55,8 +55,8 @@ position_dict = {'tl': lambda g: (edges['top'], edges['left']),
                  }
 
 abstract_sizes = {'small': (0.35, 0.5),
-                  'normal': (0.45, 0.47),
-                  'long': (0.3, 0.995)}
+                  'normal': (0.43, 0.44),
+                  'long': (0.3, 0.992)}
 
 
 #
@@ -67,8 +67,8 @@ def snap_to(position):
     # dsp, and position_dict are global variables
     window = dsp.get_input_focus().focus
     geometrynow = find_geom(window)
-    ypos, xpos = position_dict[position](geometrynow)
-    window.configure(x=xpos, y=ypos)
+    newy, newx = position_dict[position](geometrynow)
+    window.configure(x=newx, y=newy)
     dsp.flush()
 
 
@@ -76,13 +76,14 @@ def resize(size):
     """Given a 'size', resize client accordingly"""
     # dsp, and position_dict are global variables
     window = dsp.get_input_focus().focus
-    height, width = sizes[size]
-    geom = find_geom(window)
-    window.configure(height=height, width=width)
-    if geom.x + width > edges['right'] or geom.y + height > edges['bottom']:
-        geom.x -= max(geom.x + width - edges['right'], 0)
-        geom.y -= max(geom.y + height - edges['bottom'], 0)
-        window.configure(x=geom.x, y=geom.y)
+    newheight, newwidth = sizes[size]
+    nowgeom = find_geom(window)
+    window.configure(height=newheight, width=newwidth)
+    if nowgeom.x + newwidth > edges['right'] \
+            or nowgeom.y + newheight > edges['bottom']:
+        nowgeom.x -= max(nowgeom.x + newwidth - edges['right'], 0)
+        nowgeom.y -= max(nowgeom.y + newheight - edges['bottom'], 0)
+        window.configure(x=nowgeom.x, y=nowgeom.y)
     dsp.flush()
 
 

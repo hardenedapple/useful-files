@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 """
 Script to move a client to different position on the screen.
 
@@ -41,26 +42,21 @@ import sys
 #
 # Functions to move/resize given position
 #
-def snap_to(pos_func, disp):
+def snap_to(pos_func, window, geometrynow):
     """Given 'position' function, move focussed client accordingly"""
-    window = disp.get_input_focus().focus
-    geometrynow = find_geom(window)
-    ypos, xpos = pos_func(geometrynow)
-    window.configure(x=xpos, y=ypos)
-    disp.flush()
+    newy, newx = pos_func(geometrynow)
+    window.configure(x=newx, y=newy)
 
 
-def resize(size, disp, edgepos):
+def resize(size, window, edgepos, nowgeom):
     """Given a 'size', resize client accordingly"""
-    window = disp.get_input_focus().focus
-    height, width = size
-    geom = find_geom(window)
-    window.configure(height=height, width=width)
-    if geom.x + width > edgepos['right'] or geom.y + height > edgepos['bot']:
-        geom.x -= max(geom.x + width - edgepos['right'], 0)
-        geom.y -= max(geom.y + height - edgepos['bot'], 0)
-        window.configure(x=geom.x, y=geom.y)
-    disp.flush()
+    newheight, newwidth = size
+    window.configure(height=newheight, width=newwidth)
+    if nowgeom.x + newwidth > edgepos['right'] \
+            or nowgeom.y + newheight > edgepos['bot']:
+        nowgeom.x -= max(nowgeom.x + newwidth - edgepos['right'], 0)
+        nowgeom.y -= max(nowgeom.y + newheight - edgepos['bot'], 0)
+        window.configure(x=nowgeom.x, y=nowgeom.y)
 
 
 #
@@ -88,12 +84,13 @@ def create_actual_sizes(scr, abs_sizes):
     return {key: conv(val) for key, val in abs_sizes.iteritems()}
 
 
-def find_geom(win):
+def find_geom(win, maxheight):
     """Find position of window, account for reparenting window managers"""
     # taskbar stops the window reaching the top of the screen.
     # can't use y position - in case of titlebars - use height.
+    # Uses global scre
     win2 = win.query_tree().parent
-    while win2.get_geometry().height < scre.height_in_pixels:
+    while win2.get_geometry().height < maxheight:
         win = win2
         win2 = win2.query_tree().parent
     return win.get_geometry()
@@ -214,13 +211,14 @@ def main(daemon=False, pidfile='/tmp/snap_pid'):
 
     dsp = display.Display()
     scre = dsp.screen()
+    maxheight = scre.height_in_pixels
 
     myborders = {'top': 0.006,
                  'side': 0.004}
 
     abstract_sizes = {'small': (0.35, 0.5),
-                      'normal': (0.45, 0.47),
-                      'long': (0.3, 0.995)}
+                      'normal': (0.43, 0.44),
+                      'long': (0.3, 0.992)}
 
     edges = find_edges_in_pixels(scre, myborders)
     sizes = create_actual_sizes(scre, abstract_sizes)
@@ -234,11 +232,17 @@ def main(daemon=False, pidfile='/tmp/snap_pid'):
 
     def change_func(inp):
         """Handle the input and call relevant snap_to position"""
+        # Here I assume that most of the time I'll receive a valid command
+        # If that's not the case, move the defining of variables into the if
+        # clause
         pos = inp.decode('utf-8').strip()
+        window = dsp.get_input_focus().focus
+        geometrynow = find_geom(window, maxheight)
         if pos in position_dict:
-            snap_to(position_dict[pos], dsp)
+            snap_to(position_dict[pos], window, geometrynow)
         elif pos in sizes:
-            resize(sizes[pos], dsp, edges)
+            resize(sizes[pos], window, edges, geometrynow)
+        dsp.flush()
 
     serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serv.bind(('', 8732))
