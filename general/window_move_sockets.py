@@ -213,12 +213,12 @@ def main(daemon=False, pidfile='/tmp/snap_pid'):
     scre = dsp.screen()
     maxheight = scre.height_in_pixels
 
-    myborders = {'top': 0.006,
-                 'side': 0.004}
+    myborders = {'top': 0.008,
+                 'side': 0.006}
 
     abstract_sizes = {'small': (0.35, 0.5),
                       'normal': (0.43, 0.44),
-                      'long': (0.3, 0.992)}
+                      'long': (0.3, 0.987)}
 
     edges = find_edges_in_pixels(scre, myborders)
     sizes = create_actual_sizes(scre, abstract_sizes)

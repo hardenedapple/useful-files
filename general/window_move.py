@@ -42,8 +42,8 @@ import sys
 #       Convert Xlib to python3 - will take a long time before I know what's
 #                                 happening let alone be able to modify it.
 
-borders = {'top': 0.006,
-           'side': 0.004}
+borders = {'top': 0.008,
+           'side': 0.006}
 
 taskbarheight = 15
 
@@ -56,7 +56,7 @@ position_dict = {'tl': lambda g: (edges['top'], edges['left']),
 
 abstract_sizes = {'small': (0.35, 0.5),
                   'normal': (0.43, 0.44),
-                  'long': (0.3, 0.992)}
+                  'long': (0.3, 0.987)}
 
 
 #
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     # Don't bother with try/except here - just let the exception raise
     try:
         if sys.argv[1] == 'stop' and \
-           stat.S_ISDIR(os.stat('/tmp/snap_file').st_mode):
+           stat.S_ISFIFO(os.stat('/tmp/snap_file').st_mode):
             with open('/tmp/snap_file', 'w') as fif:
                 fif.write('stop')
     except IndexError:

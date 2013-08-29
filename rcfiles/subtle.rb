@@ -481,6 +481,7 @@ grab "W-c", [ :bottom_right, :bottom_right33, :bottom_right66 ]
 grab "W-S-x", [ :ranger_low ]
 grab "W-S-e", [ :music_player ]
 grab "W-S-q", [ :free_term ]
+grab "W-S-c", [ :testoutterm ]
 
 # Exec programs
 grab "W-Return", "xterm -e tmux new-session"
@@ -672,6 +673,11 @@ tag "commandex" do
   match :name => "Enter_Command"
   float true
   stick true
+end
+
+tag "tk" do
+  match :class => "Tk"
+  float true
 end
 
 # create a tag to put a terminal in the bottom right corner of firefox
