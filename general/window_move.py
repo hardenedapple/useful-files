@@ -1,5 +1,4 @@
 #!/usr/bin/env python2
-
 """
 Script to move a client to different position on the screen.
 

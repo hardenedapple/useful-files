@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 A simple pop-up app that takes a command and runs it.
 Includes shortcuts to programs I run often.

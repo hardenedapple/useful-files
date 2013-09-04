@@ -484,8 +484,8 @@ grab "W-S-q", [ :free_term ]
 grab "W-S-c", [ :testoutterm ]
 
 # Exec programs
-grab "W-Return", "xterm -e tmux new-session"
-grab "W-C-Return", "xterm"
+grab "W-Return", "xterm"
+grab "W-C-Return", "xterm -e tmux new-session"
 # grab "W-C-n", "xterm -name testterm -e tmux new-session"
 # grab "W-C-S-g", "gvim"
 
