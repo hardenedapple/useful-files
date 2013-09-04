@@ -5,12 +5,12 @@ Does not check for much in the way of errors, if there is a problem ignores it
 
 Idea:
 *   Take e-mails from somewhere (probably from lancaster university server)
-*   Parse them to find the interesting ones.
+*   Parse them
 *   Put them in a pop-up telling the subject and sender.
-*   Make the pop-up clickable - open in browser or open in pop-up.
 """
 from re import findall
 from tkinter import font as tkfont
+from functools import wraps
 import atexit
 import imaplib
 import math
@@ -41,7 +41,7 @@ def get_from_subject(mesid, mailbox):
     myheads = data[0][1].decode('utf-7')
 
     try:
-        name = findall(r'From:\s+"?([\s\w]+)"?\s+<', myheads)[0]
+        name = findall(r'From:\s+"?([\s\w,]+)"?\s+<', myheads)[0]
     except IndexError:
         # Not sure if this will work all the time - if there are any errors,
         # look here
@@ -55,9 +55,6 @@ def get_from_subject(mesid, mailbox):
 
 def find_unread(mailbox):
     """Get emails unread, print message subjects and senders"""
-    # While I agree with the best practice of converting bytes into strings
-    # early, I want to use this once, so easier to keep as bytes
-
     # Not checking here would make the case where there are messages quicker
     numunseen = findall(rb'\d+', mailbox.status('Inbox', '(UNSEEN)')[1][0])
     if numunseen == [b'0']:
@@ -76,16 +73,6 @@ def find_unread(mailbox):
 
 #
 # Creating pop-up
-def setbindings(widget, escapefunc, arrowfunc, retfunc):
-    """Set bindings for a widget"""
-    # Now want the option to open up that e-mail in the browser
-    widget.wm_title('E-mail messages')
-    widget.bind('<Escape>', escapefunc)
-    widget.bind('<Left>', arrowfunc)
-    widget.bind('<Right>', arrowfunc)
-    widget.bind('<Return>', retfunc)
-
-
 def updatesize(frame):
     """Set the size for the frame widget"""
     winwid, winhgt = frame.winfo_width(), frame.winfo_height()
@@ -95,7 +82,7 @@ def updatesize(frame):
 
 
 def close(event):
-    """Remove the window"""
+    """Remove the window that recieved the event"""
     event.widget.destroy()
 
 
@@ -106,58 +93,91 @@ def openemail(event):
     close(event)
 
 
-def create_popup(linelist):
-    """Creates a pop-up that scrolls over the lines in a list."""
-    root = tk.Tk()
-    frame = tk.Frame(master=root)
-    frame.pack()
+# A Widget inheriting from Frame with methods specific to this problem
+class MailWidget(tk.Frame):
+    """A widget that separates a list of lines into a header and the rest, then
+    cycles throught the rest while displaying the header
 
-    # Define the font and set the text variables
-    headertext = linelist[0].capitalize()
-    fontname = '-*-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1'
-    # Define the different fonts
-    myfont = tkfont.Font(root, fontname)
-    titlefont = tkfont.Font(root, fontname.replace('12', '14'))
-    # Define header label
-    infotitle = tk.Label(frame, text=headertext, font=titlefont)
-    infotitle.pack(side=tk.TOP)
-    # If there are messages, add the message label
-    if len(linelist) > 1:
-        viewlist = linelist[1:]
-        viewing = 0
-        intext = tk.StringVar()
-        intext.set(viewlist[viewing])
-        infolabel = tk.Label(frame, textvariable=intext, font=myfont,
-                            width=max(map(len, viewlist)))
+    Binds keys 'Left' and 'Right' to cycling through the list of info
+    Binds 'Escape' to closing the window
+    Binds 'r' to refreshing the widgets data
+    And Binds 'Return' to opening e-mail in webbrowser"""
 
-        # Define event handling functions
-        def update(event=None):
-            """Updates the text in the pop-up every 5 seconds"""
-            # Use the viewing variable from enclosed scope
-            nonlocal viewing, afterid
-            # So the event loops don't build up
-            root.after_cancel(afterid)
-            # incval = 1 if viewing < len(viewlist)-1 else -(len(viewlist)-1)
-            # decval = -1 if viewing > 0 else len(viewlist) - 1
-            if not event:
-                viewing += 1
-                # viewing += incval
-            else:
-                viewing += (event.keysym == 'Right')*2 - 1
-                # viewing += decval if event.keysym == 'Left' else incval
-            intext.set(viewlist[viewing % len(viewlist)])
-            afterid = root.after(5000, update)
+    def __init__(self, master=None, cnf={}, **kwds):
+        # Remove MailWidget specific arguments when reading
+        self.textfunc = kwds.pop('textfunc')
+        self.textargs = kwds.pop('textargs')
+        fontdict = kwds.pop('fontdict')
+        infofont = tkfont.Font(**fontdict)
+        fontdict['size'] += 2
+        headerfont = tkfont.Font(**fontdict)
+        super().__init__(master=master, cnf=cnf, **kwds)
+        self.viewlist = []
+        self.viewing = 0
+        self.afterid = None
+        self.headertext = tk.StringVar()
+        self.intext = tk.StringVar()
+        self.updatetext(self.textfunc, self.textargs)
+        self.header = tk.Label(self, textvariable=self.headertext,
+                               font=headerfont)
+        self.info = tk.Label(self, textvariable=self.intext,
+                             font=infofont, width=max(map(len, self.viewlist)))
+        self.header.pack()
+        self.info.pack()
+        self.bindevents(master)
 
-        # Set up the root widget
-        setbindings(root, close, update, openemail)
-        infolabel.pack()
-        afterid = root.after(5000, update)
+    # This function is only here as a helper to define other method functions
+    # It has no use outside the class and will be of no use in any objects the
+    # class makes. Hence it is defined in the class, used and deleted before
+    # any objects are created.
+    def afteriddec(function):
+        """Decorator to cancel and restart the cycle update countdown after
+        executing a function"""
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            """Ensures that updates don't get stacked"""
+            if self.afterid:
+                self.master.after_cancel(self.afterid)
+            function(self, *args, **kwargs)
+            self.afterid = self.master.after(5000, self.cycle)
+        return wrapper
 
-    else:
-        setbindings(root, close, openemail, close)
+    def updatetext(self, func, args):
+        """Given a list of strings, set the first to the header of the widget,
+        and the rest to the lines to cycle through"""
+        linelist = func(*args)
+        self.headertext.set(linelist[0].capitalize())
+        if len(linelist) > 1:
+            self.viewlist = linelist[1:]
+            self.viewing = 0
+            self.intext.set(self.viewlist[self.viewing])
+            self.afterid = self.master.after(5000, self.cycle)
 
-    root.after(10, updatesize, frame)
-    root.mainloop()
+    def bindevents(self, bindwid):
+        """Bind events to the root widget"""
+        bindwid.bind('<Escape>', close)
+        bindwid.bind('<Return>', openemail)
+        bindwid.bind('<Left>', self.cycle)
+        bindwid.bind('<Right>', self.cycle)
+        bindwid.bind('<r>', self.refresh)
+
+    @afteriddec
+    def cycle(self, event=None):
+        """Cycles the e-mail showing in the pop-up"""
+        if not event:
+            self.viewing += 1
+        else:
+            self.viewing += (event.keysym == 'Right')*2 - 1
+        self.intext.set(self.viewlist[self.viewing % len(self.viewlist)])
+
+    @afteriddec
+    def refresh(self, event):
+        """Function to update the text on a keybinding, just calls
+        self.updatetext with function the class was initialised with"""
+        self.updatetext(self.textfunc, self.textargs)
+
+    # Remove afteriddec from the class - no object has it as a method
+    del afteriddec
 
 
 #
@@ -169,21 +189,23 @@ if __name__ == '__main__':
         gmail = sys.argv[1] in gopts
     except IndexError:
         pass
+    # Get Options
     # If gmail is None - nothing has been set
     # read from tty if interactive. Else assume want lancs email
-    if gmail == None and sys.stdin.isatty():
+    if gmail is None and sys.stdin.isatty():
         # Can read from input, as it's interactive
         option = input('Lancaster UNI e-mail, or gmail? : ')
         confile = gmailvars if option in gopts else lancsvars
     # Read the user, password and server from file
     else:
         confile = gmailvars if gmail else lancsvars
-        # If not interactive, can't see the output - hance pop-up in gui
+        # If not interactive, can't see the output - hence pop-up in gui
         popup = True
         emailurl = gmailurl if gmail else lancsurl
     with open(confile) as conf:
         password, user, server = (val.strip() for val in conf.read().split())
 
+    # Login to email
     try:
         emailbox = imaplib.IMAP4_SSL(server)
         emailbox.login(user, password)
@@ -193,7 +215,15 @@ if __name__ == '__main__':
     else:
         atexit.register(emailbox.logout)
 
+    # Either pop-up or show on terminal
     if popup:
-        create_popup(find_unread(emailbox))
+        root = tk.Tk()
+        myfontdict = {'family': 'Tamsyn', 'size': 9}
+        mymail = MailWidget(master=root, fontdict=myfontdict,
+                            textfunc=find_unread, textargs=(emailbox,))
+        mymail.pack()
+        root.after(10, updatesize, mymail)
+        root.mainloop()
     else:
-        print(find_unread(emailbox))
+        for mess in find_unread(emailbox):
+            print(mess)
