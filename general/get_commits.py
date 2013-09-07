@@ -15,6 +15,7 @@ need the geneerality of not relying on bitbucket's specific web-page layout.
 '''
 import re
 import urllib.request
+import os
 
 
 def main(username, password, url):
@@ -35,7 +36,7 @@ def main(username, password, url):
 
 
 if __name__ == '__main__':
-    passfile = '/home/apple/.config/passwords/bitbucket'
+    passfile = os.environ['HOME'] + '/.config/passwords/bitbucket'
     with open(passfile) as passtup:
         myuser, mypass, myurl = passtup.read().split()
     print(main(myuser, mypass, myurl))

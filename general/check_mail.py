@@ -16,6 +16,7 @@ import imaplib
 import math
 import sys
 import tkinter as tk
+import os
 
 
 # TODO:
@@ -23,9 +24,10 @@ import tkinter as tk
 #   subtle
 
 gopts = ['gmail', 'g', 'home', 'h']
-gmailvars = '/home/apple/.config/passwords/gmailpass'
+HOME = os.environ['HOME']
+gmailvars = HOME +'/.config/passwords/gmailpass'
 gmailurl = 'https://mail.google.com/'
-lancsvars = '/home/apple/.config/passwords/lancspass'
+lancsvars = HOME +'/.config/passwords/lancspass'
 lancsurl = 'https://exchange2010.lancs.ac.uk/'
 
 

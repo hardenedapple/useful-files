@@ -5,6 +5,9 @@ username = malcomso <not_telling@fake.com>
 [hostfingerprints]
 bitbucket.org = 24:9c:45:8b:9c:aa:ba:55:4e:01:6d:58:ff:e4:28:7d:2a:14:ae:3b
 
+[pager]
+pager = LESS='FRX' less
+
 [extensions]
 color =
 extdiff =
@@ -14,6 +17,9 @@ mq =
 purge =
 rebase =
 record =
+pager =
+hgext.bookmarks =
+hggit =
 
 # change the default color to not be bold (for status output)
 # to add bold, add the word bold to the end of these lines

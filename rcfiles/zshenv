@@ -4,6 +4,7 @@ export LESSHISTFILE="/dev/null"
 
 # Default editor vim
 export EDITOR=vim
+export PAGER=less
 
 
 # Add $HOME/bin to $PATH
