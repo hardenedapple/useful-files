@@ -34,7 +34,7 @@ lancsurl = 'https://exchange2010.lancs.ac.uk/'
 def get_from_subject(mesid, mailbox):
     """Given a message id and the mailbox it comes from, return the From and
     Subject headers in a pretty(ish) format"""
-    res, data = mailbox.fetch(mesid, 'BODY[HEADER.FIELDS (SUBJECT FROM)]')
+    res, data = mailbox.fetch(mesid, 'BODY.PEEK[HEADER.FIELDS (SUBJECT FROM)]')
     if res != 'OK':
         raise RuntimeError('error in fetch call for {}'.format(mesid))
     # Apparently default character set for IMAP is UTF7
@@ -48,8 +48,6 @@ def get_from_subject(mesid, mailbox):
         name = findall(r'From:.*(<.*>)\r\n', myheads)[0]  # Assume match
 
     subject = findall(r'Subject:\s+(.*)\r\n', myheads)[0]  # Assume match
-
-    mailbox.store(mesid, '-FLAGS', '\\Seen')
     return ' '.join((name, ':', subject))
 
 
