@@ -104,8 +104,11 @@ setprompt
 
 # {{{ Syntax highlighting for man, cat etc
 
-cat sed awk grep() {
+# {{{ Cat, sed, awk, grep, tail, diff syntax highlighting
+# Cat tail, sed, awk, and grep, head
+tail head cat sed awk grep() {
   syntax=""
+  # check that highlight is installed
   type highlight > /dev/null 2>&1
   if [[ $? -eq 0 ]]; then
     for file in $@; do
@@ -115,6 +118,7 @@ cat sed awk grep() {
           *.php) syntax="php";;
           *.py) syntax="python";;
           *.diff) syntax="diff";;
+          *.rej) syntax="diff";;
           *.awk) syntax="awk";;
           *.c) syntax="c";;
           *.css) syntax="css";;
@@ -124,6 +128,8 @@ cat sed awk grep() {
           *.sql) syntax="sql";;
           *.pl) syntax="pl";;
           *.rb) syntax="rb";;
+          *.html) syntax="html";;
+          *.sh) syntax="sh";;
           /etc/apache*/*) syntax="httpd";;
         esac
       fi
@@ -135,6 +141,17 @@ cat sed awk grep() {
     command $0 $@
   fi
 }
+
+# diff (always want the same highlighting)
+diff() {
+  type highlight > /dev/null 2>&1
+  if [[ $? -eq 0 ]]; then
+    command diff $@ | highlight -O ansi --syntax=diff
+  else
+    command diff $@
+  fi
+}
+# }}}
 
 # {{{ Man page colors
 man() {

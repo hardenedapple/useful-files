@@ -158,11 +158,20 @@ def print_nice(indict):
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument('--program', dest='one_program', default=None)
-    parser.add_argument('--comb', dest='comb', nargs='*')
-    parser.add_argument('--all_mem', dest='all_mem', nargs='*')
-    parser.add_argument('--tot', dest='ramtot', action='store_true')
-    parser.add_argument('--swap', action='store_true', dest='swap')
+    parser.add_argument('--tot', dest='ramtot', action='store_true',
+                        help='Print out total ram usage')
+    parser.add_argument('--swap', action='store_true',
+                        help='Show total swap usage')
+    parser.add_argument('--program', dest='one_program', default=None,
+                        help='Program name to get memory usage of\n\
+                        (shows memory of all instances)',
+                        metavar='P-name')
+    parser.add_argument('--comb', nargs='*', metavar='Mem-Type',
+                        help='Multiple types of memory to look at\n\
+                        combine different processes into one entry.')
+    parser.add_argument('--all_mem', nargs='*', metavar='Mem-Type',
+                        help='Multiple types of memory to look at\n\
+                        keep multiple instances separate.')
     args = parser.parse_args()
     # In case given options like pss and sWaP
     if args.comb:
