@@ -81,7 +81,6 @@ setprompt() {
 
   # Check the UID
   if [[ $UID -ge 1000 ]]; then # normal user
-    # PR_USER="${PR_CYAN}TODO $ ${PR_NO_COLOR}"
     PR_USER="${PR_CYAN}$ ${PR_NO_COLOR}"
   elif [[ $UID -eq 0 ]]; then # root
     PR_USER="${PR_RED}TODO # ${PR_NO_COLOR}"
@@ -143,7 +142,7 @@ tail head cat sed awk grep() {
 }
 
 # diff (always want the same highlighting)
-diff() {
+colordiff() {
   type highlight > /dev/null 2>&1
   if [[ $? -eq 0 ]]; then
     command diff $@ | highlight -O ansi --syntax=diff
@@ -185,6 +184,9 @@ alias ll='ls -F'
 alias mympd='mpd ~/.config/mpd/mpd.conf'
 alias myncmpcpp='ncmpcpp -c ~/.config/ncmpcpp/config'
 alias killmybar='pkill conky; pkill tilda; pkill tint2'
+alias gr='cd $(git root)'
+alias hr='cd $(hg root)'
+alias colorterm='TERM=screen-256color'
 # }}}
 
 # vim: set ts=2 sw=2 foldmethod=marker:

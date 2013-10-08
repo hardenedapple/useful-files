@@ -1,13 +1,22 @@
 XTerm*termName:   xterm-256color
 ! I like the terminal font more, but it doesnt have a lot of utf characters
-XTerm*font:       -misc-tamsyn-medium-r-normal-*-14-*-*-*-*-*-iso8859-1
-XTerm*boldFont:   -misc-tamsyn-bold-r-normal-*-14-*-*-*-*-*-iso8859-1
+XTerm*font:       -misc-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
+XTerm*boldFont:   -misc-tamsyn-bold-r-normal-*-12-*-*-*-*-*-iso8859-1
 XTerm*iconName:   Apples_Terminal
 XTerm*title:      Apples_Terminal
 XTerm*utf8:       2
 XTerm*saveLines:  4096
 !XTerm*locale: true
 XTerm*selectToClipboard: true
+
+! Remove xterm control keys like Ctrl-J Ctrl-H etc
+XTerm*VT100.Translations: #override \
+            <Key>Backspace: string(0x7F)\n\
+            <Key>Delete:    string("\033[3~")\n\
+            <Key>Home:      string("\033[1~")\n\
+            <Key>End:       string("\033[4~")
+
+XTerm*ttyModes:  erase ^?
 
 
 ! vim:ft=xdefaults

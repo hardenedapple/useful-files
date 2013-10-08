@@ -26,8 +26,12 @@ fi
 
 # Really need to figure out how to neaten this up - want some to start on
 # boot, and some to start/finish when entering/leaving X
-/usr/lib/systemctl --user is-active default.target || /usr/lib/systemd/systemd --user &
+#
+# systemd has stopped working like I thought it should - comment out for now
+# /usr/lib/systemctl --user is-active default.target || /usr/lib/systemd/systemd --user &
 
+# This would be handled by systemd, if the thing worked as I think it should
+sxhkd -c ~/.config/sxhkd/sxhkdrc -r ~/.cache/sxhkd/output &
 
 # Loads the non-colour  xresources, the colours are chosen based on wm
 xrdb -load ~/xresources/base_resources

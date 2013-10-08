@@ -27,8 +27,8 @@ super + control + o
     /home/apple/bin/commandex.py
 
 # Start terminual with a font that can show some unicode characters
-shift + super + Return
-    xterm -font '-*-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-*' -geometry 78x22 -name testterm
+# shift + super + Return
+    # xterm -font '-*-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-*' -geometry 78x22 -name testterm
 
 
 

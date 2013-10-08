@@ -26,9 +26,7 @@ def main(username, password, url):
     passmgr.add_password(None, url, username, password)
     handler = urllib.request.HTTPBasicAuthHandler(passmgr)
     opener = urllib.request.build_opener(handler)
-    urllib.request.install_opener(opener)
-    mypage = urllib.request.urlopen(url).read()
-    pagestr = mypage.decode('utf-8')
+    pagestr = opener.open(url).read().decode('utf-8')
 
     # Find the number of commits the fork is behind
     reg = re.compile(r'This fork is (\d+) commits behind \b[a-zA-z/_]+\b')

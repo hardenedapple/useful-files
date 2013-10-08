@@ -9,5 +9,7 @@
 	ui = true
 [alias]
     graph = log --abbrev-commit --all --graph --decorate --color
+	root = !pwd
+	ex = "!command "
 [difftool "vimdiff"]
     cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"

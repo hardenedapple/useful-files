@@ -16,9 +16,9 @@ bind-key R source-file ~/.tmux.conf \; display-message "source-file done"
 set -g base-index 1
 
 # Move between windows easily
-# C-h doesn't work for some reason - use j, k instead of h, l
-bind-key -n C-j previous-window
-bind-key -n C-k next-window
+# watch out with Xterm, Ctrl-h del key funny-ness
+bind-key -n C-h previous-window
+bind-key -n C-l next-window
 
 # Clock style
 setw -g clock-mode-style 24
@@ -50,12 +50,13 @@ set-option -g default-shell /usr/bin/zsh
 # Quick view of processes
 unbind p
 bind p split-window -v "exec htop"
+bind C-p split-window -h "exec htop"
 
 # Quick music
 unbind n
 unbind C-n
-bind n split-window -v "exec ncmpcpp"
-bind C-n split-window -h "exec ncmpcpp"
+bind n split-window -v "exec ncmpcpp -c ~/.config/ncmpcpp/config"
+bind C-n split-window -h "exec ncmpcpp -c ~/.config/ncmpcpp/config"
 
 # Quick file-manager
 unbind f

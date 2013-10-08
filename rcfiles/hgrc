@@ -54,3 +54,9 @@ vimmerge.premerge = true
 vimmerge.binary = true
 vimmerge.checkprompt = true
 vimmerge.gui = false
+
+
+[alias]
+# slowly making exactly how I want it - needs much more improvement
+graph = hg log --graph --template "{rev}:{node}\n {tags}{phase}\n{desc|firstline}\n\n"
+ex = !cd $(hg root) && command $@
