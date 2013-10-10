@@ -15,3 +15,7 @@ fi
 if [ -d "$HOME/.gem/ruby/2.0.0/bin/" ]; then
     path=(~/.gem/ruby/2.0.0/bin $path)
 fi
+# Add zsh completion directory to fpath
+if [ -d "$HOME/.config/zsh/completion/" ]; then
+    fpath=(~/.config/zsh/completion $fpath)
+fi

@@ -9,15 +9,18 @@ XTerm*saveLines:  4096
 !XTerm*locale: true
 XTerm*selectToClipboard: true
 
-! Remove xterm control keys like Ctrl-J Ctrl-H etc
-XTerm*VT100.Translations: #override \
-            <Key>Backspace: string(0x7F)\n\
-            <Key>Delete:    string("\033[3~")\n\
-            <Key>Home:      string("\033[1~")\n\
-            <Key>End:       string("\033[4~")
+! Doesnt seem to do anything - will check later on
+! XTerm*VT100.Translations: #override \
+!             <Key>Backspace: string(0x7F)\n\
+!             <Key>Delete:    string("\033[3~")\n\
+!             <Key>Home:      string("\033[1~")\n\
+!             <Key>End:       string("\033[4~")
 
+! Change xterm specific keys - e.g. ctrl-h == backspace
+! This allows setting ctrl-h to something in tmux
 XTerm*ttyModes:  erase ^?
 XTerm*backarrowKeyIsErase: true
 
+XTerm*metaSendsEscape: true
 
 ! vim:ft=xdefaults
