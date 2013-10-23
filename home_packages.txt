@@ -61,6 +61,7 @@ dmenu
 dmxproto
 dnssec-anchors
 dnsutils
+dsniff
 dtach
 dvd+rw-tools
 e2fsprogs
@@ -82,6 +83,7 @@ flashplugin
 flex
 fontconfig
 fontsproto
+fping
 freeglut
 freetype2
 fribidi
@@ -133,6 +135,7 @@ id3
 idnkit
 imagemagick
 imlib2
+indent
 inetutils
 inputproto
 iproute2
@@ -204,10 +207,11 @@ liblqr
 libltdl
 libmad
 libmms
-libmng
 libmodplug
 libmpc
 libmpdclient
+libnet
+libnids
 libnl
 libnotify
 libogg
@@ -226,6 +230,7 @@ libshout
 libsigc++
 libsm
 libsndfile
+libsodium
 libssh2
 libtasn1
 libthai
@@ -314,9 +319,11 @@ namcap
 nano
 ncmpcpp
 ncurses
+net-tools
 netctl
 nettle
 newsbeuter
+nmap
 nspr
 nss
 nss-mdns
@@ -367,6 +374,7 @@ perl-time-duration
 perl-timedate
 perl-uri
 perl-www-robotrules
+php
 pinentry
 pixman
 pkg-config
@@ -470,6 +478,7 @@ taglib
 tamsyn-font
 tar
 tcl
+tcpdump
 terminus-font
 texinfo
 tilda
@@ -477,6 +486,7 @@ time
 tint2
 tk
 tmux
+traceroute
 transset-df
 ttf-dejavu
 tzdata
@@ -501,6 +511,8 @@ wayland
 wget
 which
 wireless_tools
+wireshark-cli
+wireshark-gtk
 wmctrl
 wpa_actiond
 wpa_supplicant
@@ -508,8 +520,10 @@ x264
 xbitmaps
 xcb-proto
 xcb-util
+xcb-util-cursor
 xcb-util-image
 xcb-util-keysyms
+xcb-util-renderutil
 xcb-util-wm
 xcompmgr
 xdg-user-dirs
@@ -517,6 +531,7 @@ xdg-utils
 xdotool
 xextproto
 xf86-input-evdev
+xf86-input-synaptics
 xf86-video-ati
 xf86dgaproto
 xf86vidmodeproto

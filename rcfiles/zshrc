@@ -110,9 +110,9 @@ setprompt
 
 # {{{ Syntax highlighting for man, cat etc
 
-# {{{ Cat, sed, awk, grep, tail, diff syntax highlighting
-# Cat tail, sed, awk, and grep, head
-tail head cat sed awk grep() {
+# {{{ Cat, sed, awk, tail, diff syntax highlighting
+# Cat tail, sed, awk, and head
+tail head cat sed awk() {
   syntax=""
   # check that highlight is installed
   type highlight > /dev/null 2>&1

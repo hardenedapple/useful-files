@@ -3,7 +3,7 @@
 # Will improve later (e.g. include '-- vt1' as one completion, add actual
 # options etc)
 _arguments "1:wmenv :(multicolor pek_woman pek_build pek_pier \
-                      pek_windmill subtle_new subtle_orig ratpoison \
+                      pek_windmill subtle_new subtle_orig ratpoison muted \
                       holo dust awesome multicolor steamburn shitfy)" \
            "2: :(--)" \
            "3: :(vt1)"
