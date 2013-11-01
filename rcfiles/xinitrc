@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # ~/.xinitrc
 #
@@ -36,80 +36,73 @@ sxhkd -c ~/.config/sxhkd/sxhkdrc -r ~/.cache/sxhkd/output &
 # Loads the non-colour  xresources, the colours are chosen based on wm
 xrdb -load ~/xresources/base_resources
 
-# run unclutter - remove mouse after a while
-# exec unclutter -idle 1 -jitter 2 -root
+
+pek_start () {
+    xrdb -merge ~/xresources/$1
+    feh --bg-fill ~/.config/wallpapers/$2 &
+    exec pekwm --config ~/.config/pekwm/$3
+}
+
+
+subtle_start () {
+    unclutter -idle 4 -jitter 2 -root
+    xrdb -merge ~/xresources/$1
+    feh --bg-fill ~/.config/wallpapers/$2
+    xmodmap ~/xmodmaps/xmodmap_super
+    exec subtle >> ~/.cache/subtle/stdout 2>> ~/.cache/subtle/stderr
+}
+
+
+awesome_start () {
+    xrdb -merge ~/xresources/$1
+    xmodmap ~/xmodmaps/xmodmap_super
+    ln -sf ~/.config/awesome/the_rcs/${2}.lua ~/.config/awesome/rc.lua
+    exec awesome >> ~/.cache/awesome/stdout 2>> ~/.cache/awesome/stderr
+}
 
 case $1 in
-    "pek_woman")  xrdb -merge ~/xresources/standard_but_calmer 
-                  feh --bg-fill ~/.config/wallpapers/multiimage_woman.jpg &
-                  exec pekwm --config ~/.config/pekwm/config
-                  ;;
+    "pek_woman")    pek_start standard_but_calmer multiimage_woman.jpg config
+                    ;;
 
-    "pek_build")  xrdb -merge ~/xresources/standard_but_calmer 
-                  feh --bg-fill ~/.config/wallpapers/skippin___skool_by_ether.jpg &
-                  exec pekwm --config ~/.config/pekwm/config
-                  ;;
+    "pek_build")    pek_start standard_but_calmer skippin___skool_by_ether.jpg config
+                    ;;
 
-     "pek_pier") xrdb -merge ~/xresources/awesome_personal_resources
-                 feh --bg-fill ~/.config/wallpapers/pier_house.jpg &
-                 exec pekwm --config ~/.config/pekwm/windmill
-                 ;;
+     "pek_pier")    pek_start awesome_personal_resources pier_house.jpg windmill
+                    ;;
 
-    "pek_windmill") xrdb -merge ~/xresources/vinyl
-                 feh --bg-fill ~/.config/wallpapers/windmill_sillhouette.jpg &
-                 exec pekwm --config ~/.config/pekwm/windmill
-                 ;;
+    "pek_windmill") pek_start vinyl windmill_sillhouette.jpg windmill
+                    ;;
 
-    "subtle_new") xrdb -merge ~/xresources/awesome_personal_resources
-                  feh --bg-fill ~/.config/wallpapers/earthrise_1.jpg
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec subtle >> ~/.cache/subtle/stdout 2>> ~/.cache/subtle/stderr
-                  ;;
+    "subtle_new")   subtle_start awesome_personal_resources earthrise_1.jpg
+                    ;;
 
-    "subtle_orig") xrdb -merge ~/xresources/subtle_initial_resources
-                  feh --bg-fill ~/.config/wallpapers/block_colours_woman_sunglasses.jpg
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec subtle >> ~/.cache/subtle/stdout 2>> ~/.cache/subtle/stderr
-                  ;;
+    "subtle_orig")  subtle_start subtle_initial_resources block_colours_woman_sunglasses.jpg
+                    ;;
 
-    "ratpoison")  xrdb -merge ~/xresources/awesome_personal_resources
-                  feh --bg-fill ~/.config/wallpapers/earthrise_1.jpg
-                  xmodmap ~/xmodmaps/xmodmap_control
-              exec /usr/bin/ratpoison -f ~/.config/ratpoison/ratpoisonrc
-                  ;;
+    "ratpoison")    xrdb -merge ~/xresources/awesome_personal_resources
+                    feh --bg-fill ~/.config/wallpapers/earthrise_1.jpg
+                    xmodmap ~/xmodmaps/xmodmap_control
+                    exec /usr/bin/ratpoison -f ~/.config/ratpoison/ratpoisonrc
+                    ;;
 
-    "shifty")     xrdb -merge ~/xresources/awesome_personal_resources
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/shifty.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
-                  ;;
+    "shifty")       awesome_start awesome_personal_resources shifty
+                    ;;
 
-    "holo")       xrdb -merge ~/xresources/holo
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/holo.lua >> ~/.cache/awesome/stdout 2>> ~/.cache/awesome/stderr
-                  ;;
+    "holo")         awesome_start holo holo
+                    ;;
 
-    "dust")       xrdb -merge ~/xresources/vinyl
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/dustrc.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
-                  ;;
+    "dust")         awesome_start vinyl dust
+                    ;;
 
-    "multicolor")  xrdb -merge ~/xresources/dremora
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/multicolor.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
-                  ;;
+    "multicolor")    awesome_start dremora multicolor
+                    ;;
 
-    "steamburn")  xrdb -merge ~/xresources/steamburn
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/steamburn.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
-                  ;;
+    "steamburn")    awesome_start steamburn steamburn
+                    ;;
 
-    "muted")      xrdb -merge ~/xresources/awesome_muted_resources
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome -c ~/.config/awesome/alt_rcs/muterc.lua >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
-                  ;;
+    "muted")        awesome_start awesome_muted_resources muted
+                    ;;
 
-    *)            xrdb -merge ~/xresources/awesome_personal_resources
-                  xmodmap ~/xmodmaps/xmodmap_super
-                  exec awesome >> ~/.cache/awesome/stdout  2>> ~/.cache/awesome/stderr
-                  ;;
+    *)              awesome_start awesome_personal_resources main
+                    ;;
 esac

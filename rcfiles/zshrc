@@ -193,7 +193,7 @@ alias myncmpcpp='ncmpcpp -c ~/.config/ncmpcpp/config'
 alias killmybar='pkill conky; pkill tilda; pkill tint2'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
-alias colorterm='TERM=screen-256color'
+alias cterm='TERM=screen-256color'
 # }}}
 
 # vim: set ts=2 sw=2 foldmethod=marker:

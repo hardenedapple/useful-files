@@ -34,20 +34,12 @@ status.unknown  = magenta
 secret = true
 
 [merge-patterns]
-** = gvimmerge
+** = vimmerge
 
 # Want to add vimdiff for those times when don't have X server
 # figure out how later
 
 [merge-tools]
-gvimmerge.executable = /usr/bin/gvimdiff
-gvimmerge.args = $local $other
-gvimmerge.premerge = true
-gvimmerge.binary = false
-gvimmerge.checkchanged = true
-gvimmerge.gui = true
-
-
 vimmerge.executable = /usr/bin/vimdiff
 vimmerge.args = $local $other
 vimmerge.premerge = true
