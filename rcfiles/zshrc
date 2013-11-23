@@ -196,4 +196,8 @@ alias hr='cd $(hg root)'
 alias cterm='TERM=screen-256color'
 # }}}
 
+# General {{{
+setopt interactivecomments
+# }}}
+
 # vim: set ts=2 sw=2 foldmethod=marker:

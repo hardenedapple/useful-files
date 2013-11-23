@@ -45,7 +45,6 @@ pek_start () {
 
 
 subtle_start () {
-    unclutter -idle 4 -jitter 2 -root
     xrdb -merge ~/xresources/$1
     feh --bg-fill ~/.config/wallpapers/$2
     xmodmap ~/xmodmaps/xmodmap_super
