@@ -33,6 +33,26 @@ lancsurl = 'https://exchange2010.lancs.ac.uk/'
 
 #
 # Getting e-mail
+def get_from(heads, attempt=0):
+    """
+    Find the sender of the emails in heads.
+
+    Tries different regular expressions to find the sender before eventually
+    giving up and returning 'Unknown'. 'Attempt' defines the level of recursion.
+
+    :attempt: integer defining the level of recursion.
+    :heads: heads to find sender of.
+    :returns: String identifying sender.
+
+    """
+    relist = [r'From:\s+"?([\s\w,]+)"?\s+<', r'From:.*(<.*>)\r\n',
+              r'From:(.*)\r\n']
+    try:
+        return findall(relist[attempt], heads)[0]
+    except IndexError:
+        return get_from(heads, attempt+1)
+
+
 def get_from_subject(mesid, mailbox):
     """Given a message id and the mailbox it comes from, return the From and
     Subject headers in a pretty(ish) format"""
@@ -41,13 +61,7 @@ def get_from_subject(mesid, mailbox):
         raise RuntimeError('error in fetch call for {}'.format(mesid))
     # Apparently default character set for IMAP is UTF7
     myheads = data[0][1].decode('utf-7')
-
-    try:
-        name = findall(r'From:\s+"?([\s\w,]+)"?\s+<', myheads)[0]
-    except IndexError:
-        # Not sure if this will work all the time - if there are any errors,
-        # look here
-        name = findall(r'From:.*(<.*>)\r\n', myheads)[0]  # Assume match
+    name = get_from(myheads)
 
     subject = findall(r'Subject:\s+(.*)\r\n', myheads)[0]  # Assume match
     return ' '.join((name, ':', subject))
@@ -120,8 +134,13 @@ class MailWidget(tk.Frame):
         self.updatetext(self.textfunc, self.textargs)
         self.header = tk.Label(self, textvariable=self.headertext,
                                font=headerfont)
+        try:
+            infowid = max(map(len, self.viewlist))
+        except ValueError:
+            # No e-mails, get width from header
+            infowid = len(self.headertext.get())
         self.info = tk.Label(self, textvariable=self.intext,
-                             font=infofont, width=max(map(len, self.viewlist)))
+                             font=infofont, width=infowid)
         self.header.pack()
         self.info.pack()
         self.bindevents(master)
