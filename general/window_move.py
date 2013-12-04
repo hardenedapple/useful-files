@@ -50,6 +50,7 @@ borders = {'top': 0.008,
            'side': 0.006}
 
 taskbarheight = 15
+fifoname = '/tmp/snap_file'
 
 position_dict = {'tl': lambda g: (edges['top'], edges['left']),
                  'tr': lambda g: (edges['top'], edges['right'] - g.width),
@@ -150,28 +151,16 @@ def follow(myfile):
         yield retline.strip()
 
 
-# More global variables
-dsp = display.Display()
-scre = dsp.screen()
-edges = find_edges_in_pixels(scre)
-sizes = create_actual_sizes(scre)
+def main():
+    """
+    Run the functionality of the script.
+    :returns: NULL
 
-if __name__ == "__main__":
-    # Don't bother with try/except here - just let the exception raise
-    try:
-        if sys.argv[1] == 'stop' and \
-           stat.S_ISFIFO(os.stat('/tmp/snap_file').st_mode):
-            with open('/tmp/snap_file', 'w') as fif:
-                fif.write('stop')
-    except IndexError:
-        pass
-    else:
-        # An other command line arguments are ignored
-        sys.exit(0)
-    os.mkfifo('/tmp/snap_file')
+    """
+    os.mkfifo(fifoname)
     # In case of some error somewhere
-    atexit.register(os.remove, '/tmp/snap_file')
-    for line in follow('/tmp/snap_file'):
+    atexit.register(os.remove, fifoname)
+    for line in follow(fifoname):
         if line in position_dict:
             snap_to(line)
         elif line in sizes:
@@ -179,3 +168,21 @@ if __name__ == "__main__":
         elif line == 'stop':
             break
         # just leave all other words alone
+
+
+if __name__ == "__main__":
+    # Only catch index errors - let the exceptions raise if there's any other
+    # problem.
+    try:
+        # An other command line arguments are ignored
+        if sys.argv[1] == 'stop' and \
+           stat.S_ISFIFO(os.stat(fifoname).st_mode):
+            with open(fifoname, 'w') as fif:
+                fif.write('stop')
+    except IndexError:
+        # More global variables
+        dsp = display.Display()
+        scre = dsp.screen()
+        edges = find_edges_in_pixels(scre)
+        sizes = create_actual_sizes(scre)
+        main()
