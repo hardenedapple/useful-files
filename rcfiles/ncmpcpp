@@ -459,7 +459,7 @@ search_engine_default_search_mode = "2"
 #
 allow_physical_files_deletion = "yes"
 #
-#allow_physical_directories_deletion = "no"
+allow_physical_directories_deletion = "yes"
 #
 external_editor = "/usr/bin/vim"
 #
