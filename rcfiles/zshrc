@@ -189,7 +189,6 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 alias ll='ls -F'
 alias mympd='mpd ~/.config/mpd/mpd.conf'
-alias myncmpcpp='ncmpcpp -c ~/.config/ncmpcpp/config'
 alias killmybar='pkill conky; pkill tilda; pkill tint2'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
