@@ -6,10 +6,10 @@ control + shift + t
     toggle_xcmp.sh
 
 XF86AudioRaiseVolume
-    amixer set Master 5%+
+    pulseaudio-ctl up || amixer set Master 5%+
 
 XF86AudioLowerVolume
-    amixer set Master 5%-
+    pulseaudio-ctl down || amixer set Master 5%-
 
 # music
 control + super + {period,comma,slash}
