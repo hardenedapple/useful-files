@@ -11,6 +11,9 @@ XF86AudioRaiseVolume
 XF86AudioLowerVolume
     pulseaudio-ctl down || amixer set Master 5%-
 
+XF86AudioMute
+    pulseaudio-ctl mute || amixer sset Master toggle
+
 # music
 control + super + {period,comma,slash}
     mpc {next,prev,toggle}

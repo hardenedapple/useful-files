@@ -69,11 +69,7 @@ complete -cf sudo
 #shopt -s cdspell
 
 
-# Add an alias to git
-alias git_graph='git log --abbrev-commit --all --graph --decorate --color'
-
 # mpd doesn't automatically search .config for config file
 # neither doesn ncmpcpp
 alias mympd='mpd ~/.config/mpd/mpd.conf'
-alias myncmpcpp='ncmpcpp -c ~/.config/ncmpcpp/config'
 alias killmybar='pkill conky; pkill tilda; pkill tint2'

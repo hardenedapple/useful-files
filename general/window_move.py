@@ -79,16 +79,17 @@ def snap_to(position):
 
 def resize(size):
     """Given a 'size', resize client accordingly"""
-    # dsp, and position_dict are global variables
+    # dsp is a global variable
     window = dsp.get_input_focus().focus
     newheight, newwidth = sizes[size]
     nowgeom = find_geom(window)
     window.configure(height=newheight, width=newwidth)
-    if nowgeom.x + newwidth > edges['right'] \
-            or nowgeom.y + newheight > edges['bottom']:
+    if nowgeom.x + newwidth > edges['right']:
         nowgeom.x -= max(nowgeom.x + newwidth - edges['right'], 0)
+        window.configure(x=nowgeom.x)
+    if nowgeom.y + newheight > edges['bottom']:
         nowgeom.y -= max(nowgeom.y + newheight - edges['bottom'], 0)
-        window.configure(x=nowgeom.x, y=nowgeom.y)
+        window.configure(y=nowgeom.y)
     dsp.flush()
 
 
@@ -119,8 +120,8 @@ def create_actual_sizes(scr):
 
 def find_geom(win):
     """Find position of window, account for reparenting window managers"""
-    # taskbar stops the window reaching the top of the screen.
-    # can't use y position - in case of titlebars - use height.
+    # taskbar stops the window spanning top to bottom of the screen
+    # can't use y position because of titlebars - use height
     win2 = win.query_tree().parent
     while win2.get_geometry().height < scre.height_in_pixels:
         win = win2
