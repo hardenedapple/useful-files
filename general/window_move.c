@@ -14,6 +14,9 @@
 #define TASKBARRIGHT 0
 #define TASKBARBOTTOM 20
 
+/* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lm\ -o\ %:r\ % | make */
+
+
 /* TODO: Haven't yet accounted for multiple monitors with Xrandr
  *       Think XRRScreenConfiguration might be the way to look for monitor size */
 
@@ -33,6 +36,12 @@
  *      focussed on that is still a child of the root window. This helps
  *      account for reparenting window managers.
  */
+
+/* Structure for names and function pointers the position functions */
+struct func_and_name {
+    char* function_name;
+    XWindowChanges (*function)(const XWindowChanges, const XWindowChanges);
+};
 
 /*****************************************************************************
  *      Position defining functions and function to choose which to use      *
@@ -126,42 +135,21 @@ XWindowChanges middle_right(const XWindowChanges current_pos, const XWindowChang
     return return_val;
 }
 
-
-
+static struct func_and_name positions[] = {{"tl", top_left}, {"tr", top_right},
+                                     {"bl", bottom_left}, {"br", bottom_right},
+                                     {"mr", middle_right}, {"ml", middle_left},
+                                     {"tm", top_middle}, {"bm", bottom_middle},
+                                     {NULL, NULL}};
 /* Return the function corresponding to a choice */
 XWindowChanges (*find_snap_function(const char* choice))(XWindowChanges, XWindowChanges)
 {
-    if (!strcmp(choice, "br"))
-    {
-        return &bottom_right;
-    }
-    if (!strcmp(choice, "tl"))
-    {
-        return &top_left;
-    }
-    if (!strcmp(choice, "tr"))
-    {
-        return &top_right;
-    }
-    if (!strcmp(choice, "bl"))
-    {
-        return &bottom_left;
-    }
-    if (!strcmp(choice, "mr"))
-    {
-        return &middle_right;
-    }
-    if (!strcmp(choice, "tm"))
-    {
-        return &top_middle;
-    }
-    if (!strcmp(choice, "bm"))
-    {
-        return &bottom_middle;
-    }
-    if (!strcmp(choice, "ml"))
-    {
-        return &middle_left;
+    int i = 0;
+    while(positions[i].function_name != NULL) {
+        if (!strcmp(choice, positions[i].function_name))
+        {
+            return positions[i].function;
+        }
+        i++;
     }
     return NULL;
 }
@@ -230,22 +218,19 @@ XWindowChanges normal(const XWindowChanges cur_geom, const XWindowChanges root_g
     return return_geom;
 }
 
-
+static struct func_and_name sizes[] = {{"normal", normal},
+                                       {"small", small}, {"tall", tall}};
 
 /* Return the function corresponding to a choice of size */
 XWindowChanges (*find_resize_function(const char* choice))(XWindowChanges, XWindowChanges)
 {
-    if (!strcmp(choice, "normal"))
-    {
-        return &normal;
-    }
-    if (!strcmp(choice, "small"))
-    {
-        return &small;
-    }
-    if (!strcmp(choice, "tall"))
-    {
-        return &tall;
+    int i = 0;
+    while(sizes[i].function_name != NULL) {
+        if (!strcmp(choice, sizes[i].function_name))
+        {
+            return sizes[i].function;
+        }
+        i++;
     }
     return NULL;
 }
