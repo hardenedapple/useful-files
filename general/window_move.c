@@ -51,8 +51,8 @@ struct func_and_name {
 XWindowChanges top_left(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    return_val.x = floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
-    return_val.y = floor(root_geom.height * TOP_EDGE) + TASKBARTOP;
+    return_val.x = (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
+    return_val.y = (int) floor(root_geom.height * TOP_EDGE) + TASKBARTOP;
     return return_val;
 }
 
@@ -60,9 +60,9 @@ XWindowChanges top_left(const XWindowChanges current_pos, const XWindowChanges r
 XWindowChanges top_right(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge = floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
     return_val.x = right_edge - current_pos.width;
-    return_val.y = floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
+    return_val.y = (int) floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
     return return_val;
 }
 
@@ -70,8 +70,8 @@ XWindowChanges top_right(const XWindowChanges current_pos, const XWindowChanges 
 XWindowChanges bottom_right(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge = floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
     return_val.x = right_edge - current_pos.width;
     return_val.y = bottom_edge - current_pos.height;
 
@@ -82,8 +82,8 @@ XWindowChanges bottom_right(const XWindowChanges current_pos, const XWindowChang
 XWindowChanges bottom_left(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int bottom_edge = floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
-    return_val.x = floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
+    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    return_val.x = (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
     return_val.y = bottom_edge - current_pos.height;
 
     return return_val;
@@ -95,7 +95,7 @@ XWindowChanges top_middle(const XWindowChanges current_pos, const XWindowChanges
     XWindowChanges return_val = current_pos;
     int middle_horizontal = (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
     return_val.x = middle_horizontal - (current_pos.width / 2) + TASKBARLEFT;
-    return_val.y = floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
+    return_val.y = (int) floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
 
     return return_val;
 }
@@ -105,7 +105,7 @@ XWindowChanges bottom_middle(const XWindowChanges current_pos, const XWindowChan
 {
     XWindowChanges return_val = current_pos;
     int middle_horizontal = (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
-    int bottom_edge = floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
     return_val.x = middle_horizontal - (current_pos.width / 2) + TASKBARLEFT;
     return_val.y = bottom_edge - current_pos.height;
 
@@ -117,7 +117,7 @@ XWindowChanges middle_left(const XWindowChanges current_pos, const XWindowChange
 {
     XWindowChanges return_val = current_pos;
     int middle_vertical = (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
-    return_val.x = floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
+    return_val.x = (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
     return_val.y = middle_vertical - (current_pos.height / 2) + TASKBARTOP;
 
     return return_val;
@@ -128,7 +128,7 @@ XWindowChanges middle_right(const XWindowChanges current_pos, const XWindowChang
 {
     XWindowChanges return_val = current_pos;
     int middle_vertical = (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
-    int right_edge = floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
     return_val.x = right_edge - current_pos.width;
     return_val.y = middle_vertical - (current_pos.height / 2) + TASKBARTOP;
 
@@ -145,7 +145,7 @@ XWindowChanges (*find_snap_function(const char* choice))(XWindowChanges, XWindow
 {
     int i = 0;
     while(positions[i].function_name != NULL) {
-        if (!strcmp(choice, positions[i].function_name))
+        if (strcmp(choice, positions[i].function_name) == 0)
         {
             return positions[i].function;
         }
@@ -162,10 +162,10 @@ XWindowChanges (*find_snap_function(const char* choice))(XWindowChanges, XWindow
 XWindowChanges small(const XWindowChanges cur_geom, const XWindowChanges root_geom)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
-    return_geom.width = root_geom.width * 0.3;
-    return_geom.height = root_geom.height * 0.3;
+    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    return_geom.width = (int) (root_geom.width * 0.3);
+    return_geom.height = (int) (root_geom.height * 0.3);
     if (return_geom.width + return_geom.x > right_edge)
     {
         return_geom.x -= return_geom.x + return_geom.width - right_edge;
@@ -182,10 +182,10 @@ XWindowChanges small(const XWindowChanges cur_geom, const XWindowChanges root_ge
 XWindowChanges tall(const XWindowChanges cur_geom, const XWindowChanges root_geom)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
-    return_geom.width = root_geom.width * 0.35;
-    return_geom.height = root_geom.height * 0.95;
+    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    return_geom.width = (int) (root_geom.width * 0.35);
+    return_geom.height = (int) (root_geom.height * 0.95);
     if (return_geom.width + return_geom.x > right_edge)
     {
         return_geom.x -= return_geom.x + return_geom.width - right_edge;
@@ -202,10 +202,10 @@ XWindowChanges tall(const XWindowChanges cur_geom, const XWindowChanges root_geo
 XWindowChanges normal(const XWindowChanges cur_geom, const XWindowChanges root_geom)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
-    return_geom.width = root_geom.width * 0.35;
-    return_geom.height = root_geom.height * 0.35;
+    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    return_geom.width = (int) (root_geom.width * 0.35);
+    return_geom.height = (int) (root_geom.height * 0.35);
     if (return_geom.width + return_geom.x > right_edge)
     {
         return_geom.x -= return_geom.x + return_geom.width - right_edge;
@@ -226,7 +226,7 @@ XWindowChanges (*find_resize_function(const char* choice))(XWindowChanges, XWind
 {
     int i = 0;
     while(sizes[i].function_name != NULL) {
-        if (!strcmp(choice, sizes[i].function_name))
+        if (strcmp(choice, sizes[i].function_name) == 0)
         {
             return sizes[i].function;
         }
@@ -249,7 +249,7 @@ XWindowChanges find_geom(Display* dpy, Window the_win, XWindowChanges root_geome
     XWindowChanges my_geometry = {0, 0, 0, 0, 0, 0, 0};
     XWindowChanges parent_geometry = {0, 0, 0, 0, 0, 0, 0};
     Window root_win = 0, parent_win = 0, *children_windows = NULL;
-    unsigned int win_depth;
+    unsigned int win_depth = 0;
     unsigned int num_children = 0;
     int still_exists = 0;
 
