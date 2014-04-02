@@ -20,6 +20,7 @@ record =
 pager =
 hgext.bookmarks =
 hggit =
+shelve =
 
 # change the default color to not be bold (for status output)
 # to add bold, add the word bold to the end of these lines
