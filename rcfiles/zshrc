@@ -112,11 +112,11 @@ setprompt
 
 # {{{ Cat, sed, awk, tail, diff syntax highlighting
 # Cat tail, sed, awk, and head
-tail head cat sed awk() {
-  syntax=""
-  # check that highlight is installed
-  type highlight > /dev/null 2>&1
-  if [[ $? -eq 0 ]]; then
+# Check that highlight is installed
+type highlight > /dev/null 2>&1
+if [[ $? -eq 0 ]]; then
+  tail head cat sed awk() {
+    syntax=""
     for file in $@; do
       if [ -f $file ]; then
         case $file in
@@ -140,13 +140,14 @@ tail head cat sed awk() {
         esac
       fi
     done
-  fi
-  if [[ $syntax != "" ]]; then
-    command $0 $@ | highlight -O ansi --syntax=$syntax
-  else
-    command $0 $@
-  fi
-}
+
+    if [[ $syntax != "" ]]; then
+      command $0 $@ | highlight -O ansi --syntax=$syntax
+    else
+      command $0 $@
+    fi
+  }
+fi
 
 # diff (always want the same highlighting)
 colordiff() {
