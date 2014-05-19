@@ -1,15 +1,16 @@
 [user]
-	name = Apple
-	email = Apple@server.fake
+    name  = Apple
+    email = Apple@server.fake
 [credential]
-	helper = cache
+    helper = cache
 [push]
-	default = simple
+    default = simple
 [color]
-	ui = true
+    ui = true
 [alias]
+    ex    = "!command "
+    root  = !pwd
     graph = log --abbrev-commit --all --graph --decorate --color
-	root = !pwd
-	ex = "!command "
+    stat  = status -sb
 [difftool "vimdiff"]
     cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
