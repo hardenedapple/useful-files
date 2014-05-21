@@ -3,7 +3,7 @@ username = malcomso <not_telling@fake.com>
 # merge = gvimdiff
 
 [hostfingerprints]
-bitbucket.org = 24:9c:45:8b:9c:aa:ba:55:4e:01:6d:58:ff:e4:28:7d:2a:14:ae:3b
+bitbucket.org = 45:AD:AE:1A:CF:0E:73:47:06:07:E0:88:F5:CC:10:E5:FA:1C:F7:99
 
 [pager]
 pager = LESS='FRX' less
