@@ -115,7 +115,7 @@ setprompt
 # Check that highlight is installed
 type highlight > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
-  tail head cat sed awk() {
+  tail head cat() {
     syntax=""
     for file in $@; do
       if [ -f $file ]; then
