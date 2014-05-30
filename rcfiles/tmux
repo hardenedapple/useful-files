@@ -47,6 +47,8 @@ setw -g aggressive-resize on
 
 setw -g utf8 on
 
+setw -g main-pane-width 100
+
 # The foreground borders don't show as the font I use doesn't show utf-8
 set-option -g pane-active-border-style fg=white
 # set-option pane-active-border-bg white
@@ -56,22 +58,22 @@ set-option -g pane-border-style fg=green
 
 set-option -g default-shell /usr/bin/zsh
 
-# Quick view of processes
+# Quick ipython
 unbind p
-bind p split-window -v "exec htop"
-bind C-p split-window -h "exec htop"
+bind p split-window -h "exec ipython"
+bind C-p split-window -v "exec ipython"
 
 # Quick music
 unbind n
 unbind C-n
-bind n split-window -v "exec ncmpcpp -c ~/.config/ncmpcpp/config"
-bind C-n split-window -h "exec ncmpcpp -c ~/.config/ncmpcpp/config"
+bind n split-window -h "exec ncmpcpp -c ~/.config/ncmpcpp/config"
+bind C-n split-window -v "exec ncmpcpp -c ~/.config/ncmpcpp/config"
 
 # Quick file-manager
 unbind f
 unbind C-f
-bind f split-window -v "exec ranger"
-bind C-f split-window -h "exec ranger"
+bind f split-window -h "exec ranger"
+bind C-f split-window -v "exec ranger"
 
 
 # This works, but only kind of - the first terminal is always named
