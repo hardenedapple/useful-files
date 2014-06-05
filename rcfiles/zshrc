@@ -176,8 +176,8 @@ man() {
 
 # Remove C-s and C-q {{{
 # Can have problems in Rtorrent with these commands, run this if needs be
-# stty stop undef
-# stty start undef
+stty stop undef
+stty start undef
 # }}}
 
 # Alias's  {{{
@@ -188,7 +188,6 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 alias ll='ls -F'
 alias mympd='mpd ~/.config/mpd/mpd.conf'
-alias killmybar='pkill conky; pkill tilda; pkill tint2'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
 alias cterm='TERM=screen-256color'
@@ -196,6 +195,7 @@ alias cterm='TERM=screen-256color'
 
 # General {{{
 setopt interactivecomments
+ulimit -c unlimited
 # }}}
 
 # Passwords {{{
