@@ -26,8 +26,10 @@ set -g base-index 1
 bind-key -n C-h previous-window
 bind-key -n C-l next-window
 
-# For the rare case I want to use vim line completion
+# For when I want to use vim line completion
 bind-key C-l send-keys 
+# In case I need to send C-h for delete
+bind-key C-h send-keys 
 
 # Clock style
 setw -g clock-mode-style 24
