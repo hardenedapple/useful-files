@@ -120,6 +120,9 @@ if [[ $? -eq 0 ]]; then
     for file in $@; do
       if [ -f $file ]; then
         case $file in
+          *.lisp) syntax="lisp";;
+          *.el) syntax="lisp";;
+          *.asd) syntax="lisp";;
           *.java) syntax="java";;
           *.php) syntax="php";;
           *.py) syntax="python";;
@@ -127,6 +130,9 @@ if [[ $? -eq 0 ]]; then
           *.rej) syntax="diff";;
           *.awk) syntax="awk";;
           *.c) syntax="c";;
+          *.cpp) syntax="cpp";;
+          *.ino) syntax="cpp";;
+          *.pde) syntax="cpp";;
           *.css) syntax="css";;
           *.js) syntax="js";;
           *.jsp) syntax="jsp";;
