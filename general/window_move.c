@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <X11/Xlib.h>
+#include <X11/extensions/Xrandr.h>
 
 /* Configuration of the positions (information about preferences */
 #define TOP_EDGE 0.008
@@ -17,20 +18,16 @@
 /* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lm\ -o\ %:r\ % | make */
 
 
-/* TODO: Haven't yet accounted for multiple monitors with Xrandr
- *       Think XRRScreenConfiguration might be the way to look for monitor size */
+/* TODO: At the moment, I go up the tree of window parents until I met the
+ *       window that is the child of the root.
+ *       This might not work well in all wm's, possibly should use the
+ *       _NET_VIRTUAL_ROOTS atom as specified in
+ *       http://standards.freedesktop.org/wm-spec/wm-spec-1.3.html
+ *       For the time being I'll use this. */
 
 /*
  *  Notes:
  *      Assumes the window extends downwards and to the right.
- *
- *      Compared to window_move.py, this program doesn't run as a daemon
- *
- *      This is because opening a connection to the X server isn't nearly as
- *      costly in C (don't know why) so the responsiveness isn't a problem.
- *
- *      This means this program opens the display and finds the root window
- *      that you are on whenever you use it - meaning Zaphod mode works.
  *
  *      Am assuming want to move the highest parent of the window you are
  *      focussed on that is still a child of the root window. This helps
@@ -51,8 +48,8 @@ struct func_and_name {
 XWindowChanges top_left(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    return_val.x = (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
-    return_val.y = (int) floor(root_geom.height * TOP_EDGE) + TASKBARTOP;
+    return_val.x = root_geom.x + (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
+    return_val.y = root_geom.y + (int) floor(root_geom.height * TOP_EDGE) + TASKBARTOP;
     return return_val;
 }
 
@@ -60,9 +57,9 @@ XWindowChanges top_left(const XWindowChanges current_pos, const XWindowChanges r
 XWindowChanges top_right(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int right_edge = root_geom.x + (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
     return_val.x = right_edge - current_pos.width;
-    return_val.y = (int) floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
+    return_val.y = root_geom.y + (int) floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
     return return_val;
 }
 
@@ -70,8 +67,9 @@ XWindowChanges top_right(const XWindowChanges current_pos, const XWindowChanges 
 XWindowChanges bottom_right(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    int right_edge = root_geom.x + (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = root_geom.y +
+        (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
     return_val.x = right_edge - current_pos.width;
     return_val.y = bottom_edge - current_pos.height;
 
@@ -82,8 +80,9 @@ XWindowChanges bottom_right(const XWindowChanges current_pos, const XWindowChang
 XWindowChanges bottom_left(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
-    return_val.x = (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
+    int bottom_edge = root_geom.y +
+        (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    return_val.x = root_geom.x + (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
     return_val.y = bottom_edge - current_pos.height;
 
     return return_val;
@@ -93,9 +92,9 @@ XWindowChanges bottom_left(const XWindowChanges current_pos, const XWindowChange
 XWindowChanges top_middle(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal = (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
+    int middle_horizontal = root_geom.x + (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
     return_val.x = middle_horizontal - (current_pos.width / 2) + TASKBARLEFT;
-    return_val.y = (int) floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
+    return_val.y = root_geom.y + (int) floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
 
     return return_val;
 }
@@ -104,8 +103,9 @@ XWindowChanges top_middle(const XWindowChanges current_pos, const XWindowChanges
 XWindowChanges bottom_middle(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal = (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
-    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    int middle_horizontal = root_geom.x + (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
+    int bottom_edge = root_geom.y +
+        (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
     return_val.x = middle_horizontal - (current_pos.width / 2) + TASKBARLEFT;
     return_val.y = bottom_edge - current_pos.height;
 
@@ -116,8 +116,8 @@ XWindowChanges bottom_middle(const XWindowChanges current_pos, const XWindowChan
 XWindowChanges middle_left(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical = (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
-    return_val.x = (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
+    int middle_vertical = root_geom.y + (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
+    return_val.x = root_geom.x + (int) floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
     return_val.y = middle_vertical - (current_pos.height / 2) + TASKBARTOP;
 
     return return_val;
@@ -127,8 +127,8 @@ XWindowChanges middle_left(const XWindowChanges current_pos, const XWindowChange
 XWindowChanges middle_right(const XWindowChanges current_pos, const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical = (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
-    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int middle_vertical = root_geom.y + (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
+    int right_edge = root_geom.x + (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
     return_val.x = right_edge - current_pos.width;
     return_val.y = middle_vertical - (current_pos.height / 2) + TASKBARTOP;
 
@@ -162,8 +162,9 @@ XWindowChanges (*find_snap_function(const char* choice))(XWindowChanges, XWindow
 XWindowChanges small(const XWindowChanges cur_geom, const XWindowChanges root_geom)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    int right_edge = root_geom.x + (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = root_geom.y +
+        (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
     return_geom.width = (int) (root_geom.width * 0.3);
     return_geom.height = (int) (root_geom.height * 0.3);
     if (return_geom.width + return_geom.x > right_edge)
@@ -182,8 +183,9 @@ XWindowChanges small(const XWindowChanges cur_geom, const XWindowChanges root_ge
 XWindowChanges tall(const XWindowChanges cur_geom, const XWindowChanges root_geom)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    int right_edge = root_geom.x + (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = root_geom.y +
+        (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
     return_geom.width = (int) (root_geom.width * 0.35);
     return_geom.height = (int) (root_geom.height * 0.95);
     if (return_geom.width + return_geom.x > right_edge)
@@ -202,8 +204,9 @@ XWindowChanges tall(const XWindowChanges cur_geom, const XWindowChanges root_geo
 XWindowChanges normal(const XWindowChanges cur_geom, const XWindowChanges root_geom)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
-    int bottom_edge = (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
+    int right_edge = root_geom.x + (int) floor(root_geom.width * (1 - RIGHT_EDGE)) - TASKBARRIGHT;
+    int bottom_edge = root_geom.y +
+        (int) floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
     return_geom.width = (int) (root_geom.width * 0.35);
     return_geom.height = (int) (root_geom.height * 0.35);
     if (return_geom.width + return_geom.x > right_edge)
@@ -244,10 +247,9 @@ XWindowChanges (*find_resize_function(const char* choice))(XWindowChanges, XWind
 /* Function that finds the geometry of the window that is a parent of given
  * window and a first generation child of the root window - hence the one I
  * want to move */
-XWindowChanges find_geom(Display* dpy, Window the_win, XWindowChanges root_geometry)
+XWindowChanges find_geom(Display* dpy, Window the_win)
 {
     XWindowChanges my_geometry = {0, 0, 0, 0, 0, 0, 0};
-    XWindowChanges parent_geometry = {0, 0, 0, 0, 0, 0, 0};
     Window root_win = 0, parent_win = 0, *children_windows = NULL;
     unsigned int win_depth = 0;
     unsigned int num_children = 0;
@@ -258,85 +260,82 @@ XWindowChanges find_geom(Display* dpy, Window the_win, XWindowChanges root_geome
 
     /* Iterate up the window tree until reach root, the interesting window is
      * the previous one */
-    while(root_geometry.width > parent_geometry.width
-          || root_geometry.height > parent_geometry.height) {
+    while(parent_win != root_win) {
 
         /* Take the parent window */
         the_win = parent_win;
-        my_geometry = parent_geometry;
 
         /* Find the next parent window - don't care about a lot of the return
          * values here */
         still_exists = XQueryTree(dpy, the_win, &root_win, &parent_win,
                                   &children_windows, &num_children);
-
-        /* Find the parents geometry */
-        still_exists = XGetGeometry(dpy, parent_win, &root_win,
-                                    &parent_geometry.x, &parent_geometry.y,
-                                    (unsigned int*) &parent_geometry.width,
-                                    (unsigned int*) &parent_geometry.height,
-                                    (unsigned int*) &parent_geometry.border_width,
-                                    &win_depth);
     }
+
+    /* Find my geometry */
+    still_exists = XGetGeometry(dpy, the_win, &root_win,
+                                &my_geometry.x, &my_geometry.y,
+                                (unsigned int*) &my_geometry.width,
+                                (unsigned int*) &my_geometry.height,
+                                (unsigned int*) &my_geometry.border_width,
+                                &win_depth);
 
     /* Have found the geometry we were looking for - it is in 'my_geometry' */
     return my_geometry;
 }
 
-/* Function to actually move the window */
-int snap_to(Display* dpy, const char* position, const XWindowChanges root_geom)
+void ApplyMove(Display* dpy, Window current, XWindowChanges new_geom)
 {
-    Window current = 0;
-    int focus_state = 0;
-    XWindowChanges (*move_func)(XWindowChanges, XWindowChanges);
-    move_func = find_snap_function(position);
-    if (move_func == NULL)
-    {
-        return -1;
-    }
-
-    XGetInputFocus(dpy, &current, &focus_state);
-    XWindowChanges cur_geom = find_geom(dpy, current, root_geom);
-    XWindowChanges new_geom = move_func(cur_geom, root_geom);
     XMoveWindow(dpy, current, new_geom.x, new_geom.y);
     XFlush(dpy);
-    return 0;
 }
 
-/* Function to actually resize the window */
-int resize_to(Display* dpy, const char* size, const XWindowChanges root_geom)
+void ApplyResize(Display* dpy, Window current, XWindowChanges new_geom)
 {
-    Window current = 0;
-    int focus_type = 0;
-    XWindowChanges (*resize_func)(XWindowChanges, XWindowChanges);
-    resize_func = find_resize_function(size);
-    if (resize_func == NULL)
-    {
-        return -1;
-    }
-
-    XGetInputFocus(dpy, &current, &focus_type);
-    XWindowChanges cur_geom = find_geom(dpy, current, root_geom);
-    XWindowChanges new_geom = resize_func(cur_geom, root_geom);
-    XMoveResizeWindow(dpy, current, new_geom.x, new_geom.y, 
-                      (unsigned int) new_geom.width,
-                      (unsigned int) new_geom.height);
+    XMoveResizeWindow(dpy, current, new_geom.x, new_geom.y,
+            (unsigned) new_geom.width,
+            (unsigned) new_geom.height);
     XFlush(dpy);
-    return 0;
 }
 
-/* Main program: 
+/* Main program:
  *      Open the connection to the X server
  *      Read in the geometry of the root window
  *      Call the function specified by the argument list
  */
 int main(int argc, char* argv[])
 {
+    int i;
     Display* dpy = NULL;
-    Window root_win;
+    Window root_win, current = 0;
     int still_exists = 0;
-    unsigned int win_depth = 0;
     XWindowChanges root_geom = {0, 0, 0, 0, 0, 0, 0};
+    XWindowChanges focussed_geom = {0, 0, 0, 0, 0, 0, 0};
+    XWindowChanges new_geom = {0, 0, 0, 0, 0, 0, 0};
+    XWindowChanges (*get_new_size)(XWindowChanges, XWindowChanges);
+    void (*apply_changes)(Display*, Window, XWindowChanges);
+
+    XRRScreenResources* my_resources;
+    XRRCrtcInfo* my_crtc;
+
+    /* Argument parsing - either motion or resize command */
+    if (argc == 3 && !strcmp(argv[1], "snap_to"))
+    {
+        get_new_size = find_snap_function(argv[2]);
+        apply_changes = &ApplyMove;
+    } else if (argc == 3 && !strcmp(argv[1], "resize_to")) {
+        get_new_size = find_resize_function(argv[2]);
+        apply_changes = &ApplyResize;
+    } else {
+        /* Not valid arguments - print usage and do nothing */
+        printf("Usage: %s [[snap_to position] | [resize_to position]]\n", argv[0]);
+        return 1;
+    }
+
+    if (!get_new_size)
+    {
+        fprintf(stderr, "Unknown size/position: %s\n", argv[2]);
+        return 2;
+    }
 
     /* Make sure the display opened correctly */
     dpy = XOpenDisplay(NULL);
@@ -347,31 +346,56 @@ int main(int argc, char* argv[])
     }
 
     root_win = DefaultRootWindow(dpy);
+    /* Check */
 
-    /* Find the geometry of the root window to use later */
-    still_exists = XGetGeometry(dpy, root_win, &root_win,
-                                &root_geom.x, &root_geom.y,
-                                (unsigned int*) &root_geom.width,
-                                (unsigned int*) &root_geom.height,
-                                (unsigned int*) &root_geom.border_width,
-                                &win_depth);
-    if (!still_exists)
+    XGetInputFocus(dpy, &current, &still_exists);
+    /* Check */
+    focussed_geom = find_geom(dpy, current);
+    /* Check */
+
+    my_resources = XRRGetScreenResources(dpy, root_win);
+    if (!my_resources)
     {
-        fprintf(stderr, "Error getting root window geometry\n");
-        return 1;
+        fprintf(stderr, "Error getting resources.\n");
+        goto close_display;
     }
 
-    /* Argument parsing - either motion or resize command */
-    if (argc == 3 && !strcmp(argv[1], "snap_to"))
+    /* Find the size of the screen the focussed window is on. */
+    for (i = 0; i < my_resources->ncrtc; ++i)
     {
-        snap_to(dpy, argv[2], root_geom);
-    } else if (argc == 3 && !strcmp(argv[1], "resize_to")) {
-        resize_to(dpy,argv[2], root_geom);
-    } else {
-        /* Not valid arguments - print usage and do nothing */
-        printf("Usage: %s [[snap_to position] | [resize_to position]]\n", argv[0]);
-    }
+        my_crtc = XRRGetCrtcInfo(dpy, my_resources, my_resources->crtcs[i]);
+        if (!my_crtc)
+        {
+            continue;
+        }
 
+        if (my_crtc->x < focussed_geom.x
+                && my_crtc->y < focussed_geom.y
+                && my_crtc->x + (int) my_crtc->width > focussed_geom.x
+                && my_crtc->y + (int) my_crtc->height > focussed_geom.y)
+        {
+            root_geom.x = my_crtc->x;
+            root_geom.y = my_crtc->y;
+            root_geom.width = my_crtc->width;
+            root_geom.height = my_crtc->height;
+            XRRFreeCrtcInfo(my_crtc);
+            break;
+        }
+
+        XRRFreeCrtcInfo(my_crtc);
+    }
+    XRRFreeScreenResources(my_resources);
+
+    /*
+     *  Here the root_geom structure contains the geometry of the crtc.
+     *  The focussed_geom structure contains the geometry of the current
+     *  window.
+     */
+    new_geom = get_new_size(focussed_geom, root_geom);
+    apply_changes(dpy, current, new_geom);
+
+close_display:
+    XCloseDisplay(dpy);
     return 0;
 }
 
