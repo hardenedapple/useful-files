@@ -12,7 +12,7 @@ import re
 
 binpath = os.environ['HOME'] + '/bin/git-remote-hg'
 
-githgurl = 'https://raw.github.com/felipec/git/fc/master/git-remote-hg.py'
+githgurl = 'https://raw.githubusercontent.com/felipec/git/master/git-remote-hg.py'
 urlreq.urlretrieve(githgurl, binpath)
 
 with open(binpath, 'r') as oldfile:
