@@ -15,7 +15,7 @@
 #define TASKBARRIGHT 0
 #define TASKBARBOTTOM 20
 
-/* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lm\ -o\ %:r\ % | make */
+/* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lXrandr\ -lm\ -o\ %:r\ % | make */
 
 
 /* TODO: At the moment, I go up the tree of window parents until I met the
