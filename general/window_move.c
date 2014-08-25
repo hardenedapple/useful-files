@@ -332,7 +332,7 @@ void ApplyResize(Display * dpy, Window current, XWindowChanges new_geom)
  *                         Find the taskbar heights.                         *
  *****************************************************************************/
 
-int set_taskbar_sizes(Display * dpy, Window window, Atom wm_strut_partial)
+int search_windows_for_taskbars(Display * dpy, Window window, Atom wm_strut_partial)
 {
     int retval = 0;
     Atom* return_values;
@@ -369,12 +369,73 @@ int set_taskbar_sizes(Display * dpy, Window window, Atom wm_strut_partial)
         } else {
             /* Assuming there will never be a taskbar that is the child of
              * another taskbar. */
-            retval = set_taskbar_sizes(dpy, children[i], wm_strut_partial);
+            retval = search_windows_for_taskbars(dpy, children[i], wm_strut_partial);
         }
 
         XFree(ret_data);
     }
 
+    return retval;
+}
+
+int strut_partial_supported(Display* dpy, Window root_win, Atom wm_strut_partial)
+{
+    Atom* return_values;
+    Atom actual_type, supported;
+    int actual_format, num_items_to_read = 100;
+    int retval = 0;
+    unsigned i;
+    unsigned long nitems_read = 0, bytes_after;
+    unsigned char* ret_data;
+
+    supported = XInternAtom(dpy, "_NET_SUPPORTED", True);
+    if (supported == None)
+    {
+        goto exit;
+    }
+
+    XGetWindowProperty(dpy, root_win, supported, 0, num_items_to_read,
+            False, XA_ATOM, &actual_type, &actual_format, &nitems_read,
+            &bytes_after, &ret_data);
+
+    if (nitems_read)
+    {
+        if (!bytes_after)
+        {
+            return_values = (Atom *) ret_data;
+            for (i = 0; i < nitems_read; ++i)
+            {
+                if (return_values[i] == wm_strut_partial)
+                {
+                    retval = 1;
+                    break;
+                }
+            }
+        } else {
+            fprintf(stderr, "More supported EWMH Atoms than I accounted for\n");
+        }
+    }
+
+    XFree(ret_data);
+
+exit:
+    return retval;
+}
+
+int set_taskbar_size(Display* dpy, Window root_win, Atom wm_strut_partial)
+{
+    int retval = 1;
+    if (strut_partial_supported(dpy, root_win, wm_strut_partial)) {
+        retval = search_windows_for_taskbars(dpy, root_win, wm_strut_partial);
+    } else {
+        /* Set some defaults as a guess */
+        fprintf(stderr, "_NET_WM_STRUT_PARTIAL atom is not supported - setting defaults\n"
+                "of sigle taskbar at the bottom of 20 pixel\n");
+        TASKBARTOP    = 0;
+        TASKBARLEFT   = 0;
+        TASKBARRIGHT  = 0;
+        TASKBARBOTTOM = 20;
+    }
     return retval;
 }
 
@@ -435,7 +496,7 @@ int main(int argc, char *argv[])
         goto close_display;
     }
 
-    if (set_taskbar_sizes(dpy, root_win, wm_strut_partial)) {
+    if (set_taskbar_size(dpy, root_win, wm_strut_partial)) {
         goto close_display;
     }
 
