@@ -4,16 +4,18 @@
 #include <math.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
+#include <X11/Xatom.h>
 
 /* Configuration of the positions (information about preferences */
 #define TOP_EDGE 0.008
 #define BOTTOM_EDGE 0.008
 #define LEFT_EDGE 0.006
 #define RIGHT_EDGE 0.006
-#define TASKBARTOP 0
-#define TASKBARLEFT 0
-#define TASKBARRIGHT 0
-#define TASKBARBOTTOM 20
+
+static int TASKBARTOP;
+static int TASKBARLEFT;
+static int TASKBARRIGHT;
+static int TASKBARBOTTOM;
 
 /* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lXrandr\ -lm\ -o\ %:r\ % */
 
@@ -326,16 +328,68 @@ void ApplyResize(Display * dpy, Window current, XWindowChanges new_geom)
     XFlush(dpy);
 }
 
+/*****************************************************************************
+ *                         Find the taskbar heights.                         *
+ *****************************************************************************/
+
+int set_taskbar_sizes(Display * dpy, Window window, Atom wm_strut_partial)
+{
+    int retval = 0;
+    Atom* return_values;
+    Atom actual_type;
+    int actual_format, num_items_to_read = 30;
+    Window parent_return, root_return;
+    Window* children;
+    unsigned n_children, i;
+    unsigned long nitems_read = 0, bytes_after;
+    unsigned char* ret_data = 0;
+
+    XQueryTree(dpy, window, &root_return,
+            &parent_return, &children, &n_children);
+
+    for (i = 0; i < n_children; ++i)
+    {
+        XGetWindowProperty(dpy, children[i], wm_strut_partial, 0, num_items_to_read,
+                False, XA_CARDINAL, &actual_type, &actual_format, &nitems_read,
+                &bytes_after, &ret_data);
+
+        if (nitems_read)
+        {
+            if (!bytes_after)
+            {
+                return_values = (Atom *) ret_data;
+                TASKBARLEFT   = TASKBARLEFT   > (int) return_values[0] ? TASKBARLEFT   : (int) return_values[0];
+                TASKBARRIGHT  = TASKBARRIGHT  > (int) return_values[1] ? TASKBARRIGHT  : (int) return_values[1];
+                TASKBARTOP    = TASKBARTOP    > (int) return_values[2] ? TASKBARTOP    : (int) return_values[2];
+                TASKBARBOTTOM = TASKBARBOTTOM > (int) return_values[3] ? TASKBARBOTTOM : (int) return_values[3];
+            } else {
+                fprintf(stderr, "Getting taskbar size, property too large.\n");
+                retval = 1;
+            }
+        } else {
+            /* Assuming there will never be a taskbar that is the child of
+             * another taskbar. */
+            retval = set_taskbar_sizes(dpy, children[i], wm_strut_partial);
+        }
+
+        XFree(ret_data);
+    }
+
+    return retval;
+}
+
 /* Main program:
- *      Open the connection to the X server
- *      Read in the geometry of the root window
- *      Call the function specified by the argument list
+ *      Open the connection to the X server.
+ *      Read in the geometry of the root window.
+ *      Find the taskbar heights.
+ *      Call the function specified by the argument list.
  */
 int main(int argc, char *argv[])
 {
     int i;
     Display *dpy = NULL;
     Window root_win, current = 0;
+    Atom wm_strut_partial;
     int still_exists = 0;
     XWindowChanges root_geom = { 0, 0, 0, 0, 0, 0, 0 };
     XWindowChanges focussed_geom = { 0, 0, 0, 0, 0, 0, 0 };
@@ -373,7 +427,17 @@ int main(int argc, char *argv[])
     }
 
     root_win = DefaultRootWindow(dpy);
-    /* Check */
+
+    wm_strut_partial = XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", True);
+    if (wm_strut_partial == None)
+    {
+        fprintf(stderr, "No STRUT_PARTIAL atom\n");
+        goto close_display;
+    }
+
+    if (set_taskbar_sizes(dpy, root_win, wm_strut_partial)) {
+        goto close_display;
+    }
 
     XGetInputFocus(dpy, &current, &still_exists);
     /* Check */
