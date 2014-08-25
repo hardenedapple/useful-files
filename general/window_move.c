@@ -422,21 +422,34 @@ exit:
     return retval;
 }
 
-int set_taskbar_size(Display* dpy, Window root_win, Atom wm_strut_partial)
+void set_taskbar_size(Display* dpy, Window root_win)
 {
-    int retval = 1;
-    if (strut_partial_supported(dpy, root_win, wm_strut_partial)) {
-        retval = search_windows_for_taskbars(dpy, root_win, wm_strut_partial);
-    } else {
-        /* Set some defaults as a guess */
-        fprintf(stderr, "_NET_WM_STRUT_PARTIAL atom is not supported - setting defaults\n"
-                "of sigle taskbar at the bottom of 20 pixel\n");
-        TASKBARTOP    = 0;
-        TASKBARLEFT   = 0;
-        TASKBARRIGHT  = 0;
-        TASKBARBOTTOM = 20;
+    Atom wm_strut_partial;
+
+    wm_strut_partial = XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", True);
+    if (wm_strut_partial == None) {
+        goto defaults;
     }
-    return retval;
+
+    if (!strut_partial_supported(dpy, root_win, wm_strut_partial)) {
+        goto defaults;
+    }
+
+    if (search_windows_for_taskbars(dpy, root_win, wm_strut_partial)) {
+        goto defaults;
+    }
+
+    return;
+
+defaults:
+
+    /* Set some defaults as a guess */
+    fprintf(stderr, "_NET_WM_STRUT_PARTIAL atom is not supported - setting defaults\n"
+            "of sigle taskbar at the bottom of 20 pixel\n");
+    TASKBARTOP    = 0;
+    TASKBARLEFT   = 0;
+    TASKBARRIGHT  = 0;
+    TASKBARBOTTOM = 20;
 }
 
 /* Main program:
@@ -450,7 +463,6 @@ int main(int argc, char *argv[])
     int i;
     Display *dpy = NULL;
     Window root_win, current = 0;
-    Atom wm_strut_partial;
     int still_exists = 0;
     XWindowChanges root_geom = { 0, 0, 0, 0, 0, 0, 0 };
     XWindowChanges focussed_geom = { 0, 0, 0, 0, 0, 0, 0 };
@@ -489,16 +501,7 @@ int main(int argc, char *argv[])
 
     root_win = DefaultRootWindow(dpy);
 
-    wm_strut_partial = XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", True);
-    if (wm_strut_partial == None)
-    {
-        fprintf(stderr, "No STRUT_PARTIAL atom\n");
-        goto close_display;
-    }
-
-    if (set_taskbar_size(dpy, root_win, wm_strut_partial)) {
-        goto close_display;
-    }
+    set_taskbar_size(dpy, root_win);
 
     XGetInputFocus(dpy, &current, &still_exists);
     /* Check */
