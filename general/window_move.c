@@ -50,10 +50,8 @@ XWindowChanges top_left(const XWindowChanges current_pos,
                         const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    return_val.x =
-        root_geom.x + (int)floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
-    return_val.y =
-        root_geom.y + (int)floor(root_geom.height * TOP_EDGE) + TASKBARTOP;
+    return_val.x = root_geom.x + (int)floor(root_geom.width * LEFT_EDGE);
+    return_val.y = root_geom.y + (int)floor(root_geom.height * TOP_EDGE);
     return return_val;
 }
 
@@ -63,11 +61,9 @@ XWindowChanges top_right(const XWindowChanges current_pos,
 {
     XWindowChanges return_val = current_pos;
     int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE)) -
-        TASKBARRIGHT;
+        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
     return_val.x = right_edge - current_pos.width;
-    return_val.y =
-        root_geom.y + (int)floor(root_geom.height * TOP_EDGE) + TASKBARTOP;
+    return_val.y = root_geom.y + (int)floor(root_geom.height * TOP_EDGE);
     return return_val;
 }
 
@@ -77,11 +73,9 @@ XWindowChanges bottom_right(const XWindowChanges current_pos,
 {
     XWindowChanges return_val = current_pos;
     int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE)) -
-        TASKBARRIGHT;
+        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE)) -
-        TASKBARBOTTOM;
+        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
     return_val.x = right_edge - current_pos.width;
     return_val.y = bottom_edge - current_pos.height;
 
@@ -94,9 +88,8 @@ XWindowChanges bottom_left(const XWindowChanges current_pos,
 {
     XWindowChanges return_val = current_pos;
     int bottom_edge = root_geom.y +
-        (int)floor(root_geom.height * (1 - BOTTOM_EDGE)) - TASKBARBOTTOM;
-    return_val.x =
-        root_geom.x + (int)floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
+        (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
+    return_val.x = root_geom.x + (int)floor(root_geom.width * LEFT_EDGE);
     return_val.y = bottom_edge - current_pos.height;
 
     return return_val;
@@ -107,11 +100,9 @@ XWindowChanges top_middle(const XWindowChanges current_pos,
                           const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal =
-        root_geom.x + (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
-    return_val.x = middle_horizontal - (current_pos.width / 2) + TASKBARLEFT;
-    return_val.y =
-        root_geom.y + (int)floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
+    int middle_horizontal = root_geom.x + (root_geom.width) / 2;
+    return_val.x = middle_horizontal - (current_pos.width / 2);
+    return_val.y = root_geom.y + (int)floor(root_geom.height * TOP_EDGE);
 
     return return_val;
 }
@@ -121,12 +112,10 @@ XWindowChanges bottom_middle(const XWindowChanges current_pos,
                              const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal =
-        root_geom.x + (root_geom.width - TASKBARRIGHT - TASKBARLEFT) / 2;
+    int middle_horizontal = root_geom.x + (root_geom.width) / 2;
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE)) -
-        TASKBARBOTTOM;
-    return_val.x = middle_horizontal - (current_pos.width / 2) + TASKBARLEFT;
+        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
+    return_val.x = middle_horizontal - (current_pos.width / 2);
     return_val.y = bottom_edge - current_pos.height;
 
     return return_val;
@@ -137,11 +126,9 @@ XWindowChanges middle_left(const XWindowChanges current_pos,
                            const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical =
-        root_geom.y + (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
-    return_val.x =
-        root_geom.x + (int)floor(root_geom.width * LEFT_EDGE) + TASKBARLEFT;
-    return_val.y = middle_vertical - (current_pos.height / 2) + TASKBARTOP;
+    int middle_vertical = root_geom.y + (root_geom.height) / 2;
+    return_val.x = root_geom.x + (int)floor(root_geom.width * LEFT_EDGE);
+    return_val.y = middle_vertical - (current_pos.height / 2);
 
     return return_val;
 }
@@ -151,13 +138,11 @@ XWindowChanges middle_right(const XWindowChanges current_pos,
                             const XWindowChanges root_geom)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical =
-        root_geom.y + (root_geom.height - TASKBARBOTTOM - TASKBARTOP) / 2;
+    int middle_vertical = root_geom.y + (root_geom.height) / 2;
     int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE)) -
-        TASKBARRIGHT;
+        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
     return_val.x = right_edge - current_pos.width;
-    return_val.y = middle_vertical - (current_pos.height / 2) + TASKBARTOP;
+    return_val.y = middle_vertical - (current_pos.height / 2);
 
     return return_val;
 }
@@ -192,11 +177,9 @@ XWindowChanges small(const XWindowChanges cur_geom,
 {
     XWindowChanges return_geom = cur_geom;
     int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE)) -
-        TASKBARRIGHT;
+        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE)) -
-        TASKBARBOTTOM;
+        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
     return_geom.width = (int)(root_geom.width * 0.3);
     return_geom.height = (int)(root_geom.height * 0.3);
     if (return_geom.width + return_geom.x > right_edge) {
@@ -215,11 +198,9 @@ XWindowChanges tall(const XWindowChanges cur_geom,
 {
     XWindowChanges return_geom = cur_geom;
     int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE)) -
-        TASKBARRIGHT;
+        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE)) -
-        TASKBARBOTTOM;
+        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
     return_geom.width = (int)(root_geom.width * 0.35);
     return_geom.height = (int)(root_geom.height * 0.95);
     if (return_geom.width + return_geom.x > right_edge) {
@@ -238,11 +219,9 @@ XWindowChanges normal(const XWindowChanges cur_geom,
 {
     XWindowChanges return_geom = cur_geom;
     int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE)) -
-        TASKBARRIGHT;
+        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE)) -
-        TASKBARBOTTOM;
+        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
     return_geom.width = (int)(root_geom.width * 0.35);
     return_geom.height = (int)(root_geom.height * 0.35);
     if (return_geom.width + return_geom.x > right_edge) {
@@ -332,36 +311,45 @@ void ApplyResize(Display * dpy, Window current, XWindowChanges new_geom)
  *                         Find the taskbar heights.                         *
  *****************************************************************************/
 
-int search_windows_for_taskbars(Display * dpy, Window window, Atom wm_strut_partial)
+int search_windows_for_taskbars(Display * dpy, Window window,
+                                Atom wm_strut_partial)
 {
     int retval = 0;
-    Atom* return_values;
+    Atom *return_values;
     Atom actual_type;
     int actual_format, num_items_to_read = 30;
     Window parent_return, root_return;
-    Window* children;
+    Window *children;
     unsigned n_children, i;
     unsigned long nitems_read = 0, bytes_after;
-    unsigned char* ret_data = 0;
+    unsigned char *ret_data = 0;
 
     XQueryTree(dpy, window, &root_return,
-            &parent_return, &children, &n_children);
+               &parent_return, &children, &n_children);
 
-    for (i = 0; i < n_children; ++i)
-    {
-        XGetWindowProperty(dpy, children[i], wm_strut_partial, 0, num_items_to_read,
-                False, XA_CARDINAL, &actual_type, &actual_format, &nitems_read,
-                &bytes_after, &ret_data);
+    for (i = 0; i < n_children; ++i) {
+        XGetWindowProperty(dpy, children[i], wm_strut_partial, 0,
+                           num_items_to_read, False, XA_CARDINAL, &actual_type,
+                           &actual_format, &nitems_read, &bytes_after,
+                           &ret_data);
 
-        if (nitems_read)
-        {
-            if (!bytes_after)
-            {
+        if (nitems_read) {
+            if (!bytes_after) {
                 return_values = (Atom *) ret_data;
-                TASKBARLEFT   = TASKBARLEFT   > (int) return_values[0] ? TASKBARLEFT   : (int) return_values[0];
-                TASKBARRIGHT  = TASKBARRIGHT  > (int) return_values[1] ? TASKBARRIGHT  : (int) return_values[1];
-                TASKBARTOP    = TASKBARTOP    > (int) return_values[2] ? TASKBARTOP    : (int) return_values[2];
-                TASKBARBOTTOM = TASKBARBOTTOM > (int) return_values[3] ? TASKBARBOTTOM : (int) return_values[3];
+                TASKBARLEFT =
+                    TASKBARLEFT >
+                    (int)return_values[0] ? TASKBARLEFT : (int)return_values[0];
+                TASKBARRIGHT =
+                    TASKBARRIGHT >
+                    (int)return_values[1] ? TASKBARRIGHT : (int)
+                    return_values[1];
+                TASKBARTOP =
+                    TASKBARTOP >
+                    (int)return_values[2] ? TASKBARTOP : (int)return_values[2];
+                TASKBARBOTTOM =
+                    TASKBARBOTTOM >
+                    (int)return_values[3] ? TASKBARBOTTOM : (int)
+                    return_values[3];
             } else {
                 fprintf(stderr, "Getting taskbar size, property too large.\n");
                 retval = 1;
@@ -369,7 +357,8 @@ int search_windows_for_taskbars(Display * dpy, Window window, Atom wm_strut_part
         } else {
             /* Assuming there will never be a taskbar that is the child of
              * another taskbar. */
-            retval = search_windows_for_taskbars(dpy, children[i], wm_strut_partial);
+            retval =
+                search_windows_for_taskbars(dpy, children[i], wm_strut_partial);
         }
 
         XFree(ret_data);
@@ -378,35 +367,31 @@ int search_windows_for_taskbars(Display * dpy, Window window, Atom wm_strut_part
     return retval;
 }
 
-int strut_partial_supported(Display* dpy, Window root_win, Atom wm_strut_partial)
+int strut_partial_supported(Display * dpy, Window root_win,
+                            Atom wm_strut_partial)
 {
-    Atom* return_values;
+    Atom *return_values;
     Atom actual_type, supported;
     int actual_format, num_items_to_read = 100;
     int retval = 0;
     unsigned i;
     unsigned long nitems_read = 0, bytes_after;
-    unsigned char* ret_data;
+    unsigned char *ret_data;
 
     supported = XInternAtom(dpy, "_NET_SUPPORTED", True);
-    if (supported == None)
-    {
+    if (supported == None) {
         goto exit;
     }
 
     XGetWindowProperty(dpy, root_win, supported, 0, num_items_to_read,
-            False, XA_ATOM, &actual_type, &actual_format, &nitems_read,
-            &bytes_after, &ret_data);
+                       False, XA_ATOM, &actual_type, &actual_format,
+                       &nitems_read, &bytes_after, &ret_data);
 
-    if (nitems_read)
-    {
-        if (!bytes_after)
-        {
+    if (nitems_read) {
+        if (!bytes_after) {
             return_values = (Atom *) ret_data;
-            for (i = 0; i < nitems_read; ++i)
-            {
-                if (return_values[i] == wm_strut_partial)
-                {
+            for (i = 0; i < nitems_read; ++i) {
+                if (return_values[i] == wm_strut_partial) {
                     retval = 1;
                     break;
                 }
@@ -422,7 +407,7 @@ exit:
     return retval;
 }
 
-void set_taskbar_size(Display* dpy, Window root_win)
+void set_taskbar_size(Display * dpy, Window root_win)
 {
     Atom wm_strut_partial;
 
@@ -444,12 +429,125 @@ void set_taskbar_size(Display* dpy, Window root_win)
 defaults:
 
     /* Set some defaults as a guess */
-    fprintf(stderr, "_NET_WM_STRUT_PARTIAL atom is not supported - setting defaults\n"
+    fprintf(stderr,
+            "_NET_WM_STRUT_PARTIAL atom is not supported - setting defaults\n"
             "of sigle taskbar at the bottom of 20 pixel\n");
-    TASKBARTOP    = 0;
-    TASKBARLEFT   = 0;
-    TASKBARRIGHT  = 0;
+    TASKBARTOP = 0;
+    TASKBARLEFT = 0;
+    TASKBARRIGHT = 0;
     TASKBARBOTTOM = 20;
+}
+
+/*
+ * This reads the workarea directly, which avoids the recursive search for
+ * which output I'm on and for what taskbars are around.
+ *
+ * There are problems with this:
+ *      a) In some wm's (e.g. pekwm) the workarea is the entirety of both
+ *         monitors when have multiple monitors. This means everything
+ *         acts on the larger workarea, which is generally not what I
+ *         want.
+ *
+ *      b) In other wm's (e.g. i3, awesome) the workarea is not set.
+ *         I then have to fall back to the default.
+ */
+int read_workarea_direct(Display * dpy, Window root_win,
+                         XWindowChanges * root_geom)
+{
+    int retval = 1;
+    Atom *return_values;
+    Atom workarea_atom, actual_type;
+    int actual_format, num_items_to_read = 100;
+    unsigned long nitems_read = 0, bytes_after;
+    unsigned char *ret_data;
+
+    workarea_atom = XInternAtom(dpy, "_NET_WORKAREA", True);
+    if (workarea_atom == None) {
+        return 1;
+    }
+
+    XGetWindowProperty(dpy, root_win, workarea_atom, 0, num_items_to_read,
+                       False, XA_CARDINAL, &actual_type, &actual_format,
+                       &nitems_read, &bytes_after, &ret_data);
+
+    if (actual_type == None) {
+        goto free_and_close;
+    }
+
+    if (nitems_read) {
+        if (!bytes_after) {
+            retval = 0;
+            return_values = (Atom *) ret_data;
+            root_geom->x = return_values[0];
+            root_geom->y = return_values[1];
+            root_geom->width = return_values[2];
+            root_geom->height = return_values[3];
+        } else {
+            fprintf(stderr, "More data than I accounted for\n");
+        }
+    }
+
+free_and_close:
+    XFree(ret_data);
+
+    return retval;
+}
+
+int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
+                  XWindowChanges * focussed_geom)
+{
+    int i;
+    XRRScreenResources *my_resources;
+    XRRCrtcInfo *my_crtc;
+
+    /* First try to read the ewhm WORKAREA hint. */
+    if (!read_workarea_direct(dpy, root_win, root_geom)) {
+        return 0;
+    }
+
+    /* If that didn't work, get the size from the output and search all windows
+     * for the _NET_WM_STRUT_PARTIAL hint */
+    set_taskbar_size(dpy, root_win);
+
+    my_resources = XRRGetScreenResources(dpy, root_win);
+    if (!my_resources) {
+        fprintf(stderr, "Error getting resources.\n");
+        return 1;
+    }
+
+    /* Find the size of the screen the focussed window is on. */
+    for (i = 0; i < my_resources->ncrtc; ++i) {
+        my_crtc = XRRGetCrtcInfo(dpy, my_resources, my_resources->crtcs[i]);
+        if (!my_crtc) {
+            continue;
+        }
+
+        if (my_crtc->x < focussed_geom->x
+            && my_crtc->y < focussed_geom->y
+            && my_crtc->x + (int)my_crtc->width > focussed_geom->x
+            && my_crtc->y + (int)my_crtc->height > focussed_geom->y) {
+            root_geom->x = my_crtc->x + TASKBARLEFT;
+            root_geom->y = my_crtc->y + TASKBARTOP;
+            root_geom->width = my_crtc->width - TASKBARLEFT - TASKBARRIGHT;
+            root_geom->height = my_crtc->height - TASKBARTOP - TASKBARBOTTOM;
+            XRRFreeCrtcInfo(my_crtc);
+            break;
+        }
+
+        XRRFreeCrtcInfo(my_crtc);
+    }
+    XRRFreeScreenResources(my_resources);
+
+    if (root_geom->width == 0 || root_geom->height == 0) {
+        /* Some time in the future, look at the other corners and use the first
+         * monitor we find that has a corner on it.
+         * For now, just complain and exit. */
+        fprintf(stderr,
+                "Top left corner is off all monitors.\nExiting without doing anything.\n");
+        return 1;
+    }
+
+    return 0;
 }
 
 /* Main program:
@@ -460,7 +558,6 @@ defaults:
  */
 int main(int argc, char *argv[])
 {
-    int i;
     Display *dpy = NULL;
     Window root_win, current = 0;
     int still_exists = 0;
@@ -469,9 +566,6 @@ int main(int argc, char *argv[])
     XWindowChanges new_geom = { 0, 0, 0, 0, 0, 0, 0 };
     XWindowChanges(*get_new_size) (XWindowChanges, XWindowChanges);
     void (*apply_changes) (Display *, Window, XWindowChanges);
-
-    XRRScreenResources *my_resources;
-    XRRCrtcInfo *my_crtc;
 
     /* Argument parsing - either motion or resize command */
     if (argc == 3 && !strcmp(argv[1], "snap_to")) {
@@ -501,53 +595,18 @@ int main(int argc, char *argv[])
 
     root_win = DefaultRootWindow(dpy);
 
-    set_taskbar_size(dpy, root_win);
-
     XGetInputFocus(dpy, &current, &still_exists);
     /* Check */
     focussed_geom = find_geom(dpy, current);
     /* Check */
 
-    my_resources = XRRGetScreenResources(dpy, root_win);
-    if (!my_resources) {
-        fprintf(stderr, "Error getting resources.\n");
-        goto close_display;
-    }
-
-    /* Find the size of the screen the focussed window is on. */
-    for (i = 0; i < my_resources->ncrtc; ++i) {
-        my_crtc = XRRGetCrtcInfo(dpy, my_resources, my_resources->crtcs[i]);
-        if (!my_crtc) {
-            continue;
-        }
-
-        if (my_crtc->x < focussed_geom.x
-            && my_crtc->y < focussed_geom.y
-            && my_crtc->x + (int)my_crtc->width > focussed_geom.x
-            && my_crtc->y + (int)my_crtc->height > focussed_geom.y) {
-            root_geom.x = my_crtc->x;
-            root_geom.y = my_crtc->y;
-            root_geom.width = my_crtc->width;
-            root_geom.height = my_crtc->height;
-            XRRFreeCrtcInfo(my_crtc);
-            break;
-        }
-
-        XRRFreeCrtcInfo(my_crtc);
-    }
-    XRRFreeScreenResources(my_resources);
-
-    if (root_geom.width == 0 || root_geom.height == 0)
-    {
-        /* Some time in the future, look at the other corners and use the first
-         * monitor we find that has a corner on it.
-         * For now, just complain and exit. */
-        fprintf(stderr, "Top left corner is off all monitors.\nExiting without doing anything.\n");
+    if (find_workarea(dpy, root_win, &root_geom, &focussed_geom)) {
+        /* Some error trying to get the workarea */
         goto close_display;
     }
 
     /*
-     *  Here the root_geom structure contains the geometry of the crtc.
+     *  Here the root_geom structure contains the geometry of the workarea.
      *  The focussed_geom structure contains the geometry of the current
      *  window.
      */
