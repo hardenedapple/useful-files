@@ -46,35 +46,33 @@ struct taskbar_sizes {
 
 /* Put the window in the top left of the screen */
 XWindowChanges top_left(const XWindowChanges current_pos,
-                        const XWindowChanges root_geom)
+                        const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    return_val.x = root_geom.x + (int)floor(root_geom.width * LEFT_EDGE);
-    return_val.y = root_geom.y + (int)floor(root_geom.height * TOP_EDGE);
+    return_val.x = workarea.x + (int)floor(workarea.width * LEFT_EDGE);
+    return_val.y = workarea.y + (int)floor(workarea.height * TOP_EDGE);
     return return_val;
 }
 
 /* Put the window at the top right of the screen */
 XWindowChanges top_right(const XWindowChanges current_pos,
-                         const XWindowChanges root_geom)
+                         const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
+    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
     return_val.x = right_edge - current_pos.width;
-    return_val.y = root_geom.y + (int)floor(root_geom.height * TOP_EDGE);
+    return_val.y = workarea.y + (int)floor(workarea.height * TOP_EDGE);
     return return_val;
 }
 
 /* Put the window at the bottom right of the screen */
 XWindowChanges bottom_right(const XWindowChanges current_pos,
-                            const XWindowChanges root_geom)
+                            const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
+    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
+        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
     return_val.x = right_edge - current_pos.width;
     return_val.y = bottom_edge - current_pos.height;
 
@@ -83,12 +81,12 @@ XWindowChanges bottom_right(const XWindowChanges current_pos,
 
 /* Put the window at the bottom left of the screen */
 XWindowChanges bottom_left(const XWindowChanges current_pos,
-                           const XWindowChanges root_geom)
+                           const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int bottom_edge = root_geom.y +
-        (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
-    return_val.x = root_geom.x + (int)floor(root_geom.width * LEFT_EDGE);
+    int bottom_edge = workarea.y +
+        (int)floor(workarea.height * (1 - BOTTOM_EDGE));
+    return_val.x = workarea.x + (int)floor(workarea.width * LEFT_EDGE);
     return_val.y = bottom_edge - current_pos.height;
 
     return return_val;
@@ -96,24 +94,24 @@ XWindowChanges bottom_left(const XWindowChanges current_pos,
 
 /* Put the window in the middle of the top edge */
 XWindowChanges top_middle(const XWindowChanges current_pos,
-                          const XWindowChanges root_geom)
+                          const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal = root_geom.x + (root_geom.width) / 2;
+    int middle_horizontal = workarea.x + (workarea.width) / 2;
     return_val.x = middle_horizontal - (current_pos.width / 2);
-    return_val.y = root_geom.y + (int)floor(root_geom.height * TOP_EDGE);
+    return_val.y = workarea.y + (int)floor(workarea.height * TOP_EDGE);
 
     return return_val;
 }
 
 /* Put the window in the middle of the bottom edge */
 XWindowChanges bottom_middle(const XWindowChanges current_pos,
-                             const XWindowChanges root_geom)
+                             const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal = root_geom.x + (root_geom.width) / 2;
+    int middle_horizontal = workarea.x + (workarea.width) / 2;
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
+        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
     return_val.x = middle_horizontal - (current_pos.width / 2);
     return_val.y = bottom_edge - current_pos.height;
 
@@ -122,11 +120,11 @@ XWindowChanges bottom_middle(const XWindowChanges current_pos,
 
 /* Put the window in the middle of the left edge */
 XWindowChanges middle_left(const XWindowChanges current_pos,
-                           const XWindowChanges root_geom)
+                           const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical = root_geom.y + (root_geom.height) / 2;
-    return_val.x = root_geom.x + (int)floor(root_geom.width * LEFT_EDGE);
+    int middle_vertical = workarea.y + (workarea.height) / 2;
+    return_val.x = workarea.x + (int)floor(workarea.width * LEFT_EDGE);
     return_val.y = middle_vertical - (current_pos.height / 2);
 
     return return_val;
@@ -134,12 +132,11 @@ XWindowChanges middle_left(const XWindowChanges current_pos,
 
 /* Put the window in the middle of the right edge */
 XWindowChanges middle_right(const XWindowChanges current_pos,
-                            const XWindowChanges root_geom)
+                            const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical = root_geom.y + (root_geom.height) / 2;
-    int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
+    int middle_vertical = workarea.y + (workarea.height) / 2;
+    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
     return_val.x = right_edge - current_pos.width;
     return_val.y = middle_vertical - (current_pos.height / 2);
 
@@ -172,15 +169,14 @@ XWindowChanges(*find_snap_function(const char *choice)) (XWindowChanges,
 
 /* Small size */
 XWindowChanges small(const XWindowChanges cur_geom,
-                     const XWindowChanges root_geom)
+                     const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
+    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
-    return_geom.width = (int)(root_geom.width * 0.3);
-    return_geom.height = (int)(root_geom.height * 0.3);
+        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
+    return_geom.width = (int)(workarea.width * 0.3);
+    return_geom.height = (int)(workarea.height * 0.3);
     if (return_geom.width + return_geom.x > right_edge) {
         return_geom.x -= return_geom.x + return_geom.width - right_edge;
     }
@@ -193,15 +189,14 @@ XWindowChanges small(const XWindowChanges cur_geom,
 
 /* Tall size */
 XWindowChanges tall(const XWindowChanges cur_geom,
-                    const XWindowChanges root_geom)
+                    const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
+    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
-    return_geom.width = (int)(root_geom.width * 0.35);
-    return_geom.height = (int)(root_geom.height * 0.95);
+        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
+    return_geom.width = (int)(workarea.width * 0.35);
+    return_geom.height = (int)(workarea.height * 0.95);
     if (return_geom.width + return_geom.x > right_edge) {
         return_geom.x -= return_geom.x + return_geom.width - right_edge;
     }
@@ -214,15 +209,14 @@ XWindowChanges tall(const XWindowChanges cur_geom,
 
 /* Normal size */
 XWindowChanges normal(const XWindowChanges cur_geom,
-                      const XWindowChanges root_geom)
+                      const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge =
-        root_geom.x + (int)floor(root_geom.width * (1 - RIGHT_EDGE));
+    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
     int bottom_edge =
-        root_geom.y + (int)floor(root_geom.height * (1 - BOTTOM_EDGE));
-    return_geom.width = (int)(root_geom.width * 0.35);
-    return_geom.height = (int)(root_geom.height * 0.35);
+        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
+    return_geom.width = (int)(workarea.width * 0.35);
+    return_geom.height = (int)(workarea.height * 0.35);
     if (return_geom.width + return_geom.x > right_edge) {
         return_geom.x -= return_geom.x + return_geom.width - right_edge;
     }
@@ -453,7 +447,7 @@ defaults:
  *         I then have to fall back to the default.
  */
 int read_workarea_direct(Display * dpy, Window root_win,
-                         XWindowChanges * root_geom)
+                         XWindowChanges * workarea)
 {
     int retval = 1;
     Atom *return_values;
@@ -479,10 +473,10 @@ int read_workarea_direct(Display * dpy, Window root_win,
         if (!bytes_after) {
             retval = 0;
             return_values = (Atom *) ret_data;
-            root_geom->x = return_values[0];
-            root_geom->y = return_values[1];
-            root_geom->width = return_values[2];
-            root_geom->height = return_values[3];
+            workarea->x = return_values[0];
+            workarea->y = return_values[1];
+            workarea->width = return_values[2];
+            workarea->height = return_values[3];
         } else {
             fprintf(stderr, "More data than I accounted for\n");
         }
@@ -494,7 +488,7 @@ free_and_close:
     return retval;
 }
 
-int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
+int find_workarea(Display * dpy, Window root_win, XWindowChanges * workarea,
                   XWindowChanges * focussed_geom)
 {
     int i;
@@ -503,7 +497,7 @@ int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
     XRRCrtcInfo *my_crtc;
 
     /* First try to read the ewhm WORKAREA hint. */
-    if (!read_workarea_direct(dpy, root_win, root_geom)) {
+    if (!read_workarea_direct(dpy, root_win, workarea)) {
         return 0;
     }
 
@@ -528,11 +522,11 @@ int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
             && my_crtc->y < focussed_geom->y
             && my_crtc->x + (int)my_crtc->width > focussed_geom->x
             && my_crtc->y + (int)my_crtc->height > focussed_geom->y) {
-            root_geom->x = my_crtc->x + edges_reserved.left;
-            root_geom->y = my_crtc->y + edges_reserved.top;
-            root_geom->width =
+            workarea->x = my_crtc->x + edges_reserved.left;
+            workarea->y = my_crtc->y + edges_reserved.top;
+            workarea->width =
                 my_crtc->width - edges_reserved.left - edges_reserved.right;
-            root_geom->height =
+            workarea->height =
                 my_crtc->height - edges_reserved.top - edges_reserved.bottom;
             XRRFreeCrtcInfo(my_crtc);
             break;
@@ -542,7 +536,7 @@ int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
     }
     XRRFreeScreenResources(my_resources);
 
-    if (root_geom->width == 0 || root_geom->height == 0) {
+    if (workarea->width == 0 || workarea->height == 0) {
         /* Some time in the future, look at the other corners and use the first
          * monitor we find that has a corner on it.
          * For now, just complain and exit. */
@@ -565,7 +559,7 @@ int main(int argc, char *argv[])
     Display *dpy = NULL;
     Window root_win, current = 0;
     int still_exists = 0;
-    XWindowChanges root_geom = { 0, 0, 0, 0, 0, 0, 0 };
+    XWindowChanges workarea = { 0, 0, 0, 0, 0, 0, 0 };
     XWindowChanges focussed_geom = { 0, 0, 0, 0, 0, 0, 0 };
     XWindowChanges new_geom = { 0, 0, 0, 0, 0, 0, 0 };
     XWindowChanges(*get_new_size) (XWindowChanges, XWindowChanges);
@@ -604,17 +598,17 @@ int main(int argc, char *argv[])
     focussed_geom = find_geom(dpy, current);
     /* Check */
 
-    if (find_workarea(dpy, root_win, &root_geom, &focussed_geom)) {
+    if (find_workarea(dpy, root_win, &workarea, &focussed_geom)) {
         /* Some error trying to get the workarea */
         goto close_display;
     }
 
     /*
-     *  Here the root_geom structure contains the geometry of the workarea.
+     *  Here the workarea structure contains the geometry of the workarea.
      *  The focussed_geom structure contains the geometry of the current
      *  window.
      */
-    new_geom = get_new_size(focussed_geom, root_geom);
+    new_geom = get_new_size(focussed_geom, workarea);
     apply_changes(dpy, current, new_geom);
 
 close_display:
