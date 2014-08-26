@@ -67,7 +67,7 @@ XWindowChanges top_right(const XWindowChanges current_pos,
         TASKBARRIGHT;
     return_val.x = right_edge - current_pos.width;
     return_val.y =
-        root_geom.y + (int)floor(root_geom.height * TOP_EDGE) - TASKBARTOP;
+        root_geom.y + (int)floor(root_geom.height * TOP_EDGE) + TASKBARTOP;
     return return_val;
 }
 
@@ -536,6 +536,15 @@ int main(int argc, char *argv[])
         XRRFreeCrtcInfo(my_crtc);
     }
     XRRFreeScreenResources(my_resources);
+
+    if (root_geom.width == 0 || root_geom.height == 0)
+    {
+        /* Some time in the future, look at the other corners and use the first
+         * monitor we find that has a corner on it.
+         * For now, just complain and exit. */
+        fprintf(stderr, "Top left corner is off all monitors.\nExiting without doing anything.\n");
+        goto close_display;
+    }
 
     /*
      *  Here the root_geom structure contains the geometry of the crtc.
