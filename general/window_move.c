@@ -12,11 +12,6 @@
 #define LEFT_EDGE 0.006
 #define RIGHT_EDGE 0.006
 
-static int TASKBARTOP;
-static int TASKBARLEFT;
-static int TASKBARRIGHT;
-static int TASKBARBOTTOM;
-
 /* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lXrandr\ -lm\ -o\ %:r\ % */
 
 /* TODO: At the moment, I go up the tree of window parents until I met the
@@ -39,6 +34,10 @@ static int TASKBARBOTTOM;
 struct func_and_name {
     char *function_name;
      XWindowChanges(*function) (const XWindowChanges, const XWindowChanges);
+};
+
+struct taskbar_sizes {
+    int top, left, right, bottom;
 };
 
 /*****************************************************************************
@@ -312,7 +311,8 @@ void ApplyResize(Display * dpy, Window current, XWindowChanges new_geom)
  *****************************************************************************/
 
 int search_windows_for_taskbars(Display * dpy, Window window,
-                                Atom wm_strut_partial)
+                                Atom wm_strut_partial,
+                                struct taskbar_sizes *edges)
 {
     int retval = 0;
     Atom *return_values;
@@ -336,19 +336,18 @@ int search_windows_for_taskbars(Display * dpy, Window window,
         if (nitems_read) {
             if (!bytes_after) {
                 return_values = (Atom *) ret_data;
-                TASKBARLEFT =
-                    TASKBARLEFT >
-                    (int)return_values[0] ? TASKBARLEFT : (int)return_values[0];
-                TASKBARRIGHT =
-                    TASKBARRIGHT >
-                    (int)return_values[1] ? TASKBARRIGHT : (int)
+                edges->left =
+                    edges->left >
+                    (int)return_values[0] ? edges->left : (int)return_values[0];
+                edges->right =
+                    edges->right > (int)return_values[1] ? edges->right : (int)
                     return_values[1];
-                TASKBARTOP =
-                    TASKBARTOP >
-                    (int)return_values[2] ? TASKBARTOP : (int)return_values[2];
-                TASKBARBOTTOM =
-                    TASKBARBOTTOM >
-                    (int)return_values[3] ? TASKBARBOTTOM : (int)
+                edges->top =
+                    edges->top >
+                    (int)return_values[2] ? edges->top : (int)return_values[2];
+                edges->bottom =
+                    edges->bottom >
+                    (int)return_values[3] ? edges->bottom : (int)
                     return_values[3];
             } else {
                 fprintf(stderr, "Getting taskbar size, property too large.\n");
@@ -358,7 +357,8 @@ int search_windows_for_taskbars(Display * dpy, Window window,
             /* Assuming there will never be a taskbar that is the child of
              * another taskbar. */
             retval =
-                search_windows_for_taskbars(dpy, children[i], wm_strut_partial);
+                search_windows_for_taskbars(dpy, children[i], wm_strut_partial,
+                                            edges);
         }
 
         XFree(ret_data);
@@ -407,9 +407,10 @@ exit:
     return retval;
 }
 
-void set_taskbar_size(Display * dpy, Window root_win)
+struct taskbar_sizes get_taskbar_size(Display * dpy, Window root_win)
 {
     Atom wm_strut_partial;
+    struct taskbar_sizes ret_edges = { 0, 0, 0, 0 };
 
     wm_strut_partial = XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", True);
     if (wm_strut_partial == None) {
@@ -420,22 +421,22 @@ void set_taskbar_size(Display * dpy, Window root_win)
         goto defaults;
     }
 
-    if (search_windows_for_taskbars(dpy, root_win, wm_strut_partial)) {
+    if (search_windows_for_taskbars(dpy, root_win,
+                                    wm_strut_partial, &ret_edges)) {
         goto defaults;
     }
 
-    return;
+    return ret_edges;
 
 defaults:
 
     /* Set some defaults as a guess */
     fprintf(stderr,
-            "_NET_WM_STRUT_PARTIAL atom is not supported - setting defaults\n"
+            "Error finding _NET_WM_STRUT_PARTIAL atom - setting defaults\n"
             "of sigle taskbar at the bottom of 20 pixel\n");
-    TASKBARTOP = 0;
-    TASKBARLEFT = 0;
-    TASKBARRIGHT = 0;
-    TASKBARBOTTOM = 20;
+    ret_edges.top = 20;
+
+    return ret_edges;
 }
 
 /*
@@ -497,6 +498,7 @@ int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
                   XWindowChanges * focussed_geom)
 {
     int i;
+    struct taskbar_sizes edges_reserved = { 0, 0, 0, 0 };
     XRRScreenResources *my_resources;
     XRRCrtcInfo *my_crtc;
 
@@ -507,7 +509,7 @@ int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
 
     /* If that didn't work, get the size from the output and search all windows
      * for the _NET_WM_STRUT_PARTIAL hint */
-    set_taskbar_size(dpy, root_win);
+    edges_reserved = get_taskbar_size(dpy, root_win);
 
     my_resources = XRRGetScreenResources(dpy, root_win);
     if (!my_resources) {
@@ -526,10 +528,12 @@ int find_workarea(Display * dpy, Window root_win, XWindowChanges * root_geom,
             && my_crtc->y < focussed_geom->y
             && my_crtc->x + (int)my_crtc->width > focussed_geom->x
             && my_crtc->y + (int)my_crtc->height > focussed_geom->y) {
-            root_geom->x = my_crtc->x + TASKBARLEFT;
-            root_geom->y = my_crtc->y + TASKBARTOP;
-            root_geom->width = my_crtc->width - TASKBARLEFT - TASKBARRIGHT;
-            root_geom->height = my_crtc->height - TASKBARTOP - TASKBARBOTTOM;
+            root_geom->x = my_crtc->x + edges_reserved.left;
+            root_geom->y = my_crtc->y + edges_reserved.top;
+            root_geom->width =
+                my_crtc->width - edges_reserved.left - edges_reserved.right;
+            root_geom->height =
+                my_crtc->height - edges_reserved.top - edges_reserved.bottom;
             XRRFreeCrtcInfo(my_crtc);
             break;
         }
