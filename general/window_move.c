@@ -14,12 +14,40 @@
 
 /* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lXrandr\ -lm\ -o\ %:r\ % */
 
-/* TODO: At the moment, I go up the tree of window parents until I met the
- *       window that is the child of the root.
- *       This might not work well in all wm's, possibly should use the
- *       _NET_VIRTUAL_ROOTS atom as specified in
- *       http://standards.freedesktop.org/wm-spec/wm-spec-1.3.html
- *       For the time being I'll use this. */
+/* TODO:
+ *  Finding main geometry:
+ *      Most wm's now are reparenting.
+ *      I beleive I could just assume this, and take the first parent.
+ *      I'm not 100% confident on this.
+ *      At the moment, I go up the tree of window parents until I meet the
+ *      window that is the child of the root.
+ *      This might not work well in all wm's, possibly should use the
+ *      _NET_VIRTUAL_ROOTS atom as specified in
+ *      http://standards.freedesktop.org/wm-spec/wm-spec-1.3.html
+ *
+ *  Finding workarea:
+ *      Some wm's (including those I use) don't set _NET_WM_WORKAREA.
+ *      When this is true, I have to find the workarea out myself.
+ *      At the moment I do this by iterating over all the windows in the server
+ *      and asking each how much space they are reserving on the edges.
+ *      This could be done much faster using the xcb library instead of Xlib.
+ *
+ *      Sometimes, when the workarea is set, it includes multiple monitors in
+ *      the same workarea.
+ *      This is not what I want.
+ *      Will add a compiler option to allow the option to never use the
+ *      _NET_WM_WORKAREA property.
+ *
+ *  Refactoring code:
+ *      I want to make one function that moves windows to the position
+ *      specified (tell it which corner to position and where to put that
+ *      corner) and implement all snaps by calling that function.
+ *
+ *      Want to do the same to resizing functions.
+ *
+ *      This will make adding command line options to choose everything much
+ *      easier.
+ */
 
 /*
  *  Notes:
