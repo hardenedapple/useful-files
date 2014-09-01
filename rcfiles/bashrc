@@ -14,16 +14,6 @@ shopt -s histappend
 #Stop less saving my search commands
 export LESSHISTFILE="/dev/null"
 
-#make ls give the nice colours to me
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$( dircolors -b ~/.dircolors)" || eval "$( dircolors -b )"
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-fi
-
-#make ll append an indicator to each entry
-alias ll='ls -F'
-
 #make a nice command prompt
 if [ $( id -u ) -eq 0 ]; then
     PS1='\[\e[0;31m\]TODO # \[\e[m\]'
@@ -42,9 +32,6 @@ if [ -d "$HOME/.gem/ruby/2.0.0/bin" ]; then
     PATH="$PATH:$HOME/.gem/ruby/2.0.0/bin"
 fi
 
-#set command line to accept vi commands
-set -o vi
-
 #Make the title of the terminal Apples_Terminal when up
 #and Minimised_Terminal when down
 if [ $TERM == "xterm-256color" ]
@@ -52,24 +39,27 @@ then
     export PROMPT_COMMAND='echo -ne "\033]0;Apples_Terminal\007"; echo -ne "\033]1;Minimised_Terminal\007"'
 fi
 
+#set command line to accept vi commands
+set -o vi
 
-# Remove the key codes ^S and ^Q to avoid clash with rtorrent
+
+# Remove C-s and C-q {{{
+# Can have problems in Rtorrent with these commands, run this if needs be
 stty stop undef
 stty start undef
+# }}}
 
-# Add bash complete when using sudo
-complete -cf sudo
-
-
-# Give a message suggesting a package when given a command not found
-#source /usr/share/doc/pkgfile/command-not-found.bash
-
-
-#If want a limited autocorrect for cd directory
-#shopt -s cdspell
-
-
-# mpd doesn't automatically search .config for config file
-# neither doesn ncmpcpp
+# Alias's  {{{
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$( dircolors -b ~/.dircolors )" || eval "$( dircolors -b )"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+fi
+alias ll='ls -F'
 alias mympd='mpd ~/.config/mpd/mpd.conf'
-alias killmybar='pkill conky; pkill tilda; pkill tint2'
+alias gr='cd $(git root)'
+alias hr='cd $(hg root)'
+alias cterm='TERM=screen-256color'
+# }}}
+
+# vim: set ts=2 sw=2 foldmethod=marker:
