@@ -52,6 +52,8 @@ stty stop undef
 stty start undef
 # }}}
 
+# # {{{ Syntax highlighting for man, cat etc
+
 # {{{ Cat, sed, awk, tail, diff syntax highlighting
 # Cat tail, sed, awk, and head
 # Check that highlight is installed
@@ -116,6 +118,24 @@ if [[ $? -eq 0 ]]; then
 
 fi
 
+# }}}
+
+# {{{ Man page colors
+
+# This adds colors to ALL less instances, might be annoying in some cases.
+export LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+export LESS_TERMCAP_md=$(printf "\e[1;31m") \
+export LESS_TERMCAP_me=$(printf "\e[0m") \
+export LESS_TERMCAP_se=$(printf "\e[0m") \
+export LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+export LESS_TERMCAP_ue=$(printf "\e[0m") \
+export LESS_TERMCAP_us=$(printf "\e[1;32m")
+
+vimman () {
+  MANPAGER="/bin/sh -c \"col -bx | vim -c 'set ft=man' -\"" man $@
+}
+
+# }}}
 # }}}
 
 # Alias's  {{{
