@@ -2,6 +2,9 @@
 # ~/.bashrc
 #
 
+# Add bash complete when using sudo
+complete -cf sudo
+
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
@@ -47,6 +50,72 @@ set -o vi
 # Can have problems in Rtorrent with these commands, run this if needs be
 stty stop undef
 stty start undef
+# }}}
+
+# {{{ Cat, sed, awk, tail, diff syntax highlighting
+# Cat tail, sed, awk, and head
+# Check that highlight is installed
+type highlight > /dev/null 2>&1
+if [[ $? -eq 0 ]]; then
+  colored_command() {
+    syntax=""
+    for file in $@; do
+      if [ -f $file ]; then
+        case $file in
+          *.lisp) syntax="lisp";;
+          *.el) syntax="lisp";;
+          *.asd) syntax="lisp";;
+          *.java) syntax="java";;
+          *.php) syntax="php";;
+          *.py) syntax="python";;
+          *.diff) syntax="diff";;
+          *.rej) syntax="diff";;
+          *.awk) syntax="awk";;
+          *.c) syntax="c";;
+          *.cpp) syntax="cpp";;
+          *.ino) syntax="cpp";;
+          *.pde) syntax="cpp";;
+          *.css) syntax="css";;
+          *.js) syntax="js";;
+          *.jsp) syntax="jsp";;
+          *.xml) syntax="xml";;
+          *.sql) syntax="sql";;
+          *.pl) syntax="pl";;
+          *.rb) syntax="rb";;
+          *.html) syntax="html";;
+          *.sh) syntax="sh";;
+          /etc/apache*/*) syntax="httpd";;
+        esac
+      fi
+    done
+
+    if [[ $syntax != "" ]]; then
+      command $@ | highlight -O ansi --syntax=$syntax
+    else
+      command $@
+    fi
+  }
+
+  cat () {
+      colored_command cat $@
+  }
+
+  head () {
+      colored_command head $@
+  }
+
+  tail () {
+      colored_command tail $@
+  }
+
+
+  # diff (always want the same highlighting)
+  colordiff() {
+    command diff $@ | highlight -O ansi --syntax=diff
+  }
+
+fi
+
 # }}}
 
 # Alias's  {{{
