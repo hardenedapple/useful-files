@@ -62,4 +62,21 @@ alias hr='cd $(hg root)'
 alias cterm='TERM=screen-256color'
 # }}}
 
+# General {{{
+ulimit -c unlimited
+# }}}
+
+# Passwords {{{
+
+PASSDIR=~/.config/passwords
+
+pw() {
+  cd "$PASSDIR"
+    if [[ ! -z "$1" ]]; then
+      vim "$1"*
+    fi
+  cd "$OLDPWD"
+}
+# }}}
+
 # vim: set ts=2 sw=2 foldmethod=marker:
