@@ -190,8 +190,8 @@ vimman () {
 
 # Remove C-s and C-q {{{
 # Can have problems in Rtorrent with these commands, run this if needs be
-stty stop undef
-stty start undef
+stty -ixon
+stty -ixoff
 # }}}
 
 # Alias's  {{{
