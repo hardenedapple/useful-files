@@ -51,8 +51,9 @@ fi
 
 # }}}
 
-#Default editor vim
+#Default editor vim, and editing mode vi
 export EDITOR=vim
+set -o vi
 
 #add $HOME/bin to $PATH
 if [ -d "$HOME/bin" ]; then
@@ -68,10 +69,6 @@ if [ $TERM == "xterm-256color" ]
 then
     export PROMPT_COMMAND='echo -ne "\033]0;Apples_Terminal\007"; echo -ne "\033]1;Minimised_Terminal\007"'
 fi
-
-#set command line to accept vi commands
-set -o vi
-
 
 # Remove C-s and C-q {{{
 # Can have problems in Rtorrent with these commands, run this if needs be
