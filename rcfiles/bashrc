@@ -2,9 +2,6 @@
 # ~/.bashrc
 #
 
-# Add bash complete when using sudo
-complete -cf sudo
-
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
@@ -196,6 +193,30 @@ pw() {
     fi
   cd "$OLDPWD"
 }
+# }}}
+
+# {{{ Completion
+# TODO:
+#     Add something to check if bash-completion has already been loaded
+enable_completion () {
+    local FOUND_BC=0
+    for file in "/usr/share/bash-completion/bash_completion" "/etc/bash_completion"
+    do
+        if [ -f $file ]
+        then
+            . $file
+            FOUND_BC=1
+        fi
+    done
+    if [[ $FOUND_BC -ne 1 ]];
+    then
+        # Add bash complete when using sudo
+        complete -cf sudo
+        complete -cf man
+    fi
+}
+
+enable_completion
 # }}}
 
 # vim: set ts=2 sw=2 foldmethod=marker:
