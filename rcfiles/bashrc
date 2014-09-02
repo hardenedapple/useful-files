@@ -17,12 +17,42 @@ shopt -s histappend
 #Stop less saving my search commands
 export LESSHISTFILE="/dev/null"
 
-#make a nice command prompt
+# {{{ Command Prompt
+# # Cant get this to work with the right aligned status indicator.
+#
+# setprompt () {
+#   local PR_GREEN="\[\e[0;32m\]"
+#   local PR_BLUE="\[\e[0;34m\]"
+#   local PR_CYAN="\[\e[0;36m\]"
+#   local PR_RED="\[\e[0;31m\]"
+#   local PR_MAGENTA="\[\e[0;35m\]"
+#   local PR_YELLOW="\[\e[0;33m\]"
+#   local PR_NO_COLOR="\[\e[0m\]"
+
+#   if [[ $( id -u ) -eq 0 ]]; then
+#     local PR_USER="${PR_RED}# ${PR_NO_COLOR}"
+#     local PR_TIME="${PR_BLUE}[${PR_RED}$(date +%H:%M:%S)${PR_BLUE}]${PR_NO_COLOR}"
+#   else
+#     local PR_USER="${PR_CYAN}$ ${PR_NO_COLOR}"
+#     local PR_TIME="${PR_BLUE}[${PR_CYAN}$(date +%H:%M:%S)${PR_BLUE}]${PR_NO_COLOR}"
+#   fi
+
+#   local PR_DIR="${PR_MAGENTA}$(basename $PWD)${PR_NO_COLOR}"
+#   # PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) "[$?]" "${PR_DIR} $(PR_TIME} ${PR_USER}"'
+#   local FRONT_PR="${PR_DIR} ${PR_TIME} ${PR_USER}"
+#   local REAR_PR="[$?]"
+#   PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) ${REAR_PR} ${FRONT_PR})'
+
+# }
+# setprompt
+
 if [ $( id -u ) -eq 0 ]; then
-    PS1='\[\e[0;31m\]TODO # \[\e[m\]'
+    PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) "[$?]" "\[\e[0;35m\]$(basename $PWD) \[\e[0;34m\][\[\e[0;31m\]$(date +%H:%M:%S)\[\e[0;34m\]]\[\e[0;31m\] #\[\e[0m\] ")'
 else
-    PS1='\[\e[0;36m\]TODO $ \[\e[m\]'
+    PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) "[$?]" "\[\e[0;35m\]$(basename $PWD) \[\e[0;34m\][\[\e[0;36m\]$(date +%H:%M:%S)\[\e[0;34m\]]\[\e[0;36m\] $\[\e[0m\] ")'
 fi
+
+# }}}
 
 #Default editor vim
 export EDITOR=vim
