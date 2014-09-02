@@ -36,7 +36,7 @@ compinit
 # only works in xterm if have metaSendsEscape in xresources
 zle -C complete-files complete-word _generic
 zstyle ':completion:complete-files:*' completer _files
-bindkey ',' complete-files
+bindkey '/' complete-files
 # }}}
 
 # Prompt set-up{{{
