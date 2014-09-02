@@ -89,8 +89,10 @@ setprompt() {
   # Check the UID
   if [[ $UID -ge 1000 ]]; then # normal user
     PR_USER="${PR_CYAN}$ ${PR_NO_COLOR}"
+    PR_TIME="${PR_BLUE}[${PR_CYAN}%D{%H:%M:%S}${PR_BLUE}]${PR_NO_COLOR}"
   elif [[ $UID -eq 0 ]]; then # root
-    PR_USER="${PR_RED}TODO # ${PR_NO_COLOR}"
+    PR_USER="${PR_RED}# ${PR_NO_COLOR}"
+    PR_TIME="${PR_BLUE}[${PR_RED}%D{%H:%M:%S}${PR_BLUE}]${PR_NO_COLOR}"
   fi
 
   # Check if we are on SSH or not
@@ -98,7 +100,6 @@ setprompt() {
     PR_HOST="${PR_YELLOW}%M:${PR_NO_COLOR}" #SSH
   fi
 
-  PR_TIME="${PR_BLUE}[${PR_CYAN}%D{%H:%M:%S}${PR_BLUE}]${PR_NO_COLOR}"
 
   # set the prompt
   WD="${PR_MAGENTA}%c${PR_NO_COLOR}"
