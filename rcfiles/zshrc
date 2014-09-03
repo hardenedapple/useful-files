@@ -25,7 +25,7 @@ zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p
 zstyle ':completion:*' substitute 1
 zstyle ':completion:*' use-compctl false
 zstyle ':completion:*' verbose true
-zstyle :compinstall filename '/home/apple/.zshrc'
+zstyle :compinstall filename '$HOME/.zshrc'
 
 autoload -Uz compinit
 compinit
@@ -222,7 +222,6 @@ if [ -x /usr/bin/dircolors ]; then
     alias grep='grep --color=auto'
 fi
 alias ll='ls -F'
-alias mympd='mpd ~/.config/mpd/mpd.conf'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
 alias cterm='TERM=screen-256color'
