@@ -216,6 +216,16 @@ alias ll='ls -F'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
 alias cterm='TERM=screen-256color'
+
+alias -s tex=vim
+alias -s txt=vim
+alias -s cpp=vim
+alias -s c=vim
+alias -s py=vim
+alias -s conf=vim
+alias -s pl=vim
+
+alias -s html=firefox
 # }}}
 
 # General {{{
