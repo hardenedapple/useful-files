@@ -35,6 +35,8 @@ bind-key C-h send-keys 
 setw -g clock-mode-style 24
 # vi-style controls for copy mode
 setw -g mode-keys vi
+bind-key -t vi-copy 'v' begin-selection
+bind-key -t vi-copy 'y' copy-selection
 
 # vi-style pane selection
 bind h select-pane -L
@@ -46,9 +48,7 @@ bind-key \ kill-session
 
 # Term size only constrained when two windows are viewing it
 setw -g aggressive-resize on
-
 setw -g utf8 on
-
 setw -g main-pane-width 100
 
 # The foreground borders don't show as the font I use doesn't show utf-8
