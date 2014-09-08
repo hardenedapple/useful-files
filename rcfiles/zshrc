@@ -48,6 +48,7 @@ bindkey '\e/' complete-files
 bindkey -v
 # steal a few commands from emacs for insert mode
 bindkey '\C-r' history-incremental-search-backward
+bindkey '\C-s' history-incremental-search-forward
 bindkey '\C-a' beginning-of-line
 bindkey '\C-e' end-of-line
 bindkey '\C-k' kill-line
