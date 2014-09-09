@@ -54,6 +54,8 @@ bindkey '\C-e' end-of-line
 bindkey '\C-k' kill-line
 bindkey '\C-n' down-line-or-history
 bindkey '\C-p' up-line-or-history
+bindkey '\eq' push-line
+bindkey '\eg' get-line
 # Have up and down arrows match current line
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
