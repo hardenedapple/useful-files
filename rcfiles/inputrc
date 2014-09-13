@@ -1,6 +1,6 @@
 $include /etc/inputrc
 
-set editing-mode vi
+set editing-mode emacs
 
 set keymap vi-command
 "\e[A":history-search-backward
@@ -14,13 +14,18 @@ set keymap vi-insert
 "\C-p":previous-history
 "\C-n":next-history
 "\C-xe":emacs-editing-mode
+# no need to lose all the emacs keybindings if they don't clash
 "\C-e":end-of-line
 "\C-a":beginning-of-line
+"\C-k":kill-line
 
 set keymap emacs
 "\e[A":history-search-backward
 "\e[B":history-search-forward
 "\C-xv":vi-editing-mode
-
+"\eM":character-search-backward
+"\em":character-search
+"\ew":copy-region-as-kill
+"\eW":kill-region
 
 set show-all-if-ambiguous on
