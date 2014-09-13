@@ -9,7 +9,8 @@
 #Stop less saving my search commands
 export LESSHISTFILE="/dev/null"
 
-# {{{ Command Prompt
+# # {{{ Command Prompt
+
 # # Cant get this to work with the right aligned status indicator.
 #
 # setprompt () {
@@ -169,10 +170,8 @@ if [ -x /usr/bin/dircolors ]; then
     alias grep='grep --color=auto'
 fi
 alias ll='ls -F'
-alias mympd='mpd ~/.config/mpd/mpd.conf'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
-alias cterm='TERM=screen-256color'
 # }}}
 
 # General {{{

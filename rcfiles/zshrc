@@ -226,7 +226,6 @@ fi
 alias ll='ls -F'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
-alias cterm='TERM=screen-256color'
 # }}}
 
 # General {{{
