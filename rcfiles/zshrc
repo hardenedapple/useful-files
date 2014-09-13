@@ -37,12 +37,8 @@ compinit
 zle -C complete-files complete-word _generic
 zstyle ':completion:complete-files:*' completer _files
 
-# 'emacs' map
-bindkey -e
-# Have up and down arrows match current line
-bindkey '\e[A' history-beginning-search-backward
-bindkey '\e[B' history-beginning-search-forward
-bindkey '\e/' complete-files
+# Both emacs and vi modes now have C-w for delete a single part of /a/file/name
+# and M-<backspace> for delete /entire/path/name
 
 # 'viins' map
 bindkey -v
@@ -54,12 +50,24 @@ bindkey '\C-e' end-of-line
 bindkey '\C-k' kill-line
 bindkey '\C-n' down-line-or-history
 bindkey '\C-p' up-line-or-history
+bindkey '\e\C-?' backward-kill-word
 bindkey '\eq' push-line
 bindkey '\eg' get-line
 # Have up and down arrows match current line
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
 bindkey '\e/' complete-files
+
+# 'emacs' map
+bindkey -e
+# Have up and down arrows match current line
+bindkey '\e[A' history-beginning-search-backward
+bindkey '\e[B' history-beginning-search-forward
+bindkey '\C-w' vi-backward-kill-word
+bindkey '\e/' complete-files
+bindkey '\eM' vi-find-prev-char
+bindkey '\em' vi-find-next-char
+bindkey '\eW' kill-region
 # }}}
 
 # Prompt set-up{{{
