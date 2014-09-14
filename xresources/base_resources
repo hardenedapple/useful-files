@@ -18,6 +18,7 @@ XTerm*iconName:   Apples_Terminal
 XTerm*title:      Apples_Terminal
 XTerm*utf8:       2
 XTerm*saveLines:  4096
+XTerm*omitTranslation: fullscreen
 !XTerm*locale: true
 XTerm*VT100.translations: #override <Btn1Up>: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0)
 XTerm*disallowedWindowOps: 20,21,SetXprop
