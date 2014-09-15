@@ -27,5 +27,7 @@ set keymap emacs
 "\em":character-search
 "\ew":copy-region-as-kill
 "\eW":kill-region
+"\eB":vi-backward-bigword
+"\eF":vi-forward-bigword
 
 set show-all-if-ambiguous on

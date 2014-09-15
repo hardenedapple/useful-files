@@ -68,6 +68,8 @@ bindkey '\e/' complete-files
 bindkey '\eM' vi-find-prev-char
 bindkey '\em' vi-find-next-char
 bindkey '\eW' kill-region
+bindkey '\eb' vi-backward-word
+bindkey '\ef' vi-forward-word
 # }}}
 
 # Prompt set-up{{{
