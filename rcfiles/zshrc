@@ -39,6 +39,12 @@ zstyle ':completion:complete-files:*' completer _files
 
 # Both emacs and vi modes now have C-w for delete a single part of /a/file/name
 # and M-<backspace> for delete /entire/path/name
+ctrl-z-bg () {
+    bg
+    zle redisplay
+}
+zle -N ctrl-z-bg
+
 
 # 'viins' map
 bindkey -v
@@ -57,6 +63,7 @@ bindkey '\eg' get-line
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
 bindkey '\e/' complete-files
+bindkey '\C-z' ctrl-z-bg
 
 # 'emacs' map
 bindkey -e
@@ -70,6 +77,7 @@ bindkey '\em' vi-find-next-char
 bindkey '\eW' kill-region
 bindkey '\eb' vi-backward-word
 bindkey '\ef' vi-forward-word
+bindkey '\C-z' ctrl-z-bg
 # }}}
 
 # Prompt set-up{{{
