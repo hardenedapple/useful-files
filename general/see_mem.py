@@ -90,10 +90,12 @@ def _is_kernel(pid, inc_non=True):
 def all_mem(memtype, inc_non=True):
     """Return a dictionary with keys process name and values memval
     Can ask for all processes I can read or all started with a command"""
-    key = lambda pid: _try_val(pid, memtype)[0]
-    val = lambda pid: _try_val(pid, memtype)[1]
-    ret = {(key(pid), pid): val(pid) for pid in _all_pids()
-           if not _is_kernel(pid, inc_non)}
+    ret = {}
+    for pid in _all_pids():
+        if _is_kernel(pid, inc_non):
+            continue
+        pid_info = _try_val(pid, memtype)
+        ret[(pid_info[0], pid)] = pid_info[1]
     # remove placeholder for those processes I don't have permission for
     # Have to make a list to iterate over (so don't modify dict while
     # iterating over it
@@ -152,7 +154,7 @@ def print_nice(indict):
     keys = sorted(indict)
     maxlen = max((len(str(key)) for key in keys))
     for key in keys:
-        print('{0:<{1}} :   {2}'.format(key, maxlen, indict[key]))
+        print('{0:<{1}} :   {2}'.format(str(key), maxlen, indict[key]))
 
 
 if __name__ == '__main__':
