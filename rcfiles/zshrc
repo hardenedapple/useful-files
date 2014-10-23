@@ -243,6 +243,13 @@ setopt interactivecomments
 ulimit -c unlimited
 # }}}
 
+# {{{ Functions
+newdir () {
+  mkdir -p "$@"
+  cd "$1"
+}
+# }}}
+
 # Passwords {{{
 
 PASSDIR=~/.config/passwords

@@ -200,6 +200,13 @@ pw() {
 }
 # }}}
 
+# {{{ Functions
+newdir () {
+  mkdir -p "$@"
+  cd "$1"
+}
+# }}}
+
 # {{{ Completion
 # TODO:
 #     Add something to check if bash-completion has already been loaded
