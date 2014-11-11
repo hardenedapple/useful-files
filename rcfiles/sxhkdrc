@@ -2,9 +2,6 @@
 # firefox 'save' pop-up
 
 # general
-control + shift + t
-    toggle_xcmp.sh
-
 XF86AudioRaiseVolume
     pulseaudio-ctl up || amixer set Master 5%+
 
