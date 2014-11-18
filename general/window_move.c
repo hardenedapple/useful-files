@@ -7,10 +7,30 @@
 #include <X11/Xatom.h>
 
 /* Configuration of the positions (information about preferences */
-#define TOP_EDGE 0.008
-#define BOTTOM_EDGE 0.008
-#define LEFT_EDGE 0.006
-#define RIGHT_EDGE 0.006
+#define TOP_GAP 0.008
+#define BOTTOM_GAP 0.008
+#define LEFT_GAP 0.006
+#define RIGHT_GAP 0.006
+
+#define LEFT_EDGE(workarea) workarea.x + (int)floor(workarea.width * LEFT_GAP)
+#define TOP_EDGE(workarea) workarea.y + (int)(workarea.height * TOP_GAP)
+#define RIGHT_EDGE(workarea) \
+    workarea.x + (int)floor(workarea.width * (1 - RIGHT_GAP))
+#define BOTTOM_EDGE(workarea) \
+    workarea.y + (int)floor(workarea.height * (1 - BOTTOM_GAP))
+
+#define PUT_LEFT(changes, workarea) \
+    changes.x = LEFT_EDGE(workarea)
+#define PUT_RIGHT(changes, workarea) \
+    changes.x = RIGHT_EDGE(workarea) - changes.width
+#define PUT_TOP(changes, workarea) \
+    changes.y = TOP_EDGE(workarea)
+#define PUT_BOTTOM(changes, workarea) \
+    changes.y = BOTTOM_EDGE(workarea) - changes.height
+#define PUT_MIDDLE_HORIZONTAL(changes, workarea) \
+    changes.x = workarea.x + (workarea.width) / 2 - (current_pos.width / 2)
+#define PUT_MIDDLE_VERTICAL(changes, workarea) \
+    changes.y = workarea.y + (workarea.height) / 2 - (current_pos.height / 2)
 
 /* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lXrandr\ -lm\ -o\ %:r\ % */
 
@@ -35,10 +55,18 @@
  *      Sometimes, when the workarea is set, it includes multiple monitors in
  *      the same workarea.
  *      This is not what I want.
- *      Will add a compiler option to allow the option to never use the
- *      _NET_WM_WORKAREA property.
+ *      Will check for if there are multiple monitors first, and if there is
+ *      only one monitor, try to use _NET_WM_WORKAREA.
  *
  *  Refactoring code:
+ *      Will switch from Xlib to using XCB.
+ *      This will mean I can ask for multiple things at once, and do some
+ *      things in between asking for things and reading them.
+ *
+ *      When doing this, will look at whether the xcb_ ... _iterator ...
+ *      functions/types are better for looking at all the crtc's and looking at
+ *      all the windows.
+ *
  *      I want to make one function that moves windows to the position
  *      specified (tell it which corner to position and where to put that
  *      corner) and implement all snaps by calling that function.
@@ -47,6 +75,37 @@
  *
  *      This will make adding command line options to choose everything much
  *      easier.
+ */
+
+/*
+ * New outline:
+ *      Open the display.
+ *
+ *      Request "screen resources", "root window", "_NET_SUPPORTED atom",
+ *      "_NET_WORKAREA atom", "focussed window", "_NET_WM_STRUT_PARTIAL atom",
+ *      in that order.
+ *
+ *      Get the screen resources, check crtc's, CHECK IF THERE IS ONLY ONE
+ *      MONITOR, if there is only one monitor, check for the _NET_WORKAREA atom
+ *      and if it's supported, and exists, use that.
+ *
+ *      Get the focussed window reply and send the  request for its geometry.
+ *
+ *      If the workarea atom is not supported, have to find the workarea by
+ *      counting all the windows that have a _NET_WM_STRUT_PARTIAL property and
+ *      sum the total together.
+ *
+ *      The method to find all windows with a _NET_WM_STRUT_PARTIAL property
+ *      will have to be reorganised.
+ *          It gets given a query_tree_cookie, uses that to get the children,
+ *          asks for the wm_strut_partial property cookie of all the children
+ *          asks for the query_tree_cookie of all the children.
+ *          gets the property_reply for all the children, and adds any edges it
+ *          finds
+ *          calls itself recursively with each of the query_tree_cookies of the
+ *          children.
+ *
+ *      Then get the geometry of the focussed window, and apply the changes.
  */
 
 /*
@@ -77,8 +136,8 @@ XWindowChanges top_left(const XWindowChanges current_pos,
                         const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    return_val.x = workarea.x + (int)floor(workarea.width * LEFT_EDGE);
-    return_val.y = workarea.y + (int)floor(workarea.height * TOP_EDGE);
+    PUT_LEFT(return_val, workarea);
+    PUT_TOP(return_val, workarea);
     return return_val;
 }
 
@@ -87,9 +146,8 @@ XWindowChanges top_right(const XWindowChanges current_pos,
                          const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
-    return_val.x = right_edge - current_pos.width;
-    return_val.y = workarea.y + (int)floor(workarea.height * TOP_EDGE);
+    PUT_RIGHT(return_val, workarea);
+    PUT_TOP(return_val, workarea);
     return return_val;
 }
 
@@ -98,11 +156,8 @@ XWindowChanges bottom_right(const XWindowChanges current_pos,
                             const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
-    int bottom_edge =
-        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
-    return_val.x = right_edge - current_pos.width;
-    return_val.y = bottom_edge - current_pos.height;
+    PUT_RIGHT(return_val, workarea);
+    PUT_BOTTOM(return_val, workarea);
 
     return return_val;
 }
@@ -112,10 +167,8 @@ XWindowChanges bottom_left(const XWindowChanges current_pos,
                            const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int bottom_edge = workarea.y +
-        (int)floor(workarea.height * (1 - BOTTOM_EDGE));
-    return_val.x = workarea.x + (int)floor(workarea.width * LEFT_EDGE);
-    return_val.y = bottom_edge - current_pos.height;
+    PUT_LEFT(return_val, workarea);
+    PUT_BOTTOM(return_val, workarea);
 
     return return_val;
 }
@@ -125,9 +178,8 @@ XWindowChanges top_middle(const XWindowChanges current_pos,
                           const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal = workarea.x + (workarea.width) / 2;
-    return_val.x = middle_horizontal - (current_pos.width / 2);
-    return_val.y = workarea.y + (int)floor(workarea.height * TOP_EDGE);
+    PUT_TOP(return_val, workarea);
+    PUT_MIDDLE_HORIZONTAL(return_val, workarea);
 
     return return_val;
 }
@@ -137,11 +189,8 @@ XWindowChanges bottom_middle(const XWindowChanges current_pos,
                              const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_horizontal = workarea.x + (workarea.width) / 2;
-    int bottom_edge =
-        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
-    return_val.x = middle_horizontal - (current_pos.width / 2);
-    return_val.y = bottom_edge - current_pos.height;
+    PUT_BOTTOM(return_val, workarea);
+    PUT_MIDDLE_HORIZONTAL(return_val, workarea);
 
     return return_val;
 }
@@ -151,9 +200,8 @@ XWindowChanges middle_left(const XWindowChanges current_pos,
                            const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical = workarea.y + (workarea.height) / 2;
-    return_val.x = workarea.x + (int)floor(workarea.width * LEFT_EDGE);
-    return_val.y = middle_vertical - (current_pos.height / 2);
+    PUT_LEFT(return_val, workarea);
+    PUT_MIDDLE_VERTICAL(return_val, workarea);
 
     return return_val;
 }
@@ -163,10 +211,8 @@ XWindowChanges middle_right(const XWindowChanges current_pos,
                             const XWindowChanges workarea)
 {
     XWindowChanges return_val = current_pos;
-    int middle_vertical = workarea.y + (workarea.height) / 2;
-    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
-    return_val.x = right_edge - current_pos.width;
-    return_val.y = middle_vertical - (current_pos.height / 2);
+    PUT_RIGHT(return_val, workarea);
+    PUT_MIDDLE_VERTICAL(return_val, workarea);
 
     return return_val;
 }
@@ -200,9 +246,8 @@ XWindowChanges small(const XWindowChanges cur_geom,
                      const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
-    int bottom_edge =
-        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
+    int right_edge = RIGHT_EDGE(workarea);
+    int bottom_edge = BOTTOM_EDGE(workarea);
     return_geom.width = (int)(workarea.width * 0.3);
     return_geom.height = (int)(workarea.height * 0.3);
     if (return_geom.width + return_geom.x > right_edge) {
@@ -220,9 +265,8 @@ XWindowChanges tall(const XWindowChanges cur_geom,
                     const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
-    int bottom_edge =
-        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
+    int right_edge = RIGHT_EDGE(workarea);
+    int bottom_edge = BOTTOM_EDGE(workarea);
     return_geom.width = (int)(workarea.width * 0.35);
     return_geom.height = (int)(workarea.height * 0.95);
     if (return_geom.width + return_geom.x > right_edge) {
@@ -240,9 +284,8 @@ XWindowChanges normal(const XWindowChanges cur_geom,
                       const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = workarea.x + (int)floor(workarea.width * (1 - RIGHT_EDGE));
-    int bottom_edge =
-        workarea.y + (int)floor(workarea.height * (1 - BOTTOM_EDGE));
+    int right_edge = RIGHT_EDGE(workarea);
+    int bottom_edge = BOTTOM_EDGE(workarea);
     return_geom.width = (int)(workarea.width * 0.35);
     return_geom.height = (int)(workarea.height * 0.35);
     if (return_geom.width + return_geom.x > right_edge) {
@@ -358,19 +401,10 @@ int search_windows_for_taskbars(Display * dpy, Window window,
         if (nitems_read) {
             if (!bytes_after) {
                 return_values = (Atom *) ret_data;
-                edges->left =
-                    edges->left >
-                    (int)return_values[0] ? edges->left : (int)return_values[0];
-                edges->right =
-                    edges->right > (int)return_values[1] ? edges->right : (int)
-                    return_values[1];
-                edges->top =
-                    edges->top >
-                    (int)return_values[2] ? edges->top : (int)return_values[2];
-                edges->bottom =
-                    edges->bottom >
-                    (int)return_values[3] ? edges->bottom : (int)
-                    return_values[3];
+                edges->left = edges->left > (int)return_values[0] ? edges->left : (int)return_values[0];
+                edges->right = edges->right > (int)return_values[1] ? edges-> right : (int)return_values[1];
+                edges->top = edges->top > (int)return_values[2] ? edges->top : (int)return_values[2];
+                edges->bottom = edges->bottom > (int)return_values[3] ? edges->bottom : (int)return_values[3];
             } else {
                 fprintf(stderr, "Getting taskbar size, property too large.\n");
                 retval = 1;
