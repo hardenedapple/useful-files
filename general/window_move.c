@@ -32,6 +32,15 @@
 #define PUT_MIDDLE_VERTICAL(changes, workarea) \
     changes.y = workarea.y + (workarea.height) / 2 - (current_pos.height / 2)
 
+#define CHECK_RIGHT(changes, edge) \
+    if (changes.width + changes.x > edge) { \
+        changes.x -= changes.x + changes.width - edge; \
+    } else (void)0
+#define CHECK_BOTTOM(changes, edge) \
+    if (change.height + changes.y > edge) { \
+        changes.y -= changes.y + changes.height - edge; \
+    } else (void)0
+
 /* set makeprg=clang\ -Wall\ -W\ -Werror\ -lX11\ -lXrandr\ -lm\ -o\ %:r\ % */
 
 /* TODO:
@@ -250,12 +259,8 @@ XWindowChanges small(const XWindowChanges cur_geom,
     int bottom_edge = BOTTOM_EDGE(workarea);
     return_geom.width = (int)(workarea.width * 0.3);
     return_geom.height = (int)(workarea.height * 0.3);
-    if (return_geom.width + return_geom.x > right_edge) {
-        return_geom.x -= return_geom.x + return_geom.width - right_edge;
-    }
-    if (return_geom.height + return_geom.y > bottom_edge) {
-        return_geom.y -= return_geom.y + return_geom.height - bottom_edge;
-    }
+    CHECK_RIGHT(return_geom, right_edge);
+    CHECK_BOTTOM(return_geom, bottom_edge);
 
     return return_geom;
 }
@@ -269,12 +274,8 @@ XWindowChanges tall(const XWindowChanges cur_geom,
     int bottom_edge = BOTTOM_EDGE(workarea);
     return_geom.width = (int)(workarea.width * 0.35);
     return_geom.height = (int)(workarea.height * 0.95);
-    if (return_geom.width + return_geom.x > right_edge) {
-        return_geom.x -= return_geom.x + return_geom.width - right_edge;
-    }
-    if (return_geom.height + return_geom.y > bottom_edge) {
-        return_geom.y -= return_geom.y + return_geom.height - bottom_edge;
-    }
+    CHECK_RIGHT(return_geom, right_edge);
+    CHECK_BOTTOM(return_geom, bottom_edge);
 
     return return_geom;
 }
@@ -288,12 +289,8 @@ XWindowChanges normal(const XWindowChanges cur_geom,
     int bottom_edge = BOTTOM_EDGE(workarea);
     return_geom.width = (int)(workarea.width * 0.35);
     return_geom.height = (int)(workarea.height * 0.35);
-    if (return_geom.width + return_geom.x > right_edge) {
-        return_geom.x -= return_geom.x + return_geom.width - right_edge;
-    }
-    if (return_geom.height + return_geom.y > bottom_edge) {
-        return_geom.y -= return_geom.y + return_geom.height - bottom_edge;
-    }
+    CHECK_RIGHT(return_geom, right_edge);
+    CHECK_BOTTOM(return_geom, bottom_edge);
 
     return return_geom;
 }
