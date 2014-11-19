@@ -12,21 +12,14 @@
 #define LEFT_GAP 0.006
 #define RIGHT_GAP 0.006
 
-#define LEFT_EDGE(workarea) workarea.x + (int)floor(workarea.width * LEFT_GAP)
-#define TOP_EDGE(workarea) workarea.y + (int)(workarea.height * TOP_GAP)
-#define RIGHT_EDGE(workarea) \
-    workarea.x + (int)floor(workarea.width * (1 - RIGHT_GAP))
-#define BOTTOM_EDGE(workarea) \
-    workarea.y + (int)floor(workarea.height * (1 - BOTTOM_GAP))
-
 #define PUT_LEFT(changes, workarea) \
-    changes.x = LEFT_EDGE(workarea)
+    changes.x = left_edge(workarea)
 #define PUT_RIGHT(changes, workarea) \
-    changes.x = RIGHT_EDGE(workarea) - changes.width
+    changes.x = right_edge(workarea) - changes.width
 #define PUT_TOP(changes, workarea) \
-    changes.y = TOP_EDGE(workarea)
+    changes.y = top_edge(workarea)
 #define PUT_BOTTOM(changes, workarea) \
-    changes.y = BOTTOM_EDGE(workarea) - changes.height
+    changes.y = bottom_edge(workarea) - changes.height
 #define PUT_MIDDLE_HORIZONTAL(changes, workarea) \
     changes.x = workarea.x + (workarea.width) / 2 - (current_pos.width / 2)
 #define PUT_MIDDLE_VERTICAL(changes, workarea) \
@@ -37,7 +30,7 @@
         changes.x -= changes.x + changes.width - edge; \
     } else (void)0
 #define CHECK_BOTTOM(changes, edge) \
-    if (change.height + changes.y > edge) { \
+    if (changes.height + changes.y > edge) { \
         changes.y -= changes.y + changes.height - edge; \
     } else (void)0
 
@@ -139,6 +132,26 @@ struct taskbar_sizes {
 /*****************************************************************************
  *      Position defining functions and function to choose which to use      *
  *****************************************************************************/
+int left_edge(const XWindowChanges workarea)
+{
+    return workarea.x + (int)floor(workarea.width * LEFT_GAP);
+}
+
+int top_edge(const XWindowChanges workarea)
+{
+    return workarea.y + (int)(workarea.height * TOP_GAP);
+}
+
+int right_edge(const XWindowChanges workarea)
+{
+    return workarea.x + (int)floor(workarea.width * (1 - RIGHT_GAP));
+}
+
+int bottom_edge(const XWindowChanges workarea)
+{
+    return workarea.y + (int)floor(workarea.height * (1 - BOTTOM_GAP));
+}
+
 
 /* Put the window in the top left of the screen */
 XWindowChanges top_left(const XWindowChanges current_pos,
@@ -255,12 +268,12 @@ XWindowChanges small(const XWindowChanges cur_geom,
                      const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = RIGHT_EDGE(workarea);
-    int bottom_edge = BOTTOM_EDGE(workarea);
+    int right_limit = right_edge(workarea);
+    int bottom_limit = bottom_edge(workarea);
     return_geom.width = (int)(workarea.width * 0.3);
     return_geom.height = (int)(workarea.height * 0.3);
-    CHECK_RIGHT(return_geom, right_edge);
-    CHECK_BOTTOM(return_geom, bottom_edge);
+    CHECK_RIGHT(return_geom, right_limit);
+    CHECK_BOTTOM(return_geom, bottom_limit);
 
     return return_geom;
 }
@@ -270,12 +283,12 @@ XWindowChanges tall(const XWindowChanges cur_geom,
                     const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = RIGHT_EDGE(workarea);
-    int bottom_edge = BOTTOM_EDGE(workarea);
+    int right_limit = right_edge(workarea);
+    int bottom_limit = bottom_edge(workarea);
     return_geom.width = (int)(workarea.width * 0.35);
     return_geom.height = (int)(workarea.height * 0.95);
-    CHECK_RIGHT(return_geom, right_edge);
-    CHECK_BOTTOM(return_geom, bottom_edge);
+    CHECK_RIGHT(return_geom, right_limit);
+    CHECK_BOTTOM(return_geom, bottom_limit);
 
     return return_geom;
 }
@@ -285,12 +298,12 @@ XWindowChanges normal(const XWindowChanges cur_geom,
                       const XWindowChanges workarea)
 {
     XWindowChanges return_geom = cur_geom;
-    int right_edge = RIGHT_EDGE(workarea);
-    int bottom_edge = BOTTOM_EDGE(workarea);
+    int right_limit = right_edge(workarea);
+    int bottom_limit = bottom_edge(workarea);
     return_geom.width = (int)(workarea.width * 0.35);
     return_geom.height = (int)(workarea.height * 0.35);
-    CHECK_RIGHT(return_geom, right_edge);
-    CHECK_BOTTOM(return_geom, bottom_edge);
+    CHECK_RIGHT(return_geom, right_limit);
+    CHECK_BOTTOM(return_geom, bottom_limit);
 
     return return_geom;
 }
