@@ -57,8 +57,9 @@ set-option -g pane-active-border-style fg=white
 set-option -g pane-border-style fg=green
 # set-option pane-border-bg green
 
-
+# Settings for how I'm currently working.
 set-option -g default-shell /usr/bin/zsh
+set-window-option -g xterm-keys on
 
 # Quick ipython
 unbind p
