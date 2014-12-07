@@ -9,6 +9,10 @@ do
     then
         break
     fi
+    # Two cases to account for:
+    #     If there's quotes in the string, need xargs for parsing tokens
+    #     If call 'commit' within xargs, the vim instance ran causes some
+    #     errors.
     if [[ "$line" == *'"'* ]]
     then
         echo $line | xargs git
