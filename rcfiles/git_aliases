@@ -1,0 +1,17 @@
+# Add functions to set a whole load of git aliases   
+# This is written in this manner at the moment, so it can be shared by both
+# bash and zsh init files.
+# The Idea is these functions are sourced in the rc and called when needed.
+giti() {
+    while read -r command
+    do
+        alias $command="git $command"
+    done < ~/share/off_path_bin/git_commands
+}
+
+ungiti() {
+    while read -r command
+    do
+        unalias $command
+    done < ~/share/off_path_bin/git_commands
+}

@@ -172,6 +172,9 @@ fi
 alias ll='ls -F'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
+
+source ~/share/off_path_bin/git_aliases
+
 # }}}
 
 # General {{{
