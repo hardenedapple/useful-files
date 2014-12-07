@@ -1,0 +1,8 @@
+#!/bin/bash
+
+repeated_command=$(basename ${0%i})
+
+while read -ep "> " line
+do
+    echo $line | xargs $repeated_command
+done
