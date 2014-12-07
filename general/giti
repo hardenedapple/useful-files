@@ -1,0 +1,10 @@
+#!/bin/bash
+
+while read -ep "> " line
+do
+    if [[ "$line" == "quit" ]]
+    then
+        break
+    fi
+    echo $line | xargs git
+done
