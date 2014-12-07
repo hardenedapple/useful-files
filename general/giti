@@ -1,10 +1,18 @@
 #!/bin/bash
 
+# Problems with this script:
+#       Have no history to work with.
+
 while read -ep "> " line
 do
     if [[ "$line" == "quit" ]]
     then
         break
     fi
-    echo $line | xargs git
+    if [[ "$line" == *'"'* ]]
+    then
+        echo $line | xargs git
+    else
+        git $line
+    fi
 done
