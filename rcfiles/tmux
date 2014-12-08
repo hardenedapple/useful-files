@@ -53,11 +53,8 @@ setw -g main-pane-width 100
 
 # The foreground borders don't show as the font I use doesn't show utf-8
 set-option -g pane-active-border-style fg=white
-# set-option pane-active-border-bg white
 set-option -g pane-border-style fg=green
-# set-option pane-border-bg green
 
-# Settings for how I'm currently working.
 set-option -g default-shell /usr/bin/zsh
 set-window-option -g xterm-keys on
 
@@ -79,7 +76,7 @@ bind f split-window -h "exec ranger"
 bind C-f split-window -v "exec ranger"
 
 
-# This works, but only kind of - the first terminal is always named
+#This works, but only kind of - the first terminal is always named
 # screen, but every terminal after that is determined by this
 # With the '-g' any console tmux session overrides all Xterm sessions and
 # default-terminal is 'screen' for them all. But it stops the first pane
