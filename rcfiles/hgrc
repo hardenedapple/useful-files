@@ -1,5 +1,6 @@
 [ui]
 username = malcomso <not_telling@fake.com>
+ssh = ssh -C
 # merge = gvimdiff
 
 [hostfingerprints]
