@@ -11,6 +11,6 @@
     ex    = "!command "
     root  = !pwd
     graph = log --abbrev-commit --all --graph --decorate --color
-    stat  = status -sb
+    stat  = status -sb --ignore-submodules=all
 [difftool "vimdiff"]
     cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
