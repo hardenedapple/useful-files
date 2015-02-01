@@ -12,6 +12,15 @@ XF86AudioMute
     pulseaudio-ctl mute || amixer sset Master toggle
 
 # music
+XF86AudioPlay
+    mpc toggle
+
+XF86AudioNext
+    mpmc next
+
+XF86AudioPrev
+    mpmc prev
+
 control + super + {period,comma,slash}
     mpc {next,prev,toggle}
 
