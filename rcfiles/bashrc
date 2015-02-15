@@ -156,6 +156,8 @@ export LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
 export LESS_TERMCAP_ue=$(printf "\e[0m") \
 export LESS_TERMCAP_us=$(printf "\e[1;32m")
 
+export MANSECT=1:8:5:7:2:0:3:4:6
+
 vimman () {
   MANPAGER="/bin/sh -c \"col -bx | vim -c 'set ft=man' -\"" man $@
 }
