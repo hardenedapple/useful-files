@@ -1,5 +1,5 @@
 [ui]
-username = malcomso <not_telling@fake.com>
+username = hardenedapple <not_telling@fake.com>
 ssh = ssh -C
 # merge = gvimdiff
 

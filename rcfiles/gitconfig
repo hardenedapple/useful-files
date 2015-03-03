@@ -1,6 +1,6 @@
 [user]
-    name  = Apple
-    email = Apple@server.fake
+    name  = hardenedapple
+    email = hardenedapple@server.fake
 [credential]
     helper = cache
 [push]
