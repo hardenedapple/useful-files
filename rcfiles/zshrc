@@ -215,7 +215,7 @@ colordiff() {
 # {{{ Man page
 
 vimman () {
-  MANPAGER="/bin/sh -c \"col -bx | vim -c 'set ft=man' -\"" man $@
+  vim -c "runtime ftplugin/man.vim" -c "Man $*" -c 'wincmd o'
 }
 
 # }}}
