@@ -287,4 +287,15 @@ pw() {
 }
 # }}}
 
+# If Dumb {{{
+if [[ "$TERM" == "dumb" ]]
+then
+       unsetopt zle
+       unsetopt prompt_cr
+       unsetopt prompt_subst
+       unfunction precmd
+       unfunction preexec
+       PS1='$ '
+fi
+
 # vim: set ts=2 sw=2 foldmethod=marker:
