@@ -1,10 +1,9 @@
 [ui]
 username = hardenedapple <not_telling@fake.com>
 ssh = ssh -C
-# merge = gvimdiff
 
 [hostfingerprints]
-bitbucket.org = 45:AD:AE:1A:CF:0E:73:47:06:07:E0:88:F5:CC:10:E5:FA:1C:F7:99
+bitbucket.org = 46:de:34:e7:9b:18:cd:7f:ae:fd:8b:e3:bc:f4:1a:5e:38:d7:ac:24
 
 [pager]
 pager = LESS='FRX' less
@@ -19,7 +18,7 @@ rebase =
 record =
 pager =
 hgext.bookmarks =
-hggit =
+# hggit =
 shelve =
 
 # change the default color to not be bold (for status output)
@@ -35,21 +34,19 @@ status.unknown  = magenta
 secret = true
 
 [merge-patterns]
-** = vimmerge
-
-# Want to add vimdiff for those times when don't have X server
-# figure out how later
+*.org = emacs
+** = vim
 
 [merge-tools]
-vimmerge.executable = /usr/bin/vimdiff
-vimmerge.args = $local $other
-vimmerge.premerge = true
-vimmerge.binary = true
-vimmerge.checkprompt = true
-vimmerge.gui = false
+vim.executable = /usr/bin/vimdiff
+vim.args = $local $other
+vim.premerge = true
+vim.binary = true
+vim.checkprompt = true
+vim.gui = false
 
+emacs.executable = /usr/bin/emacs
+emacs.args = -q  --load ~/.emacs.d/without_plugins.el --eval "(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\")"
 
 [alias]
-# slowly making exactly how I want it - needs much more improvement
-graph = log --graph --style=phases
 ex = !cd $(hg root) && command $@
