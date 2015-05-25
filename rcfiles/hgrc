@@ -50,3 +50,4 @@ emacs.args = -q  --load ~/.emacs.d/without_plugins.el --eval "(ediff-merge-with-
 
 [alias]
 ex = !cd $(hg root) && command $@
+graph = log --graph --style=phases
