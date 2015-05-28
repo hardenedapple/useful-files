@@ -91,6 +91,7 @@ if [[ $? -eq 0 ]]; then
         case $file in
           *.lisp) syntax="lisp";;
           *.el) syntax="lisp";;
+          *.hs) syntax="haskell";;
           *.asd) syntax="lisp";;
           *.java) syntax="java";;
           *.php) syntax="php";;
