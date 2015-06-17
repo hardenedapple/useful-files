@@ -18,13 +18,18 @@ set -g bell-action any
 #Reload source file
 bind-key R source-file ~/.tmux.conf \; display-message "source-file done"
 
-# start window numbering at 1
+# start numbering at 1 -- these numbers are easier to reach.
 set -g base-index 1
+setw -g pane-base-index 1
 
 # Move between windows easily
 # watch out with Xterm, Ctrl-h del key funny-ness
 bind-key -n C-h previous-window
 bind-key -n C-l next-window
+
+# Match my emacs bindings for selecting a pane
+unbind p
+bind p display-panes
 
 # For when I want to use vim line completion
 bind-key C-l send-keys 
@@ -59,15 +64,15 @@ set-option -g default-shell /usr/bin/zsh
 set-window-option -g xterm-keys on
 
 # Quick ipython
-unbind p
-bind p split-window -h "exec ipython"
-bind C-p split-window -v "exec ipython"
+unbind q
+bind q split-window -h "exec ipython"
+bind C-q split-window -v "exec ipython"
 
 # Quick music
 unbind n
 unbind C-n
-bind n split-window -h "exec ncmpcpp -c ~/.config/ncmpcpp/config"
-bind C-n split-window -v "exec ncmpcpp -c ~/.config/ncmpcpp/config"
+bind n split-window -h "exec ncmpcpp"
+bind C-n split-window -v "exec ncmpcpp"
 
 # Quick file-manager
 unbind f
