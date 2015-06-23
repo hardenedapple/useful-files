@@ -71,6 +71,7 @@ bindkey -e
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
 bindkey '\C-w' vi-backward-kill-word
+bindkey '\C-u' backward-kill-line
 bindkey '\e/' complete-files
 bindkey '\eM' vi-find-prev-char
 bindkey '\em' vi-find-next-char
