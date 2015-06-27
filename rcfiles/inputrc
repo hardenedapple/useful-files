@@ -12,8 +12,6 @@ set keymap vi-command
 set keymap vi-insert
 "\e[A":history-search-backward
 "\e[B":history-search-forward
-"\e\C-?":unix-word-rubout
-"\C-w":backward-kill-word
 "\C-u":unix-line-discard
 "\C-p":previous-history
 "\C-n":next-history
@@ -27,8 +25,6 @@ set keymap emacs
 "\e[A":history-search-backward
 "\e[B":history-search-forward
 "\C-xv":vi-editing-mode
-"\e\C-?":unix-word-rubout
-"\C-w":backward-kill-word
 "\C-u":unix-line-discard
 "\eM":character-search-backward
 "\em":character-search
