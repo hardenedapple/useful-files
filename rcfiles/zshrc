@@ -46,6 +46,17 @@ ctrl-z-jobs () {
 }
 zle -N ctrl-z-jobs
 
+# start-kbd-macro() {
+#   local macro
+#   while
+#     read -k 1
+#     [[ $REPLY != \) ]] || (( ##$macro[-1] != 24 )); do
+#     macro+="$REPLY"
+#   done
+#   bindkey -s '^Xe' "$macro[1,-2]"
+# }
+# zle -N start-kbd-macro
+# bindkey '^X)' start-kbd-macro
 
 # 'viins' map
 bindkey -v
