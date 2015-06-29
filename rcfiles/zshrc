@@ -44,17 +44,106 @@ ctrl-z-jobs () {
 }
 zle -N ctrl-z-jobs
 
-# start-kbd-macro() {
-#   local macro
-#   while
-#     read -k 1
-#     [[ $REPLY != \) ]] || (( ##$macro[-1] != 24 )); do
-#     macro+="$REPLY"
-#   done
-#   bindkey -s '^Xe' "$macro[1,-2]"
+
+# Macros for zshell {{{
+
+# # Suggestion by danielsh on freenode channel #zsh
+# # Will attempt this way once I've exhausted the current method I have
+#
+# # I expect that this will fix the 'digit-argument' problem I've been having
+# # the man page says that 'digit-argument' finds the digit to use from the last
+# # character of the key used to invoke the command, which is why it doesn't
+# # work in my start-kbd-macro widget.
+#
+# zmodload zsh/zleparameter
+# typeset -a myrecord
+# ${(k)widgets} () {
+#     myrecord+=("$WIDGET")
+#     zle .$WIDGET
 # }
-# zle -N start-kbd-macro
-# bindkey '^X)' start-kbd-macro
+#
+# # If I can also store the keys, and somehow use bindkey, I should be able to
+# # bypass the problem with the 'accept-*' widgets
+#
+# ${(k)widgets} () {
+#     myrecord+="$KEYS"
+#     zle -w .$WIDGET
+# }
+#
+# end-kbd-macro () {
+#     bindkey -s "^Xe" "$myrecord"
+# }
+
+typeset -a next_macro
+
+end-kbd-macro() {
+    # Doesn't actually do anything -- just here for the name
+}
+zle -N end-kbd-macro
+
+# TODO:
+#   capture the number of arguments in digit-argument
+#   Make checking for the breaking widgets more robust
+#   Save multiple "accept-" widgets in the same macro
+#     Look into hook functions (zshmisc SPECIAL FUNCTIONS)
+#     Look into recursive-edit zle builtin
+#   (possibly) store macros on a ring, and have widgets for cycling 'next macro'
+start-kbd-macro() {
+    local current_macro
+    local string_insert
+    typeset -a current_macro
+    while
+        zle read-command
+        [[ $REPLY != "end-kbd-macro" ]] ;do
+        zle -w $REPLY
+        if [[ $REPLY == "self-insert" ]]; then
+            string_insert+="$LBUFFER[-1]"
+        elif [[ $REPLY == "undefined-key" ]]; then
+            zle -M "Undefined key -- quitting macro"
+            current_macro=()
+            break
+        else
+            if [[ -n "$string_insert" ]]; then
+                current_macro+=("X$string_insert")
+                string_insert=""
+            fi
+            current_macro+=("$REPLY")
+        fi
+        if [[ $REPLY == "accept-"* ]]; then
+            break
+        fi
+        zle -R
+    done
+    if [[ -n "$string_insert" ]]; then
+        current_macro+=("X$string_insert")
+    fi
+    if [[ -n $current_macro ]]; then
+        next_macro=($current_macro)
+        zle -M "Macro recorded"
+    fi
+}
+zle -N start-kbd-macro
+
+run-kbd-macro() {
+    # Currently having a lot of problems with digit arguments
+    # Can't use the digit argument to run our macro multiple times, and if the
+    # NUMERIC variable is set when running other widgets then they take the
+    # argument themselves.
+    # For now, remove the argument whenever we're called to stop that last
+    # problem.
+    NUMERIC=1
+    for i in $next_macro; do
+        if [[ $i[1] == "X" ]]; then
+            LBUFFER+="$i[2,-1]"
+            zle -R
+        else
+            zle $i
+        fi
+    done
+}
+zle -N run-kbd-macro
+
+# }}}
 
 # 'viins' map
 bindkey -v
@@ -78,6 +167,9 @@ bindkey '\C-z' ctrl-z-jobs
 
 # 'emacs' map
 bindkey -e
+bindkey '\C-x(' start-kbd-macro
+bindkey '\C-x)' end-kbd-macro
+bindkey '\C-xe' run-kbd-macro
 # Have up and down arrows match current line
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
