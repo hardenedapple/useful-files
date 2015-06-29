@@ -83,8 +83,10 @@ bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
 bindkey '\e\C-?' vi-backward-kill-word
 delete-forward-word () {
-  zle vi-forward-word
-  zle vi-backward-kill-word
+    LBUFFER+=" "
+    zle vi-forward-word
+    zle vi-backward-kill-word
+    zle backward-delete-char
 }
 zle -N delete-forward-word
 bindkey '\ed' delete-forward-word
