@@ -102,6 +102,8 @@ start-kbd-macro() {
             zle -M "Undefined key -- quitting macro"
             current_macro=()
             break
+        elif [[ $REPLY == "run-kbd-macro" || $REPLY == "start-kbd-macro" ]]; then
+            zle -M "Ignoring macro command -- recursion is not accounted for"
         else
             if [[ -n "$string_insert" ]]; then
                 current_macro+=("X$string_insert")
