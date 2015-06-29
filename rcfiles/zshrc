@@ -40,9 +40,7 @@ zstyle ':completion:complete-files:*' completer _files
 # Both emacs and vi modes now have M-<backspace> for delete /entire/path/name
 # and C-w for delete a single part of /a/file/name
 ctrl-z-jobs () {
-  echo
-  jobs
-  zle redisplay
+    zle -M "$(jobs)"
 }
 zle -N ctrl-z-jobs
 
