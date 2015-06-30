@@ -34,3 +34,5 @@ set keymap emacs
 "\eF":vi-forward-bigword
 
 set show-all-if-ambiguous on
+set mark-symlinked-directories on
+set skip-completed-text on
