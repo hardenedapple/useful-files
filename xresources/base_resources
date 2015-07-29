@@ -20,7 +20,10 @@ XTerm*utf8:       2
 XTerm*saveLines:  4096
 XTerm*omitTranslation: fullscreen
 !XTerm*locale: true
-XTerm*VT100.translations: #override <Btn1Up>: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0)
+XTerm*VT100.translations: #override \
+    <Btn1Up>: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
+    Ctrl<Key>Return: spawn-new-terminal()
+
 XTerm*disallowedWindowOps: 20,21,SetXprop
 
 ! Doesnt seem to do anything - will check later on
