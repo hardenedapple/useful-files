@@ -185,6 +185,7 @@ delete-forward-word () {
 zle -N delete-forward-word
 bindkey '\ed' delete-forward-word
 bindkey '\C-u' backward-kill-line
+bindkey '\C-x\C-u' kill-whole-line
 bindkey '\e/' complete-files
 bindkey '\eM' vi-find-prev-char
 bindkey '\em' vi-find-next-char
