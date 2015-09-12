@@ -54,7 +54,6 @@ fi
 
 #Default editor vim, and editing mode vi
 export EDITOR=vim
-set -o vi
 
 #add $HOME/bin to $PATH
 if [ -d "$HOME/bin" ]; then
