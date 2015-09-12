@@ -61,18 +61,39 @@ zle -N ctrl-z-jobs
 #     myrecord+=("$WIDGET")
 #     zle .$WIDGET
 # }
-#
+
+# # Current option:
+# #   Wrap every widget in the current keymap.
+# #   Store the $KEYS variable for every widget called in a global string
+# #   When ending the macro, use bindkey -s "$macro_key" "$recorded_string"
+# #   Make sure to unwrap all the functions.
+
 # # If I can also store the keys, and somehow use bindkey, I should be able to
 # # bypass the problem with the 'accept-*' widgets
 #
-# ${(k)widgets} () {
-#     myrecord+="$KEYS"
-#     zle -w .$WIDGET
+# start-kbd-macro () {
+#     # iterate over all currently bound widgets, storing them in some variable to
+#     # reset everything from, and wrapping them with a function like
+#     # ${(k)widgets} () {
+#     #     myrecord+="$KEYS"
+#     #     zle -w .$WIDGET
+#     # }
+#     myrecord=""
 # }
 #
 # end-kbd-macro () {
-#     bindkey -s "^Xe" "$myrecord"
+#     # iterate over all stored widgets, resetting them back to their original state.
+#     # then somehow have a function that takes a string and converts it into an action
+#     # such that the widget behaves like bindkey below
+#     # bindkey -s "^Xe" "$myrecord"
+#     # Name that widget run-kbd-macro
 # }
+#
+# # Note -- If I didn't mind always having all widgets wrapped, then I could just
+# # have start-kbd-macro reset myrecord, and end-kbd-macro store it in this
+# # mystical way
+#
+
 
 typeset -a next_macro
 
@@ -243,10 +264,10 @@ setprompt() {
   PR_NO_COLOR="%{$terminfo[sgr0]%}"
 
   # Check the UID
-  if [[ $UID -ge 1000 ]]; then # normal user
-    PR_USER_COL="${PR_CYAN}"
-  elif [[ $UID -eq 0 ]]; then # root
+  if [[ $UID -eq 0 ]]; then # root
     PR_USER_COL="${PR_RED}"
+  else
+    PR_USER_COL="${PR_CYAN}"
   fi
 
   PR_USER="${PR_USER_COL}%# ${PR_NO_COLOR}"
