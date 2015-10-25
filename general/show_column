@@ -1,0 +1,29 @@
+#!/usr/bin/awk -f
+
+# Called on the command line
+
+BEGIN {
+    if (column_title == "") {
+        print "Must specify column_title";
+        print "Usage: show_column -v column_title=<title> [ -v header_pattern=<header> ]";
+        exit 1;
+    }
+    if (header_pattern == "")
+        header_pattern = column_title;
+
+    column = 0;
+}
+
+$0 ~ header_pattern && !column {
+    for (i = 1; i < NF; ++i) {
+        if ($i ~ column_title) {
+            column = i;
+            next;
+        }
+    }
+}
+
+column {
+    print $column;
+}
+
