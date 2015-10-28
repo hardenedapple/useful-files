@@ -3,7 +3,7 @@
 # Have had some trouble with solaris not having the maxdepth argument,
 # currently assuming the trouble is only in solaris, but could be in other
 # linux distros as well.
-if [ $OSTYPE == 'solaris' ]; then
+if [[ $OSTYPE =~ 'solaris' ]]; then
     find ${PATH//:\// /} -name $@
 else
     find ${PATH//:\// /} -maxdepth 1 -name $@
