@@ -1,0 +1,37 @@
+#!/usr/bin/awk -f
+
+# Called on the command line
+
+BEGIN {
+    if (grep_pattern == "") {
+        print "Require pattern to search for";
+        print "Usage: show_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v header_pattern=<header> ]";
+        exit 1;
+    }
+
+    if (column == "") {
+        column = 0;
+        if (column_title == "") {
+            print "Must specify column_title or column";
+            print "Usage: show_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v header_pattern=<header> ]";
+            exit 1;
+        }
+    }
+
+    if (header_pattern == "" && column_title)
+        header_pattern = column_title;
+}
+
+$0 ~ header_pattern && !column {
+    for (i = 1; i < NF + 1; ++i) {
+        if ($i ~ column_title) {
+            column = i;
+            next;
+        }
+    }
+}
+
+column && $column ~ grep_pattern {
+    print $0;
+}
+
