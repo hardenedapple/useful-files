@@ -15,7 +15,7 @@ BEGIN {
 }
 
 $0 ~ header_pattern && !column {
-    for (i = 1; i < NF; ++i) {
+    for (i = 1; i < NF + 1; ++i) {
         if ($i ~ column_title) {
             column = i;
             next;
