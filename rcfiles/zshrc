@@ -304,6 +304,7 @@ if [[ $? -eq 0 ]]; then
           *.rej) syntax="diff";;
           *.awk) syntax="awk";;
           *.c) syntax="c";;
+          *.h) syntax="c";;
           *.cpp) syntax="cpp";;
           *.ino) syntax="cpp";;
           *.pde) syntax="cpp";;
