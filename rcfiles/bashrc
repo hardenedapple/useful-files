@@ -63,13 +63,6 @@ if [ -d "$HOME/.gem/ruby/2.0.0/bin" ]; then
     PATH="$PATH:$HOME/.gem/ruby/2.0.0/bin"
 fi
 
-#Make the title of the terminal Apples_Terminal when up
-#and Minimised_Terminal when down
-if [ $TERM == "xterm-256color" ]
-then
-    export PROMPT_COMMAND='echo -ne "\033]0;Apples_Terminal\007"; echo -ne "\033]1;Minimised_Terminal\007"'
-fi
-
 # Remove C-s and C-q {{{
 # Can have problems in Rtorrent with these commands, run this if needs be
 stty -ixon

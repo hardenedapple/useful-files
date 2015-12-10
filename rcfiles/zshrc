@@ -227,21 +227,12 @@ case $TERM in
     *xterm*)
         precmd() {
             vcs_info
-            print -Pn "\e]0;Apples_Terminal\a"  # When up
-            print -Pn "\e]1;Minimised_Terminal\a" # When minimised
         }
-        # preexec () { print -Pn "\e]0;Apples_Terminal ($1)\a" }
         ;;
     screen|screen-256color)
         precmd () {
             vcs_info
-            print -Pn "\e]83;title \"$1\"\a"
-            print -Pn "\e]0;$TERM - (%L) [%n@%M]%# [%~]\a"
         }
-        # preexec () {
-            # print -Pn "\e]83;title \"$1\"\a"
-            # print -Pn "\e]0;$TERM - (%L) [%n@%M]%# [%~] ($1)\a"
-        # }
         ;;
 esac
 
