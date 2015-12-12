@@ -20,6 +20,25 @@ BEGIN {
 
     if (header_pattern == "" && column_title)
         header_pattern = column_title;
+
+    if (filter == "")
+        filter = 0;
+    else
+        filter = 1;
+
+}
+
+# I don't really know whether this should work or if it does by some
+# implementation detail -- (i.e. whether a boolean is defined to be an integer,
+# with 0 as false etc) -- but it works and is neater than explicitly describing
+# the two patterns.
+column {
+    if (xor(filter, ($column ~ grep_pattern)))
+        print $0;
+}
+
+$0 ~ header_pattern {
+    print $0;
 }
 
 $0 ~ header_pattern && !column {
@@ -31,7 +50,4 @@ $0 ~ header_pattern && !column {
     }
 }
 
-column && $column ~ grep_pattern {
-    print $0;
-}
 
