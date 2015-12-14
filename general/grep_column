@@ -37,11 +37,11 @@ column {
         print $0;
 }
 
-$0 ~ header_pattern {
+header_pattern && $0 ~ header_pattern {
     print $0;
 }
 
-$0 ~ header_pattern && !column {
+header_pattern && $0 ~ header_pattern && !column {
     for (i = 1; i < NF + 1; ++i) {
         if ($i ~ column_title) {
             column = i;
