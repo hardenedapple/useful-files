@@ -10,7 +10,10 @@
 [alias]
     ex    = "!command "
     root  = !pwd
-    graph = log --abbrev-commit --all --graph --decorate --color
+    graph = log --abbrev-commit --graph --decorate --color
+    cur   = !git --no-pager graph -n 1
+    head  = !git --no-pager graph --all -n 5
+    here  = !git --no-pager graph -n 5
     stat  = status -sb --ignore-submodules=all
 [difftool "vimdiff"]
     cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
