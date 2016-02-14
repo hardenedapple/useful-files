@@ -1,3 +1,6 @@
+/*
+ * vimcmd: set makeprg=gcc\ -o\ %:r\ -lX11\ -lbsd\ %
+ */
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>

@@ -8,7 +8,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-/* set makeprg=clang -Wall -W -Werror -I/usr/include/graphviz/ -lcgraph -lgvc -g trials.c -o trials */
+/*
+ * vimcmd: set makeprg=clang\ -Wall\ -W\ -Werror\ -I/usr/include/graphviz/\ -lcgraph\ -lgvc\ -g\ %\ -o\ %:r
+ */
 
 /*
  * Questions:
@@ -435,8 +437,11 @@ int main(int argc, char *argv[])
     /* Check we've been given a top directory */
     if (argc < 2)
     {
-        fprintf(stderr, "Usage: %s top directory [dot options] \n\
-                [--ignore_list (list directory names to ignore)\n", argv[0]);
+        fprintf(stderr, "Usage: %s [top directory] [dot options] \n\
+                [--ignore_list (list directory names to ignore)\n"
+                "See DOT(1) for the \"dot options\" e.g.\n"
+                "%s . -Tpng > this_directory.png\n",
+                argv[0], argv[0]);
         return 0;
     }
 
