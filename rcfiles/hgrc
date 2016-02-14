@@ -53,3 +53,4 @@ ex = !cd $(hg root) && command $@
 graph = log --graph --style=phases
 cur = log --rev . --style=phases
 head = graph -l 5
+here = graph --rev 'last(ancestors(.), 5)'
