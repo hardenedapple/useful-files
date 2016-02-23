@@ -101,6 +101,22 @@ print(child.stdout.read())
   * If the compiler doesn't give it a stack frame, then there's no "leave"
   * instruction, and I can't tell it to go back to the main function for a
   * clean exit.
+  *
+  * Specifically:
+  *     Without this test, the entry to this function is
+  *         0x0000000000400596 <+0>:	push   %rbp
+  *         0x0000000000400597 <+1>:	mov    %rsp,%rbp
+  *     As the compiler knows that %rsp is the same as %rbp, when the function
+  *     exists, rather than use "leave", it uses
+  *         0x00000000004005a5 <+15>:	pop    %rbp
+  *         0x00000000004005a6 <+16>:	retq
+  *     This means the stack pointer is not changed.
+  *     In order to put the stack pointer back where it should be when we exit
+  *     to the main function, we need the "leave" instruction.
+  *     We have control over the value of %rbp, from the original stack
+  *     smashing attack in function_test().
+  *     Hence, given a "leave" instruction, we have control over %rsp once we
+  *     get to main().
   */
 void
 function_a(void)
