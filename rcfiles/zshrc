@@ -411,7 +411,7 @@ PASSDIR=~/.config/passwords
 pw() {
   cd "$PASSDIR"
     if [[ ! -z "$1" ]]; then
-      vim "$1"*
+      command vim "$1"*
     fi
   cd "$OLDPWD"
 }
