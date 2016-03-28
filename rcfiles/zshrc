@@ -283,9 +283,8 @@ setprompt
 
 # {{{ Syntax highlighting for man, cat etc
 
-# {{{ Cat, sed, awk, tail, diff syntax highlighting
-# Cat tail, sed, awk, and head
-# Check that highlight is installed
+# {{{ Cat, tail, head, less, and diff syntax highlighting
+# Check that highlight is installed first
 type highlight > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
   tail head cat() {
@@ -317,31 +316,30 @@ if [[ $? -eq 0 ]]; then
           *.rb) syntax="rb";;
           *.html) syntax="html";;
           *.sh) syntax="sh";;
+          *.patch) syntax="patch";;
           /etc/apache*/*) syntax="httpd";;
         esac
       fi
     done
 
     if [[ $syntax != "" ]]; then
-      command $0 $@ | highlight -O ansi --syntax=$syntax
+      command $0 $@ | highlight --validate-input -O ansi --syntax=$syntax
     else
       command $0 $@
     fi
   }
-fi
 
-# diff (always want the same highlighting)
-colordiff() {
-  type highlight > /dev/null 2>&1
-  if [[ $? -eq 0 ]]; then
+  colorless() {
+    LESSOPEN='|highlight --validate-input --force -O ansi %s 2>/dev/null' less $@
+  }
+
+  colordiff() {
     command diff $@ | highlight -O ansi --syntax=diff
-  else
-    command diff $@
-  fi
-}
+  }
+fi
 # }}}
 
-# {{{ Man page
+# {{{ Man in Vim
 
 vimman () {
   vim -c "runtime ftplugin/man.vim" -c "Man $*" -c 'wincmd o'
