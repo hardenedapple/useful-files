@@ -10,8 +10,8 @@
 [alias]
     ex    = "!command "
     root  = !pwd
-    graphstyle = log --abbrev-commit --graph --decorate --color
-    graph = log --abbrev-commit --graph --all --decorate --color
+    graphstyle = log --abbrev-commit --graph --decorate
+    graph = log --abbrev-commit --graph --all --decorate
     cur   = !git --no-pager graphstyle -n 1
     head  = !git --no-pager graph -n 5
     here  = !git --no-pager graphstyle -n 5
