@@ -6,7 +6,7 @@
 [ -z "$PS1" ] && return
 
 
-#Stop less saving my search commands
+# Stop less saving my search commands
 export LESSHISTFILE="/dev/null"
 
 # # {{{ Command Prompt
@@ -56,10 +56,10 @@ setprompt
 
 # }}}
 
-#Default editor vim, and editing mode vi
+# Default editor vim, but leave editing mode as emacs
 export EDITOR=vim
 
-#add $HOME/bin to $PATH
+# add $HOME/bin to $PATH
 if [ -d "$HOME/bin" ]; then
     PATH="$PATH:$HOME/bin"
 fi
