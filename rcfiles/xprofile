@@ -1,0 +1,56 @@
+#!/usr/bin/sh
+#
+# ~/.xprofile
+# Configuration options for every X window session.
+#
+# Remove unrequired paths, add extras
+xset -fp /usr/share/fonts/OTF/
+xset -fp /usr/share/fonts/Type1/
+xset +fp /usr/share/fonts/local/
+xset fp rehash
+
+# Start pulseaudio - restart if already running
+if pgrep pulseaudio > /dev/null ; then
+    pulseaudio --kill
+fi
+pulseaudio --start
+
+# Start the dropbox daemon
+pgrep dropbox > /dev/null
+if [[ $? -eq 1 ]]; then
+    ~/bin/dropbox.py start
+fi
+
+pgrep sxhkd > /dev/null
+if [[ $? -eq 1 ]]; then
+    sxhkd -c ~/.config/sxhkd/sxhkdrc -r ~/.cache/sxhkd/output &
+fi
+
+# Have some tmux sessions already started.
+~/bin/start_tmux_sessions.sh&
+
+xrandr | grep 'VGA[[:xdigit:]] connected' > /dev/null
+vga_missing=$?
+xrandr | grep 'HDMI[[:xdigit:]] connected' > /dev/null
+hdmi_missing=$?
+
+if [[ $hdmi_missing -eq 0 ]] && [[ $vga_missing -eq 0 ]]; then
+    xrandr --output HDMI1 --auto --left-of VGA1
+fi
+
+
+xrdb -load ~/xresources/base_resources
+xrdb -merge ~/xresources/own_colors
+
+pgrep xautolock > /dev/null
+if [[ $? -eq 1 ]]; then
+    /usr/bin/xautolock -time 10 -locker slock -corners +000 -cornerdelay 3 -cornerredelay 20 -detectsleep&
+fi
+
+# Environment variables for GUI applications.
+export acmeshell=/usr/lib/plan9/bin/rc
+
+if [ -d "$HOME/bin" ]; then
+    export PATH="$HOME/bin:$PATH"
+fi
+
