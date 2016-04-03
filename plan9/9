@@ -1,0 +1,32 @@
+#!/bin/sh
+
+PLAN9=${PLAN9:-/usr/lib/plan9}
+export PLAN9
+
+SHELL=/usr/lib/plan9/bin/rc
+export SHELL
+
+# I expect this will turn out to be incorrect.
+# Probably I need to make a shell script that checks for an existing acme
+# session and if there is one adds a window into it.
+# Hasn't come up yet -- leaving it for now.
+EDITOR=/usr/lib/plan9/bin/acme
+export EDITOR
+
+PAGER=
+export PAGER
+
+case "$PATH" in
+$PLAN9/bin:*)
+	;;
+*)
+	PATH=$HOME/bin/plan9:$PLAN9/bin:$PATH
+	export PATH
+	;;
+esac
+
+case $# in
+[1-9]*)
+       exec "$@"
+       ;;
+esac
