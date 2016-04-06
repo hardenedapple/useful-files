@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+
+# NOTE this is only called 'dis' to match the Solaris program.
+# I require the argument '-F' for consistency with that program.
+# This is a VERY poor approximation of the program, it only does the one
+# function (disassemble a single function), but it's pretty useful for me.
+
+usage () {
+    echo "Usage: dis -F <function name> <binary>"
+    exit 1
+}
+
+if [[ $# -ne 3 || $1 != '-F'  || ! -x $3 ]]; then
+    usage
+fi
+
+gdb -batch -ex "file $3" -ex "disassemble $2"
+
