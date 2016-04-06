@@ -16,6 +16,9 @@ export EDITOR
 PAGER=
 export PAGER
 
+MANPATH=/usr/lib/plan9/man:
+export MANPATH
+
 case "$PATH" in
 $PLAN9/bin:*)
 	;;
