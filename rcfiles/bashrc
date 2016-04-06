@@ -220,14 +220,7 @@ pw() {
 # {{{ Functions
 newdir () {
   mkdir -p "$@"
-  cd "$1"
-}
-
-swap () {
-  tmpfile=$(mktemp -u XXXXXX)
-  mv "$1" "$tmpfile"
-  mv "$2" "$1"
-  mv "$tmpfile" "$2"
+  cd "${@: -1}"
 }
 # }}}
 

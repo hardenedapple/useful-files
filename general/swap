@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+tmpfile=$(mktemp -u XXXXXX)
+mv "$1" "$tmpfile"
+mv "$2" "$1"
+mv "$tmpfile" "$2"
