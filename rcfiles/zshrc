@@ -362,6 +362,7 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 alias ll='ls -F'
 alias gr='cd $(git root)'
+alias gitn='git --no-pager'
 alias hr='cd $(hg root)'
 alias acme='9 acme'
 alias nm='nm -f sysv'
