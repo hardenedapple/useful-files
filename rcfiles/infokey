@@ -1,0 +1,6 @@
+#info
+^v  scroll-half-screen-down
+\mv scroll-half-screen-up
+
+#vars
+automatic-tiling=On
