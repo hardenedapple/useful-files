@@ -1,0 +1,30 @@
+#!/usr/lib/plan9/bin/rc
+
+# Outline of what this script needs to do:
+#	Get the tag we're searching for via the argument
+#	Store output of grep <argument> 9tags in variable
+#	If variable is one line long, 'Plumb' it
+#	Otherwise, print all lines (should go to +Errors window)
+
+# Currently the only action I still need is to know how to 'Plumb' something
+# Have a look at the "plumb" command.
+# Would be reasonably nice to have 'findtag' as a plumbing rule in
+#  $HOME/lib/plumbing -- but it may be troublesome to find a heuristic that
+#  accurately tells us whether the user wanted to search for a string via tags or
+#  just in the current file.
+
+# Have the order of arguments like this for convenience of use inside acme.
+if (~ $2 '') {
+	tagsFile=tags
+	tagName=$1
+}
+if not {
+	tagsFile=$1
+	tagName=$2
+}
+
+9tag <{awk '{ if ($1 ~ "'$tagName'") print $0}' < $tagsFile}
+
+# I could use my grep_column script here, but since its main power is not
+# needed I think it better to not create dependencies where they're not needed.
+# grep_column -v column'='1 -v grep_pattern'='$tagName $tagsFile
