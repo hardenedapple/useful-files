@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# TODO In a perfect world, this would essentially be a macro.
+# I want to have this take any furthur string on the commmand line
+# and make the command line below to execute.
+# cat $1 | ${@:2} > $tmpfile
+#
+# Currently, I can't get this to work without bash expanding the variables
+# in inconveniant ways.
+# I will try to keep an eye out for anything that makes the possible.
+
 tmpfile=$(mktemp -u XXXXXX)
 "${@:2}" < "$1" > "$tmpfile"
 mv "$tmpfile" "$1"
