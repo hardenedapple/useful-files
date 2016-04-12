@@ -5,7 +5,7 @@
 BEGIN {
     if (grep_pattern == "") {
         print "Require pattern to search for";
-        print "Usage: show_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v header_pattern=<header> ]";
+        print "Usage: grep_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v header_pattern=<header> ]";
         exit 1;
     }
 
