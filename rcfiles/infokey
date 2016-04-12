@@ -2,5 +2,7 @@
 ^v  scroll-half-screen-down
 \mv scroll-half-screen-up
 
-#vars
+#var
 automatic-tiling=On
+link-style=cyan,underline
+active-link-style=cyan,nounderline
