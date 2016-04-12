@@ -6,7 +6,7 @@ export PLAN9
 SHELL=/usr/lib/plan9/bin/rc
 export SHELL
 
-# I expect this will turn out to be incorrect.
+# TODO -- I expect this will turn out to be incorrect.
 # Probably I need to make a shell script that checks for an existing acme
 # session and if there is one adds a window into it.
 # Hasn't come up yet -- leaving it for now.
@@ -19,14 +19,43 @@ export PAGER
 MANPATH=/usr/lib/plan9/man:
 export MANPATH
 
-case "$PATH" in
-$PLAN9/bin:*)
-	;;
-*)
-	PATH=$HOME/bin/plan9:$PLAN9/bin:$PATH
-	export PATH
-	;;
-esac
+# Want $PATH to be  $HOME/bin/plan9:$HOME/bin:$PLAN9/bin:<rest of path>
+# so we first make sure those paths are at the start of the variable, then
+# remove all duplicates from the path with an awk script.
+
+PATH=$HOME/bin/plan9:$HOME/bin:$PLAN9/bin:$PATH
+
+awkscript='
+BEGIN {
+	FS=":";
+	HOME=ENVIRON["HOME"];
+}
+
+{
+	# Iterate over all elements in $PATH.
+    # Store uniq elements.
+    # Print the uniq elements out.
+    uniqCount = 0;
+	for (i = 1; i < NF + 1; i++) {
+        if ($i in seen)
+            continue;
+        seen[$i] = 1;
+        directories[uniqCount++] = $i;
+	}
+
+    for ( i = 0; i < uniqCount - 1; i++ ) {
+        printf("%s%s", directories[i], FS);
+    }
+    printf("%s", directories[uniqCount - 1]);
+}
+'
+
+# This should be run by the plan9 version of awk (because we've already changed
+# $PATH to have the plan9 versions at the start).
+# Hence my tests on that version should carry across to any other platform I'm
+# running this on, and I only have to hope $PLAN9 is set correctly.
+PATH=$(echo $PATH | awk "$awkscript" -)
+export PATH
 
 case $# in
 [1-9]*)
