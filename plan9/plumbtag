@@ -1,0 +1,41 @@
+#!/usr/lib/plan9/bin/rc
+
+# Currently the only action I still need is to know how to 'Plumb' something
+# Have a look at the "plumb" command.
+# Would be reasonably nice to have 'findtag' as a plumbing rule in
+#  $HOME/lib/plumbing -- but it may be troublesome to find a heuristic that
+#  accurately tells us whether the user wanted to search for a string via tags or
+#  just in the current file.
+
+# Have the order of arguments like this for convenience of use inside acme.
+if (~ $2 '') {
+	tagsFile=tags
+	tagName=$1
+}
+if not {
+	tagsFile=$1
+	tagName=$2
+}
+
+# Set ifs to newline so the number of items in $matchingTags is the number of
+# matching tags.
+# TODO should look for a way to use \n here.
+
+ifs='
+'
+matchingTags=`{9tag <{look -x $tagName $tagsFile}}
+
+if (~ $#matchingTags 0) {
+	echo "No matching tags"
+	exit 1
+}
+
+# Edit our best guess for the tag the user wants.
+B `{echo $matchingTags(1) | awk '{print $2}'}
+
+# If there are more than one tag, print them to stdout so the user can select
+# them at their leisure.
+if (! ~ $#matchingTags 1)
+	echo $matchingTags
+
+exit 0
