@@ -1,13 +1,27 @@
 #!/usr/bin/gawk -f
 
+# I think it's too difficult to account for patterns in ctags(1) files.
+# Mainly because patterns often include tabs, so I then have to create a proper
+# parser, that splits the first two tabs, but in the rest of the line it looks
+# for the pattern /.../.
+# Doing this seems like more of a proper scripting languages task as opposed to
+# awk(1), and the benefit is reasonably small.
+# If I start modifying files quickly I may change my tune, and end up rewriting
+# this small script in python or the like.
+
 BEGIN {
-	FS = "	";
+	# The ctags(1) manual says that items will always be
+	# seperated by <TAB>, hence there's no reason to split by
+	# generic whitespace.
+	FS="\t";
 }
 
-# Ignore lines beginning with an exclamation mark.
+# Ignore lines beginning with an exclamation mark (these are comments from
+# the ctags(1) program).
 !/^!/ {
 	sub(/;/, "	", $3);
 	printf("%s	%s:%s", $1, $2, $3);
 	for (i = 4; i < NF + 1; i++)
-		print FS, $i;
+		printf "	%s", $i;
+	printf "\n"
 }
