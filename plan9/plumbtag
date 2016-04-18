@@ -26,7 +26,7 @@ ifs='
 matchingTags=`{9tag <{look -x $tagName $tagsFile}}
 
 if (~ $#matchingTags 0) {
-	echo "No matching tags"
+	echo 'No matching tags'
 	exit 1
 }
 
@@ -35,7 +35,9 @@ B `{echo $matchingTags(1) | awk '{print $2}'}
 
 # If there are more than one tag, print them to stdout so the user can select
 # them at their leisure.
-if (! ~ $#matchingTags 1)
-	echo $matchingTags
+if (! ~ $#matchingTags 1) {
+	for (tag in $matchingTags)
+		echo $tag
+}
 
 exit 0
