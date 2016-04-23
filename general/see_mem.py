@@ -40,7 +40,7 @@ def _find_mem(pid, memtype):
         for line in memfile:
             match = re.match(r'{0}:\s+(\d+)\s*kB'.format(memtype), line)
             if match:
-                ret += int(match.group(1))
+                ret += int(match.groups()[-1])
     return ret
 
 
@@ -158,8 +158,31 @@ def print_nice(indict):
 
 
 if __name__ == '__main__':
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
+    from argparse import ArgumentParser, RawTextHelpFormatter
+    parser = ArgumentParser(description='''
+    This script provides slightly more specific/nuanced information about the
+    current memory usage on a machine.
+
+    It is just a front end to viewing the /proc/PID/smaps files of different
+    processes and summing the output of some elements.
+
+    Some options take a Mem-Type argument, to specifiy what type of memory to
+    display.
+    Memory types are just regular expressions that we search for in
+    /proc/PID/smaps, hence there are no specified options to choose from.
+
+    The following entries are the fields currently stored on my laptop, and are
+    provided as a memory aid.
+
+    Size, Rss, Pss, Shared_Clean, Shared_Dirty, Private_Clean, Private_Dirty,
+    Referenced, Anonymous, AnonHugePages, Shared_Hugetlb, Private_Hugetlb, Swap,
+    SwapPss, KernelPageSize, MMUPageSize, Locked
+
+    Be advised -- some regular expressions may give misleading results.
+    For example, '(Size|Rss)' will doubly-count the memory currently resident
+    in RAM.
+
+    ''', formatter_class=RawTextHelpFormatter)
     parser.add_argument('--tot', dest='ramtot', action='store_true',
                         help='Print out total ram usage')
     parser.add_argument('--swap', action='store_true',
@@ -173,13 +196,18 @@ if __name__ == '__main__':
                         combine different processes into one entry.')
     parser.add_argument('--all_mem', nargs='*', metavar='Mem-Type',
                         help='Multiple types of memory to look at\n\
-                        keep multiple instances separate.')
+                        keep multiple instances of programs separate.')
+    parser.add_argument('--no-capitalize', action='store_false',
+                        default=True, dest='should_capitalize',
+                        help='Disable automatic capitalisation of regular'
+                        ' expressions')
     args = parser.parse_args()
     # In case given options like pss and sWaP
-    if args.comb:
-        args.comb[:] = [val.capitalize() for val in args.comb]
-    if args.all_mem:
-        args.all_mem[:] = [val.capitalize() for val in args.all_mem]
+    if args.should_capitalize:
+        if args.comb:
+            args.comb[:] = [val.capitalize() for val in args.comb]
+        if args.all_mem:
+            args.all_mem[:] = [val.capitalize() for val in args.all_mem]
     # Don't like this method of giving defaults - but allows to
     # distinguish between option given with no arguments and option not
     # given
