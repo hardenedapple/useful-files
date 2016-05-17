@@ -1,0 +1,18 @@
+#!/usr/lib/plan9/bin/rc
+
+# This script overrides the bash version when I'm running something
+# from plan9port.
+# That way I can still use the rc shell syntax with the 'filterfile' script.
+# This also means that when running plan9 programs I get a slightly nicer
+# syntax for this functionality.
+
+# I want to make this script more "see-through" to the user.
+# i.e. I'd like to remove the need to quote pipelines when you want to filter
+# a file with a complex command.
+# I don't think this is possible -- but I'm planning on keeping an eye out
+# while reading about the shell, just in case.
+
+tmpfile=`{mktemp -u XXXXXX}
+eval $*(2-) '<' $1 '>' $tmpfile 
+chmod `{stat -c %a $1} $tmpfile
+mv $tmpfile $1
