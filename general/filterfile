@@ -8,7 +8,8 @@
 # Currently, I can't get this to work without bash expanding the variables
 # in inconveniant ways.
 # I will try to keep an eye out for anything that makes the possible.
-
+set -e
 tmpfile=$(mktemp -u XXXXXX)
 "${@:2}" < "$1" > "$tmpfile"
+chmod $(stat -c "%a" "$1") "$tmpfile"
 mv "$tmpfile" "$1"
