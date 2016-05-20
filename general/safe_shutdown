@@ -1,0 +1,43 @@
+#!/usr/bin/bash
+
+# Test whether any unusual programs are running.
+# I store the output of pstree(1) under conditions where I know it's safe to
+# turn the computer off.
+# In this script I check against these previously stored states one at a time,
+# and if the machine is currently in one of those states, I turn the machine
+# off.
+# This avoids the problem of powering off my machine while I've minimised a
+# terminal running vim, or while there's some strange daemon running in the
+# background.
+#
+# The specific set of programs running that I'm happy to shutdown without
+# stopping will change depending on the machine I'm running.
+# For that reason (and privicy reasons, I've not added in true pstree(1) output
+# in this file).
+
+
+option1='output option 1'
+option2='output option 2'
+option3='output option 3'
+
+for setup in "${option1}" "${option2}" "${option3}";
+do
+    difference=$(diff   <(echo -ne "${setup}") \
+                        <(pstree))
+    if [[ "$difference" == "" ]]; then
+        sudo poweroff
+    fi
+done
+
+echo 'Programs currently running: '
+echo "$difference"
+
+# In order to convert from pstree(1) output into the formats I need for this
+# script I can use the following vim commands:
+#
+# From pstree(1) output into compatible format:
+# vimcmd: /^# systemd/mark s | /#$/mark e | 's,'e s/# \(.*\)$/\1\\n/ | 's,'e-1 join!
+# 
+# To change back:
+# vimcmd: /^# 'systemd/s/^# '// | s/'$// | s/\\n/\r/g | '[,']s/^/# /
+
