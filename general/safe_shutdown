@@ -19,11 +19,12 @@
 option1='output option 1'
 option2='output option 2'
 option3='output option 3'
+current=$(pstree)
 
 for setup in "${option1}" "${option2}" "${option3}";
 do
     difference=$(diff   <(echo -ne "${setup}") \
-                        <(pstree))
+                        <(echo "${current}"))
     if [[ "$difference" == "" ]]; then
         sudo poweroff
     fi
@@ -31,6 +32,9 @@ done
 
 echo 'Programs currently running: '
 echo "$difference"
+
+echo -e "\n${current}" >> ~/pstree_output
+echo 'The current file is stored in ~/pstree_output'
 
 # In order to convert from pstree(1) output into the formats I need for this
 # script I can use the following vim commands:
