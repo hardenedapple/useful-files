@@ -1,0 +1,58 @@
+#!/usr/bin/env rc
+
+# This script selects the previous output in the marked win(1) window.
+# This allows the user to either delete it, or run some command on the now
+# selected text.
+#
+# We don't allow modifying the window directly via this script because this
+# interferes with how win(1) handles the acme(1) buffers.
+#
+# Currently I'm thinking that win(1) opens up the event file of the acme namespace
+# once this file is open, it watches the window and updates its view of where
+# the end of the buffer is depending on whatever actions happen.
+# I assume it uses this end position to tell whether pressing return should
+# run the 'Send' command, or just insert a newline into the buffer at the current
+# position.
+#
+# Working on this assumption, I believe that applying any modifications during
+# my script wouldn't let win(1) know that text is  removed, and hence win(1) gets
+# confused.
+# This would explain why pressing 'Return' no longer runs the 'Send' command, and
+# the error message from pressing 'Delete'
+# "
+# stdout writing address #5289: address out of range; resetting
+# "
+# appears to match this hypothesis (the given position is at the end of the buffer
+# once I have removed and put back the given output, making sure to also remove the
+# repeated command I need to put the output back).
+#
+# It sucessfully removes the text I want removed, but I then have to press
+# Delete to break whatever is happening in the win(1) program.
+# There is then a complaint that the buffer has changed that I expect comes
+# from the win(1) program.
+#
+# The window to use must be marked, as a workaround how the win(1) program
+# reimplements the middle mouse button.
+# Instead of just running the command, it runs the Send action on the text.
+# This moves the cursor to the end of the buffer, inserts the text highlighted
+# there, and runs the command line formed from the prompt on that line.
+# This means I can't then tell which output I wanted to modify, because as far
+# as the program running can tell, you could have just typed the script at the
+# command line and pressed enter.
+
+initial_index=`{9p read acme/index | grep XXX | awk '{print $1}'}
+
+echo -n 'addr=dot' | 9p write acme/$initial_index/ctl
+
+# If we were given an argument, use that as the prompt to delete between.
+if (~ $1 '')
+	prompt_pattern='%'
+if not
+	prompt_pattern=$1
+
+# Select the range to remove
+echo -n '-/^'$prompt_pattern'/+1;/^'$prompt_pattern'/-1' | 9p write acme/$initial_index/addr
+
+# Select that range in the acme(1) window -- allowing the user to do whatever
+# they want with it.
+echo -n 'dot=addr' | 9p write acme/$initial_index/ctl
