@@ -31,7 +31,7 @@
 # There is then a complaint that the buffer has changed that I expect comes
 # from the win(1) program.
 #
-# The window to use must be marked, as a workaround how the win(1) program
+# The window to use must be marked as a workaround how the win(1) program
 # reimplements the middle mouse button.
 # Instead of just running the command, it runs the Send action on the text.
 # This moves the cursor to the end of the buffer, inserts the text highlighted
@@ -42,8 +42,12 @@
 
 
 # If we were given an argument, use that as the prompt to delete between.
+# This is useful if I want to select the output from a gdb command, where
+# the $prompt variable does not represent the range I'm interested in.
+# TODO -- check whether $prompt is set, if I change $prompt in a startup
+# script, will that also change $prompt when this batch script is run?
 if (~ $1 '')
-	prompt_pattern='%'
+	prompt_pattern=$prompt(1)
 if not
 	prompt_pattern=$1
 
