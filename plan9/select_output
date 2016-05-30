@@ -40,9 +40,6 @@
 # as the program running can tell, you could have just typed the script at the
 # command line and pressed enter.
 
-initial_index=`{9p read acme/index | grep XXX | awk '{print $1}'}
-
-echo -n 'addr=dot' | 9p write acme/$initial_index/ctl
 
 # If we were given an argument, use that as the prompt to delete between.
 if (~ $1 '')
@@ -50,9 +47,19 @@ if (~ $1 '')
 if not
 	prompt_pattern=$1
 
-# Select the range to remove
-echo -n '-/^'$prompt_pattern'/+1;/^'$prompt_pattern'/-1' | 9p write acme/$initial_index/addr
+matching_windows=`{9p read acme/index | grep XXX | awk '{print $1}'}
 
-# Select that range in the acme(1) window -- allowing the user to do whatever
-# they want with it.
-echo -n 'dot=addr' | 9p write acme/$initial_index/ctl
+# Currently not sure whether I prefer to be notified why nothing happened,
+# or if I would prefer no interruptions.
+if ( @{exit $#matching_windows} ) {
+	echo 'No marked window.'
+	exit 0
+}
+
+for (window_index in $matching_windows) {
+	echo -n 'addr=dot' | 9p write acme/$window_index/ctl
+	echo -n '-/^'$prompt_pattern'/+1;/^'$prompt_pattern'/-1' | 9p write acme/$window_index/addr
+	echo -n 'dot=addr' | 9p write acme/$window_index/ctl
+}
+
+exit 0
