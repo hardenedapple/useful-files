@@ -16,12 +16,15 @@
 # in this file).
 
 
-option1='output option 1'
-option2='output option 2'
-option3='output option 3'
+declare -A stored_values
+stored_values=(
+    [0]='output option 1'
+    [1]='output option 2'
+    [2]='output option 3'
+    )
 current=$(pstree)
 
-for setup in "${option1}" "${option2}" "${option3}";
+for setup in "${stored_values[@]}";
 do
     difference=$(diff   <(echo -ne "${setup}") \
                         <(echo "${current}"))
@@ -36,12 +39,10 @@ echo "$difference"
 echo -e "\n${current}" >> ~/pstree_output
 echo 'The current file is stored in ~/pstree_output'
 
-# In order to convert from pstree(1) output into the formats I need for this
-# script I can use the following vim commands:
-#
-# From pstree(1) output into compatible format:
-# vimcmd: /^# systemd/mark s | /#$/mark e | 's,'e s/# \(.*\)$/\1\\n/ | 's,'e-1 join!
-# 
+
+# Command to change pstree(1) output into the format paste the pstree output at
+# the end of this file, and use the command below:
+# vimcmd: /^systemd/mark s | 's,$ s/\([^#].*\)$/\1\\n/ | 's,$ join!
 # To change back:
-# vimcmd: /^# 'systemd/s/^# '// | s/'$// | s/\\n/\r/g | '[,']s/^/# /
+# vimcmd: /^\w*='systemd/s/^\w*='// | s/'$// | s/\\n/\r/g
 
