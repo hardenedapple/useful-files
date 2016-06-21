@@ -42,7 +42,8 @@ echo 'The current file is stored in ~/pstree_output'
 
 # Command to change pstree(1) output into the format paste the pstree output at
 # the end of this file, and use the command below:
-# vimcmd: /^systemd/mark s | 's,$ s/\([^#].*\)$/\1\\n/ | 's,$ join!
+# vimcmd: /^systemd/mark s | 's,$ s/\([^#].*\)$/\1\\n/ | 's,$ join! | m?^\v\s*\[\d+\]\='systemd? | s/\v(^|$)/'/g | normal 0kyf=jP0
+# vimcmd: /^systemd/mark s | 's,$ s/\([^#].*\)$/\1\\n/ | 's,$ join! | m?^\v\s*\[\d+\]\='systemd? | s/\v(^|$)/'/g | -1s/^\v(\s*\[)(\d+)(\]\=)'systemd.*\n\zs\ze'systemd/\=submatch(1) . (submatch(2) + 1) . submatch(3)
 # To change back:
 # vimcmd: /^\w*='systemd/s/^\w*='// | s/'$// | s/\\n/\r/g
 
