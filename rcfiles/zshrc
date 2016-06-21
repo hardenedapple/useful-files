@@ -197,11 +197,17 @@ bindkey '\C-xe' run-kbd-macro
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
 bindkey '\e\C-?' vi-backward-kill-word
+# This replaces 'kill-word' on the M-d keybinding because it only kills part of
+# a subword e.g. in the middle of the /this/is/a/test word, then kill-word
+# removes everything to the end of the word while this widget only kills the
+# end part of the last part of the sub-word.
 delete-forward-word () {
-    LBUFFER+=" "
-    zle vi-forward-word
-    zle vi-backward-kill-word
-    zle backward-delete-char
+    while [[ ${RBUFFER[1]} =~ '[[:space:]]' ]]; do
+      zle delete-char
+    done
+    while [[ ${RBUFFER[1]} =~ '[[:alnum:]]' ]]; do
+      zle delete-char
+    done
 }
 zle -N delete-forward-word
 bindkey '\ed' delete-forward-word
