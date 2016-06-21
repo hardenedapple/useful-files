@@ -8,6 +8,7 @@
 # awk(1), and the benefit is reasonably small.
 # If I start modifying files quickly I may change my tune, and end up rewriting
 # this small script in python or the like.
+# As it is, I only support transforming tags files created with ctags -n.
 
 BEGIN {
 	# The ctags(1) manual says that items will always be
@@ -20,6 +21,13 @@ BEGIN {
 # the ctags(1) program).
 !/^!/ {
 	sub(/;/, "	", $3);
+    # This line is mainly here so that if you get an error when using the
+    # output of this script in acme(1) or the like, and have a look in this
+    # file there is a note for you to see.
+    # Handling patterns is too difficult (see the comment at the top of this
+    # file), so instead of adding the below, just create the tag file with
+    # ctags -n .
+	# gsub(/\(/, "\\(", $3);
 	printf("%s	%s:%s", $1, $2, $3);
 	for (i = 4; i < NF + 1; i++)
 		printf "	%s", $i;
