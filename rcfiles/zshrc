@@ -201,13 +201,20 @@ bindkey '\e\C-?' vi-backward-kill-word
 # a subword e.g. in the middle of the /this/is/a/test word, then kill-word
 # removes everything to the end of the word while this widget only kills the
 # end part of the last part of the sub-word.
+# Features this widget needs are:
+# 1) Deletes a "small word", i.e. just one-sublevel in a full path.
+# 2) Stores that word in the CUTBUFFER and modifies the killring accordingly.
 delete-forward-word () {
-    while [[ ${RBUFFER[1]} =~ '[[:space:]]' ]]; do
-      zle delete-char
-    done
-    while [[ ${RBUFFER[1]} =~ '[[:alnum:]]' ]]; do
-      zle delete-char
-    done
+  killring=($CUTBUFFER $killring)
+  CUTBUFFER=""
+  while [[ ${RBUFFER[1]} =~ '[^[:alnum:]]' ]]; do
+    CUTBUFFER="${CUTBUFFER}${RBUFFER[1]}"
+    zle delete-char
+  done
+  while [[ ${RBUFFER[1]} =~ '[[:alnum:]]' ]]; do
+    CUTBUFFER="${CUTBUFFER}${RBUFFER[1]}"
+    zle delete-char
+  done
 }
 zle -N delete-forward-word
 bindkey '\ed' delete-forward-word
