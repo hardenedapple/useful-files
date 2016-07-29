@@ -1,8 +1,10 @@
 [user]
-    name  = hardenedapple
-    email = hardenedapple@server.fake
+    name  = Matthew Malcomson
+    email = hardenedapple@gmail.com
 [credential]
     helper = cache
+[status]
+    showUntrackedFiles = no
 [push]
     default = simple
 [color]
