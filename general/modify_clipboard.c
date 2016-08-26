@@ -4,7 +4,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#ifdef sun
+#include <string.h>
+#else
 #include <bsd/string.h>
+#endif
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
@@ -31,7 +35,7 @@ char *base64_encode(const unsigned char *data,
 
     *output_length = 4 * ((input_length + 2) / 3);
 
-    char *encoded_data = malloc(*output_length);
+    char *encoded_data = malloc(*output_length + 1);
     if (encoded_data == NULL) return NULL;
 
     for (i = 0, j = 0; i < input_length;) {
@@ -50,6 +54,8 @@ char *base64_encode(const unsigned char *data,
 
     for (i = 0; i < mod_table[input_length % 3]; i++)
         encoded_data[*output_length - 1 - i] = '=';
+
+    encoded_data[*output_length] = '\0';
 
     return encoded_data;
 }
@@ -284,7 +290,7 @@ int distribute_modified_selection(Display* dpy, Atom selection_type,
                             8,
                             PropModeReplace,
                             (unsigned char*) my_message,
-                            strlen(my_message) + 1);
+                            strlen(my_message));
             
             response.xselection.property = req->property;
         } 
@@ -304,7 +310,17 @@ int distribute_modified_selection(Display* dpy, Atom selection_type,
 }
 
 
-int main()
+void
+usage(char *progname)
+{
+    printf("Usage: %s [-c]\n\n"
+            "Runs a program that modifies the clipboard in place whenever "
+            "it's used.\n\nWhen someone copies something to the clipboard, "
+            "this program\nconverts that text into the base64 encoded version "
+            "and then distributes\nthat in its place.\n", progname);
+}
+
+int main(int argc, char *argv[])
 {
 
     Display* dpy;
@@ -332,7 +348,19 @@ int main()
     mywin  = XCreateSimpleWindow(dpy, root, 0, 0, 100, 100, 0,
                                  BlackPixel(dpy, screen),
                                  BlackPixel(dpy, screen));
-    CLIP   = XInternAtom(dpy, "CLIPBOARD", 0);
+    /* Can't be bothered for a proper argument handling.
+     * Just need a help to remind myself what happens and I'll be happy. */
+    if (argc == 2 &&
+            (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
+        usage(argv[0]);
+        return 0;
+    }
+
+    if (argc > 1) {
+        CLIP   = XInternAtom(dpy, "CLIPBOARD", 0);
+    } else {
+        CLIP   = XInternAtom(dpy, "PRIMARY", 0);
+    }
 
     /* Get the current selection */
     should_stop = 0;
