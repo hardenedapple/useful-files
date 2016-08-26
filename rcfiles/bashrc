@@ -211,7 +211,7 @@ PASSDIR=~/.config/passwords
 pw() {
   cd "$PASSDIR"
     if [[ ! -z "$1" ]]; then
-      command vim "$1"*
+      command vim ~/.config/passwords/passwords.gpg -c "/\\c$1/"
     fi
   cd "$OLDPWD"
 }
