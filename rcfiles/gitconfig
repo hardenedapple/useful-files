@@ -3,8 +3,6 @@
     email = hardenedapple@gmail.com
 [credential]
     helper = cache
-[status]
-    showUntrackedFiles = no
 [push]
     default = simple
 [color]
@@ -17,6 +15,7 @@
     cur   = !git --no-pager graphstyle -n 1
     head  = !git --no-pager graph -n 5
     here  = !git --no-pager graphstyle -n 5
-    stat  = status -sb --ignore-submodules=all
+    stat  = status --ignore-submodules=all --untracked-files=no
+    stat1  = status --untracked-files=no
 [difftool "vimdiff"]
     cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
