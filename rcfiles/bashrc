@@ -23,6 +23,7 @@ export LESSHISTFILE="/dev/null"
      local PR_MAGENTA=
      local PR_YELLOW=
      local PR_NO_COLOR=
+     local PR_USER_COL=
    else
      local PR_GREEN="\[\e[0;32m\]"
      local PR_BLUE="\[\e[0;34m\]"
@@ -31,12 +32,11 @@ export LESSHISTFILE="/dev/null"
      local PR_MAGENTA="\[\e[0;35m\]"
      local PR_YELLOW="\[\e[0;33m\]"
      local PR_NO_COLOR="\[\e[0m\]"
-   fi
-
-   if [[ $( id -u ) -eq 0 ]]; then
-     local PR_USER_COL="${PR_RED}"
-   else
-     local PR_USER_COL="${PR_CYAN}"
+     if [[ $( id -u ) -eq 0 ]]; then
+       local PR_USER_COL="${PR_RED}"
+     else
+       local PR_USER_COL="${PR_CYAN}"
+     fi
    fi
 
    local PR_USER="${PR_USER_COL}\$ ${PR_NO_COLOR}"
@@ -257,6 +257,14 @@ enable_completion () {
 }
 
 enable_completion
+# }}}
+
+# {{{ Other
+if [[ "$TERM" == "dumb" ]]
+then
+  export PAGER=
+  export MANPAGER='col -b'
+fi
 # }}}
 
 # vim: set ts=2 sw=2 foldmethod=marker:
