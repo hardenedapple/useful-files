@@ -68,7 +68,9 @@ setprompt
 # }}}
 
 # Default editor vim, but leave editing mode as emacs
-export EDITOR=vim
+if [[ $TERM != 'dumb' ]]; then
+  export EDITOR=vim
+fi
 
 # add $HOME/bin to $PATH
 if [ -d "$HOME/bin" ]; then

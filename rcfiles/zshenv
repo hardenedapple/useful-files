@@ -13,9 +13,13 @@ export HISTCONTROL=ignoreboth
 export LESSHISTFILE="/dev/null"
 export LESS="-R -j 5"
 
-# Default editor vim
-export EDITOR=vim
-export PAGER=less
+if [[ $TERM == 'dumb' ]]; then
+    export PAGER=
+    export MANPAGER='col -b'
+else
+    export EDITOR=vim
+    export PAGER=less
+fi
 
 export MANSECT=1:8:5:7:2:0:3:4:6
 
