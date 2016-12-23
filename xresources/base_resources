@@ -1,5 +1,49 @@
 ! vimcmd: !xrdb -load ~/xresources/base_resources
 ! vimcmd: !xrdb -merge ~/xresources/awesome_personal_resources
+UXTerm*termName:   xterm-256color
+! I like the terminal font more, but it doesnt have a lot of utf characters
+! font  -> default
+! font1 -> unreadable
+! font2 -> tiny
+! font3 -> small
+! font4 -> medium
+! font5 -> large
+! font6 -> huge
+UXTerm*font:       -misc-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
+! UXTerm*font1:       -misc-tamsyn-medium-r-normal-*-0-*-*-*-*-*-iso8859-1
+UXTerm*font2:       -misc-tamsyn-medium-r-normal-*-9-*-*-*-*-*-iso8859-1
+UXTerm*font3:       -misc-tamsyn-medium-r-normal-*-14-*-*-*-*-*-iso8859-1
+UXTerm*font4:       -misc-tamsyn-medium-r-normal-*-16-*-*-*-*-*-iso8859-1
+UXTerm*font5:       -misc-tamsyn-medium-r-normal-*-20-*-*-*-*-*-iso8859-1
+UXTerm*boldFont:   -misc-tamsyn-bold-r-normal-*-12-*-*-*-*-*-iso8859-1
+UXTerm*iconName:   Apples_Terminal
+UXTerm*title:      Apples_Terminal
+UXTerm*utf8:       2
+UXTerm*saveLines:  4096
+UXTerm*omitTranslation: fullscreen
+!UXTerm*locale: true
+UXTerm*VT100.translations: #override \
+    <Btn1Up>: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
+    Ctrl<Key>Return: spawn-new-terminal()
+
+UXTerm*disallowedWindowOps: 20,21,SetXprop
+
+! Doesnt seem to do anything - will check later on
+! UXTerm*VT100.Translations: #override \
+!             <Key>Backspace: string(0x7F)\n\
+!             <Key>Delete:    string("\033[3~")\n\
+!             <Key>Home:      string("\033[1~")\n\
+!             <Key>End:       string("\033[4~")
+
+! Change xterm specific keys - e.g. ctrl-h == backspace
+! This allows setting ctrl-h to something in tmux
+UXTerm*ttyModes:  erase ^?
+UXTerm*backarrowKeyIsErase: true
+
+UXTerm*metaSendsEscape: true
+
+UXTerm*scrollKey: true
+
 XTerm*termName:   xterm-256color
 ! I like the terminal font more, but it doesnt have a lot of utf characters
 ! font  -> default
