@@ -1,5 +1,5 @@
 ! vimcmd: !xrdb -load ~/xresources/base_resources
-! vimcmd: !xrdb -merge ~/xresources/awesome_personal_resources
+! vimcmd: !xrdb -merge ~/xresources/own_colors
 UXTerm*termName:   xterm-256color
 ! I like the terminal font more, but it doesnt have a lot of utf characters
 ! font  -> default
