@@ -4,6 +4,7 @@ Functions to find memory usage
 
 Can run as a script to ask for total memory free, memory usage of all
 programs or memory usage of single programs.
+
 """
 
 # At the moment I'm not happy with how the arguments are parsed
@@ -154,6 +155,17 @@ def print_nice(indict):
     keys = sorted(indict)
     maxlen = max((len(str(key)) for key in keys))
     for key in keys:
+        # TODO -- When running the one_program() function, this print format
+        # doesn't help with the second dictionary (the dictionaries that are
+        # the values of the main one).
+        # Because of this, the keys of the second dicttionary are printed all
+        # in one column, and in a random order, making the output from this
+        # script hard to automatically parse.
+        #
+        # I'd like to fix this on principle, but currently I have no reason to
+        # automatically parse the output, and can't really be bothered to think
+        # about how I'd like it.
+        # Hence I'm leaving it for now.
         print('{0:<{1}} :   {2}'.format(str(key), maxlen, indict[key]))
 
 
