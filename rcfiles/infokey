@@ -1,6 +1,11 @@
 #info
 ^v  scroll-half-screen-down
 \mv scroll-half-screen-up
+# Because I'll probably look for this again:
+# Despite how you read Help-Inv in the info node for info, the `r' key is
+# only for Emacs, and doesn't work in the standalone info reader.
+# r Info-history-forward
+# Does *not* work.
 
 #var
 automatic-tiling=On

@@ -23,6 +23,7 @@ export LESSHISTFILE="/dev/null"
      local PR_MAGENTA=
      local PR_CYAN=
      local PR_NO_COLOR=
+     local PR_USER_COL=
    else
      local PR_RED="\[\e[0;31m\]"
      local PR_GREEN="\[\e[0;32m\]"
@@ -180,6 +181,7 @@ if [ -x /usr/bin/dircolors ]; then
     alias ls='ls --color=auto'
     alias grep='grep --color=auto'
 fi
+alias gdb='gdb -q'
 alias ll='ls -F'
 alias gr='cd $(git root)'
 alias hr='cd $(hg root)'
@@ -207,7 +209,6 @@ ungiti() {
 export HISTCONTROL=ignoreboth
 
 ulimit -c unlimited
-shopt -s autocd
 shopt -s checkwinsize
 shopt -s dirspell
 shopt -s extglob
