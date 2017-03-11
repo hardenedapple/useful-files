@@ -1,0 +1,5 @@
+source ~/.config/gdb/gdbinit
+source ~/.vim/bundle/vsh/integration/with_gdb.py
+add-auto-load-safe-path /home/matthew/temp_dir/gdb/gdb/gdb-gdb.gdb
+
+macro define offsetof(type, member) &(((type *)0)->member)
