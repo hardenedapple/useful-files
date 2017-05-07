@@ -300,7 +300,7 @@ setprompt
 # Check that highlight is installed first
 type highlight > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
-  tail head cat() {
+  colortail colorhead colorcat() {
     syntax=""
     for file in $@; do
       if [ -f $file ]; then
@@ -336,9 +336,9 @@ if [[ $? -eq 0 ]]; then
     done
 
     if [[ $syntax != "" ]]; then
-      command $0 $@ | highlight --validate-input -O ansi --syntax=$syntax
+      command ${0#color} $@ | highlight --validate-input -O ansi --syntax=$syntax
     else
-      command $0 $@
+      command ${0#color} $@
     fi
   }
 

@@ -133,15 +133,15 @@ if [[ $? -eq 0 ]]; then
     fi
   }
 
-  cat () {
+  colorcat () {
       colored_command cat $@
   }
 
-  head () {
+  colorhead () {
       colored_command head $@
   }
 
-  tail () {
+  colortail () {
       colored_command tail $@
   }
 
@@ -265,7 +265,12 @@ enable_completion
 if [[ "$TERM" == "dumb" ]]
 then
   export PAGER=
-  export MANPAGER='col -b'
+  # Usually I would want $MANPAGER set to col -b, if I'm running in vsh, then
+  # I've already set $MANPAGER to 'col -b | cat', which obviously does the same
+  # but buffers the output so it doesn't make nvim slow.
+  if [[ -z "$MANPAGER" ]]; then
+    export MANPAGER='col -b'
+  fi
 fi
 # }}}
 
