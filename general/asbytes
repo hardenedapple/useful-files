@@ -18,7 +18,7 @@ case $1 in
     intel)
         echo -e $2 > $tmpfile2
         nasm $tmpfile2 -f bin -o $tmpfile
-        echo  ;;
+        ;;
     att)
         echo $2 | as -o $tmpfile2
         ld --entry=0x7c00 -Ttext=0x7c00 --oformat=binary $tmpfile2 -o $tmpfile
