@@ -1,0 +1,35 @@
+#!/usr/bin/bash
+
+set -e
+
+usage () {
+    echo "Usage : $0 (intel|att) 'instructions'"
+    exit 1
+}
+
+if [[ $# -ne 2 ]]; then
+    usage
+fi
+
+tmpfile="$(mktemp)"
+tmpfile2="$(mktemp)"
+
+case $1 in
+    intel)
+        echo -e $2 > $tmpfile2
+        nasm $tmpfile2 -f bin -o $tmpfile
+        echo  ;;
+    att)
+        echo $2 | as -o $tmpfile2
+        ld --entry=0x7c00 -Ttext=0x7c00 --oformat=binary $tmpfile2 -o $tmpfile
+        ;;
+    help)
+        usage ;;
+    *)
+        usage ;;
+esac
+
+
+rm $tmpfile2
+xxd -g 1 $tmpfile
+rm $tmpfile

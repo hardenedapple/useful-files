@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Little script that makes *adding* bytes into a binary file using xxd much
+# easier.
+# Usually, when adding bytes, xxd removes any extended columns (because the
+# offset column hasn't been updated).
+# This removes the offset column and the ascii interpretation (the ascii has to
+# be removed so xxd can handle the hexdump without offsets by using xxd -r -p).
+# We then pass the output of that awk script to xxd -r -p so that this script
+# is a drop-in replacement for xxd -r.
+
+awk '{
+    firstcol=length($1);
+    # 16 because that is how long the ascii part at the end is by default.
+    # We ignore the two spaces after the last hexadecimal bytes because
+    # a) they dont change the result
+    # b) having 16 is much clearer that this is the default line length of the
+    #    xxd output (lines are split on hex boundaries).
+    tot=(length($0) - firstcol - 1 - 16);
+    print substr($0, firstcol + 2, tot)
+}' |
+xxd -r -p

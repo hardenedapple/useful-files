@@ -1,0 +1,30 @@
+#!/usr/bin/bash
+
+set -e
+
+usage () {
+    echo "Usage : $0 (intel|att) 'bytes' [extra flags]"
+    exit 1
+}
+
+if [[ $# -lt 2 ]]; then
+    usage
+fi
+
+tmpfile="$(mktemp)"
+
+case $1 in
+    intel|att) ;;
+    help)
+        usage ;;
+    *)
+        usage ;;
+esac
+
+bytes="$2"
+format="$1"
+shift 2
+
+echo "$bytes" | xxd -r -p > $tmpfile
+objdump --disassembler-options=$format -D -b binary "$@" $tmpfile
+rm $tmpfile
