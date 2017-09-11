@@ -429,7 +429,8 @@ pw() {
 # If Dumb {{{
 if [[ "$TERM" == "dumb" ]]
 then
-       unsetopt zle
+       # unsetopt zle
+       zstyle ':completion:*' list-prompt
        unsetopt prompt_cr
        unsetopt prompt_subst
        PS1='%% '
