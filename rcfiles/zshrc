@@ -355,7 +355,7 @@ fi
 # {{{ Man in Vim
 
 vimman () {
-  nvim -c "runtime ftplugin/man.vim" -c "Man $*" -c 'wincmd o'
+  nvim -c "Man $*" -c 'wincmd o'
 }
 
 # }}}
