@@ -13,11 +13,21 @@
 # I'm keeping it around as more of a reference for what I need to do when
 # setting up a new machine.
 
-install-command () {
-    sudo apt install $*
-    # if Ubuntu  sudo apt install
-    # if Arch    sudo pacman -S
-    # if ...
+# NOTE:
+#   When installing in a VM under virtualbox, I've noticed that the guest
+#   additions 5.2.0 don't work, you can get the guest additions 5.1.30 from
+#   http://download.virtualbox.org/virtualbox/5.1.30/
+#
+#   If you're reading this after an update has been made, then you may be able
+#   to use some version after 5.2.0
+
+install-packages () {
+    # Attempt to install everything I want.
+    if command -v apt; then
+        sudo apt install gcc g++ clang gdb make git mercurial zsh emacs vim neovim i3 i3status ranger cmake pkg-config ninja-build autoconf automake
+    elif command -v pacman; then
+        sudo pacman -S base base-devel cmake unzip zsh emacs gvim i3-wm i3status ranger git gdb
+    fi
 }
 
 run-install () {
@@ -25,7 +35,9 @@ run-install () {
     # i.e. run install part of vim
 }
 
-install-command gcc g++ clang gdb make git mercurial zsh emacs vim neovim i3 i3status ranger
+# TODO Remove the `share` parts of the vim alias in zshrc.
+# (will have to change my local setup to fit this).
+install-packages
 mkdir ~/repos
 
 # Rc Files

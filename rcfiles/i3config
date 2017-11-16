@@ -23,7 +23,9 @@ set $mod Mod4
 # Set some windows to float
 for_window [class="Tk"] floating enable
 for_window [class="feh"] floating enable
+for_window [class="Figure 1"] floating enable
 for_window [class="Xmessage"] floating enable
+for_window [class="Pinentry"] floating enable
 for_window [class="VirtualBox"] floating enable
 
 # Mod current window moves to previous workspace - don't like this
@@ -58,9 +60,20 @@ bindsym $mod+Control+o move workspace to output right
 # default_orientation <horizontal|auto|vertical>
 # workspace_layout <default|stacking|tabbed>
 
-# Put firefox on tag 2
-assign [class="Firefox"] 2
+# Put firefox on tag 2 on output VGA1
+workspace 1 output HDMI1
+workspace 2 output HDMI1
+workspace 3 output HDMI1
+workspace 4 output HDMI1
+workspace 5 output HDMI1
+workspace 6 output VGA1
+workspace 7 output VGA1
+workspace 8 output VGA1
+workspace 9 output VGA1
+workspace 10 output VGA1
 
+assign [class="Thunderbird"] 9
+assign [class="Firefox"] 10
 
 
 # Font for window titles. Will also be used by the bar unless a different font
@@ -76,8 +89,7 @@ font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec i3-sensible-terminal
-bindsym $mod+Shift+Return exec xterm -fn -misc-tamsyn-medium-r-normal-*-13-*-*-*-*-*-iso8859-1
+bindsym $mod+Return exec xterm -fn -misc-tamsyn-medium-r-normal-*-13-*-*-*-*-*-iso8859-1
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -121,8 +133,8 @@ bindsym $mod+z split h
 # split in vertical orientation
 bindsym $mod+v split v
 
-# # enter fullscreen mode for the focused container
-# bindsym $mod+f fullscreen
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen
 
 # minimise / send to scratchpad current window
 bindsym $mod+n move scratchpad
@@ -228,3 +240,4 @@ bar {
 }
 
 exec firefox
+exec xbanish
