@@ -1,0 +1,9 @@
+#!/bin/bash
+# Usage
+#   man -k <something> | cut -d' ' -f1 | grep-man-pages -i <grep-pattern>
+#
+if [[ -t 0 ]]; then
+    echo "Usage: man -k <something> | $0 <grep-arguments>"
+else
+    xargs -I{} sh -c "output=\$( man {} 2>/dev/null | grep $* ) && echo \"{}\\n\$output\""
+fi
