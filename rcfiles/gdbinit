@@ -3,3 +3,9 @@ source ~/.vim/bundle/vsh/integration/with_gdb.py
 add-auto-load-safe-path /home/matthew/temp_dir/gdb/gdb/gdb-gdb.gdb
 
 macro define offsetof(type, member) &(((type *)0)->member)
+
+# n.b. this uses one of my commands in gdb-walkers, and hence can't be used
+# without installing that on the machine.
+define files-functions
+    shellpipe info functions ! sed -n '/^File $arg0/,/^\(File\|Non-debugging\)/p'
+end
