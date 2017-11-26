@@ -15,6 +15,13 @@
 #include <errno.h>
 #include <sched.h>
 
+/*
+ * TODO???
+ *  Maybe I should invoke the current shell that the user is running?
+ *  It"s not actually something that I want, more something that makes sense
+ *  for the program.
+ */
+
 #define err_exit(msg)    do { perror(msg); exit(EXIT_FAILURE); \
                         } while (0)
 
@@ -83,6 +90,11 @@ void usage(char* command_name)
  *
  *      You then have to get into that mounted overlay.
  *      This can be done by a simple cd ../$(basename `pwd`)
+ *
+ *  I believe you need to make mounts private yourself once having gotten into
+ *  the new namespace because systemd has changed the defaults so this is the
+ *  case.
+ *      https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=739593
  */
 
 /*
@@ -96,23 +108,8 @@ void usage(char* command_name)
  *      Linux 2.4.
  *      But if I don"t include that flag I get EINVAL.
  *
- *      ls -l /proc/self/ns
- *      shows that when in the shell this command leaves you in, you have a
- *      different mount namespace to the one you started in.
- *
  *      What determines a peer group between namespaces?
  *      How would one change peer groups?
- *
- *      mount --make-private in the shell provided by this program shows
- *      that it removes the `shared:X` in the relevant line of
- *      /proc/self/mountinfo.
- *      But it doesn't remove the mount from other namespaces.
- *      In processes from other mount namespaces, the relevant line in
- *      /proc/self/mountinfo stays the same, with the `shared:X` still
- *      there.
- *      A process in one namespace changing files in the overlay fs
- *      propagates those changes to the other namespace, and unmounting the
- *      mount point in one namespace unmounts it to the other.
  */
 
 // Documentation on overlayfs
@@ -129,6 +126,8 @@ int mount_readonly(
         const char * const mount_point,
         const char * const empty_dir)
 {
+    char * const curdir = get_current_dir_name();
+    if (curdir == NULL) { err_exit("get_current_dir_name returned NULL"); }
     const char * const options_format = "lowerdir=%s:%s";
     // Don't actually need the + 1 here, but it saves anyone reading it the
     // thought "are we missing the NULL character ... oh no, it"s counted in
@@ -153,7 +152,10 @@ int mount_readonly(
     // Have to change directory to the mount point so that we enter the
     // overlayfs instead of staying in the original filesystem (which is not
     // mounted read-only).
-    if (chdir(mount_point)) { err_exit("chdir"); }
+    if (chdir(mount_point)) { err_exit("chdir to mount"); }
+    // Put the user back into the directory we were originally in.
+    if (chdir(curdir)) { err_exit("chdir to original dir"); }
+    free(curdir);
     if (seteuid(orig_uid)) { err_exit("uid failed"); }
 
     char * const argv[] = { "/bin/bash", NULL };
@@ -202,7 +204,6 @@ int main(int argc, char *argv[])
     if (!is_empty_directory(argv[2])) { usage(argv[0]); }
     if (!strcmp("/", argv[1])) { usage(argv[0]); }
     uid_t real = getuid();
-    if (seteuid(0)) { err_exit("seteuid to root failed"); }
     mount_readonly(real, argv[1], argv[2]);
 
     return 0;
