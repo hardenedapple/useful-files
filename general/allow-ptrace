@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Allow attaching to running process with ptrace.
+# This is just so I don't have to remember the file.
+sudo bash -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
