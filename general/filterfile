@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# NOTE:
+#   A much better solution to the same program is the `sponge` utility from the
+#   `moreutils` package.
+#   instead of
+#   $ filterfile <filename> <command>
+#   you do
+#   $ <command> <filename> | ... | sponge <filename>
+
 # TODO In a perfect world, this would essentially be a macro.
 # I want to have this take any furthur string on the commmand line
 # and make the command line below to execute.
