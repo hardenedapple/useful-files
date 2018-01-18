@@ -11,7 +11,7 @@ export LESS_TERMCAP_us=$(printf "\e[1;32m")
 export IPYTHONDIR="~/.config/ipython"
 export HISTCONTROL=ignoreboth
 export LESSHISTFILE="/dev/null"
-export LESS="-R -j 5"
+export LESS="-SR -j 5"
 
 if [[ $TERM == 'dumb' ]]; then
     export PAGER=

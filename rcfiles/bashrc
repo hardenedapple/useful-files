@@ -262,6 +262,7 @@ enable_completion
 # }}}
 
 # {{{ Other
+export LESS='-SR -j 5'
 if [[ "$TERM" == "dumb" ]]
 then
   export PAGER=
