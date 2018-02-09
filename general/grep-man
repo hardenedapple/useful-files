@@ -5,5 +5,5 @@
 if [[ -t 0 ]]; then
     echo "Usage: man -k <something> | cut -d' ' -f1 | $0 <grep-arguments>"
 else
-    xargs -I{} sh -c "output=\$( man {} 2>/dev/null | grep $* ) && echo \"{}\\n\$output\""
+    xargs -I{} sh -c "output=\$( man {} 2>/dev/null | grep $* ) && echo -e \"{}\n\$output\""
 fi
