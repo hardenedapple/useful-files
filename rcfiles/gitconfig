@@ -23,6 +23,12 @@
     cur   = !git --no-pager graphstyle -n 1
     head  = !git --no-pager graph -n 5
     here  = !git --no-pager graphstyle -n 5
+    # This makes some things a little easier,
+    # e.g.     `git diff origin/$(git curbranch)`
+    curbranch = symbolic-ref --short HEAD
+    # Format is 'XY': X shows status of index, Y shows status of work tree.
+    # Mainly used for   `vim $(git modified)`
+    modified = !git status --porcelain=v1 --short --untracked-files=no | sed -n 's/^.M //p'
     stat  = status --ignore-submodules=all --untracked-files=no
     stat1  = status --untracked-files=no
 [difftool "vimdiff"]
