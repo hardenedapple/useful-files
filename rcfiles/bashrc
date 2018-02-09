@@ -265,10 +265,14 @@ enable_completion
 export LESS='-SR -j 5'
 if [[ "$TERM" == "dumb" ]]
 then
-  export PAGER=
-  # Usually I would want $MANPAGER set to col -b, if I'm running in vsh, then
-  # I've already set $MANPAGER to 'col -b | cat', which obviously does the same
-  # but buffers the output so it doesn't make nvim slow.
+  # Usually I would want these variables set to col -b to remove wierd
+  # linefeeds and backspaces (I think -- I haven't used a `dumb` terminal very
+  # much, and hence haven't encountered many cases where this matters).
+  # If I'm running in vsh, then I've already set them to 'col -b | cat', which
+  # does the same but buffers the output so it doesn't make nvim slow.
+  if [[ -z "$PAGER" ]]; then
+    export PAGER='col -b'
+  fi
   if [[ -z "$MANPAGER" ]]; then
     export MANPAGER='col -b'
   fi
