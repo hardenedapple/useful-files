@@ -1,0 +1,35 @@
+#!/bin/bash
+
+usage () {
+    echo "$0 [branch] [remote]"
+    echo "Sets the local <branch> to point to <remote>/<branch> ignoring any"
+    echo "extra commits the local branch might have."
+    echo "Remote has a default of 'origin'."
+    echo "Branch has a default of the branch that HEAD is currently pointing to."
+}
+
+case $1 in
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+esac
+if test -z "$1"; then
+    branch=$(git symbolic-ref --short HEAD)
+    if [[ $? -ne 0 ]]; then
+        echo "Using a default branch requires HEAD to be on a branch."
+        usage
+        exit 1
+    fi
+else
+    branch=$1
+fi
+
+remote=${2:-origin}
+
+
+set -e
+
+git checkout "${remote}/${branch}"
+git branch --force ${branch}
+git checkout ${branch}
