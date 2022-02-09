@@ -5,7 +5,10 @@
 BEGIN {
     if (grep_pattern == "") {
         print "Require pattern to search for";
-        print "Usage: grep_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v header_pattern=<header> ]";
+	print "Usage: grep_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v extra_prints=<to_print> ] [ -v header_pattern=<pattern> ]";
+	print "This script prints out lines where the text in the given column matches the `grep_pattern`.";
+	print "Column is chosen either by the column in which `column_title` can be found (assuming a header with titles followed";
+	print "by a table) or by column number `column`.";
         exit 1;
     }
 
@@ -13,7 +16,10 @@ BEGIN {
         column = 0;
         if (column_title == "") {
             print "Must specify column_title or column";
-            print "Usage: show_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v header_pattern=<header> ]";
+            print "Usage: grep_column -v (column=<column> | column_title=<title>) -v grep_pattern=<filter> [ -v extra_prints=<to_print> ] [ -v header_pattern=<pattern> ]";
+	    print "This script prints out lines where the text in the given column matches the `grep_pattern`.";
+	    print "Column is chosen either by the column in which `column_title` can be found (assuming a header with titles followed";
+	    print "by a table) or by column number `column`.";
             exit 1;
         }
     }
@@ -37,8 +43,8 @@ column {
         print $0;
 }
 
-header_pattern && $0 ~ header_pattern {
-    print $0;
+extra_prints && $0 ~ extra_prints {
+  print $0;
 }
 
 header_pattern && $0 ~ header_pattern && !column {
