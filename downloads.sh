@@ -123,7 +123,7 @@ echo "e.g. Ubuntu will probably have something annoying there."
 # assume whatever settings are on the machine, if ~/bin exists then PATH will
 # include it.
 mkdir ~/bin 2>/dev/null
-for i in ~/repos/useful-files/general/{asbytes,disasbytes,dis,grep_column,searchPATH,see_mem.py,show_column,swap,xxdreverse,grep-man};
+for i in ~/repos/useful-files/general/{asbytes,disasbytes,dis,grep_column,searchPATH,see_mem.py,show_column,swap,xxdreverse,grep-man,get-section};
 do
     ln -sf $i ~/bin/${i##*/};
 done
