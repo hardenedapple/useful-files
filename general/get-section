@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+'''
+Print sections based on their headers.
+
+'''
+
+from argparse import ArgumentParser
+from enum import Enum
+import re
+import sys
+
+# TODO
+#   When piping to something (e.g. `head`), if the pipe has closed then I can
+#   get error messages.
+#   Probably just need to register a signal handler for SIGPIPE.
+
+class State(Enum):
+    HEADER = 1
+    SECTION = 2
+    OUTSIDE = 3
+
+
+def switch_header(line, interesting, header, all_flag):
+    assert(re.match(interesting, line))
+def switch_section(line, interesting, header, all_flag):
+    assert(not re.match(interesting, line))
+    assert(not re.match(interesting, line))
+def switch_outside(line, interesting, header, all_flag):
+    assert(not re.match(interesting, line))
+    assert(re.match(header, line))
+    if not all_flag:
+        sys.exit(0)
+
+transition_action = {
+    State.HEADER: switch_header,
+    State.SECTION: switch_section,
+    State.OUTSIDE: switch_outside,
+}
+
+def update_header(line, interesting, header):
+    if re.match(interesting, line):
+        return State.HEADER
+    if re.match(header, line):
+        return State.OUTSIDE
+    return State.SECTION
+def update_section(line, interesting, header):
+    return update_header(line, interesting, header)
+def update_outside(line, interesting, header):
+    if re.match(interesting, line):
+        return State.HEADER
+    return State.OUTSIDE
+updates = {
+    State.HEADER: update_header,
+    State.SECTION: update_section,
+    State.OUTSIDE: update_outside,
+}
+
+def do_nothing(*args):
+    pass
+def print_line(line):
+    print(line, end='')
+actions = {
+    State.HEADER: print_line,
+    State.SECTION: print_line,
+    State.OUTSIDE: do_nothing,
+}
+
+def main():
+    parser = ArgumentParser('Print sections from some input.\n'
+                            '''
+Example usage to find the disassembly of a function named foo in a large
+binary called bar:
+objdump -d bar | get-section --interesting='^0.*<foo>:' --header='^0'
+''')
+    parser.add_argument('--interesting', required=True,
+                        help='Pattern marking the start of the interesting section.')
+    parser.add_argument('--header', required=True,
+                        help='Pattern marking start of sections.')
+    parser.add_argument('--all', action='store_true',
+                        help='Whether to print all matching sections.')
+    args = parser.parse_args()
+
+    interesting = re.compile(args.interesting)
+    header = re.compile(args.header)
+    state = State.OUTSIDE
+    for line in sys.stdin.readlines():
+        new_state = updates[state](line, interesting, header)
+        if new_state != state:
+            transition_action[new_state](line, interesting, header, args.all)
+        state = new_state
+        actions[state](line)
+
+if __name__ == "__main__":
+    main()
