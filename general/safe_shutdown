@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Test whether any unusual programs are running.
 # I store the output of pstree(1) under conditions where I know it's safe to

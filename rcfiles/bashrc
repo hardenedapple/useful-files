@@ -225,6 +225,8 @@ pw() {
   cd "$PASSDIR"
     if [[ ! -z "$1" ]]; then
       command vim ~/.config/passwords/passwords.gpg -c "/\\c$1/"
+    else
+      echo "Usage: pw [search string]"
     fi
   cd "$OLDPWD"
 }
@@ -275,6 +277,11 @@ then
   fi
   if [[ -z "$MANPAGER" ]]; then
     export MANPAGER='col -b'
+  fi
+  # Do the equivalent as above but for git, because git doesn't use the PAGER
+  # environment variable.
+  if [[ -z "$GIT_PAGER" ]]; then
+    export GIT_PAGER='col -b'
   fi
 fi
 # }}}

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # NOTE this is only called 'dis' to match the Solaris program.
 # I require the argument '-F' for consistency with that program.
