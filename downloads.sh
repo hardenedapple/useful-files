@@ -80,8 +80,8 @@ echo " config/01_general_settings.el to get past that"
 # "mkdir: cannot create directory '...': File exists"
 # "ln: failed to create symbolic link '...': No such file or directory"
 mkdir -p ~/.config/i3 ~/.config/i3status
-ln -sf ~/repos/useful-files/rcfiles/i3config ~/.config/i3/config
-ln -sf ~/repos/useful-files/rcfiles/i3statusconfig ~/.config/i3status/config
+ln -sf ~/repos/useful-files/rcfiles/i3config ~/.config/i3/
+ln -sf ~/repos/useful-files/rcfiles/i3status.conf ~/.config/i3/
 echo "i3 has been installed and configured."
 echo "You will need to tell your Distro to start it when logging in."
 
@@ -165,7 +165,7 @@ xset +fp /usr/local/share/fonts
 fc-cache /usr/local/share/fonts
 
 # This is for future logins.
-cat <<EOF > /etc/X11/xorg.conf.d/99-extra-font-dir.conf
+cat <<EOF > /usr/share/X11/xorg.conf.d/99-extra-font-dir.conf
 Section "Files"
     FontPath "/usr/local/share/fonts"
 EndSection
