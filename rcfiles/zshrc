@@ -185,6 +185,10 @@ bindkey '\eg' get-line
 # Have up and down arrows match current line
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
+# These are the keybindings for "Application corsor/keypad mode".
+# That mode is toggled in XTerm in the CTRL-MiddleClick menu.
+bindkey '\eOA' history-beginning-search-backward
+bindkey '\eOB' history-beginning-search-forward
 bindkey '\e/' complete-files
 bindkey '\C-z' ctrl-z-jobs
 
@@ -196,6 +200,10 @@ bindkey '\C-xe' run-kbd-macro
 # Have up and down arrows match current line
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
+# These are the keybindings for "Application corsor/keypad mode".
+# That mode is toggled in XTerm in the CTRL-MiddleClick menu.
+bindkey '\eOA' history-beginning-search-backward
+bindkey '\eOB' history-beginning-search-forward
 bindkey '\e\C-?' vi-backward-kill-word
 # This replaces 'kill-word' on the M-d keybinding because it only kills part of
 # a subword e.g. in the middle of the /this/is/a/test word, then kill-word
