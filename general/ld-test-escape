@@ -1,0 +1,33 @@
+#!/bin/bash
+
+usage () {
+  echo 'Usage:'
+  echo -e "\t$0 < <input-text>"
+  echo 'Reads from stdin and writes to stdout an escaped version for use in TCL'
+  echo 'testsuite files.'
+  echo 'Includes some specifics for LD testcases.'
+  if [[ "$1" != "" ]]; then
+    echo
+    echo 'Problem is:'
+    echo "$@"
+    exit 1
+  fi
+  exit 0
+}
+
+if [ $# -ne 0 ]; then
+  case "$1" in
+    --help|-h|help)
+      usage
+      ;;
+    *)
+      usage "Invalid argument \"$1\""
+      ;;
+  esac
+fi
+
+cat | \
+  sed 's/[]+*().?[]/\\&/g' \
+  | sed -Ee 's/^ *[0-9a-f]+:\t[0-9a-f]+/ *[0-9a-f]+:\t.*/' \
+  | sed -Ee 's/^[^:]*:     file format .*/.*:     file format .*/' \
+  | sed -Ee 's/^[0-9a-f]+ </[0-9a-f]+ </'

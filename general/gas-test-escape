@@ -1,0 +1,39 @@
+#!/bin/bash
+
+usage () {
+  echo 'Usage:'
+  echo -e "\t$0 [success|error]"
+  echo 'Reads from stdin and writes to stdout an escaped version for use in TCL'
+  echo 'testsuite files.'
+  if [[ "$1" != "" ]]; then
+    echo
+    echo 'Problem is:'
+    echo "$@"
+    exit 1
+  fi
+  exit 0
+}
+
+switch="no"
+case "$1" in
+  --help|-h|help)
+    usage
+    ;;
+  ''|success)
+    switch="no"
+    ;;
+  error)
+    switch="yes"
+    ;;
+  *)
+    usage "Invalid argument \"$1\""
+    ;;
+esac
+
+cat | \
+  sed 's/[]+*().?[]/\\&/g' | \
+  (if [[ "$switch" == "no" ]]; then
+    sed -Ee 's/^ *[0-9a-f]+:/ *[0-9a-f]+:/' | sed -Ee 's/^a\\\.out/[^:]+/'
+  else
+    sed -Ee 's/^([^ :]+):[0-9]+:/\1:[0-9]+:/' | sed -Ee 's/^[^ :]+:/[^ :]+:/';
+  fi)
