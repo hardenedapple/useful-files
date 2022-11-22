@@ -74,6 +74,12 @@ echo "If this is the case, then emacs will load without the majority of your con
 echo -n "Simply comment out the lines setting the font in"
 echo " config/01_general_settings.el to get past that"
 
+# Emacs extra if needed/wanted
+# Follow instructions from below link to install more up-to-date version.
+# Configure with `--prefix=$HOME/bin/emacs` and install, PATH from zshenv
+# should include installed binaries.
+# https://www.gnu.org/software/emacs/manual/html_node/efaq/Installing-Emacs.html
+
 # i3
 # Just ensure the config file is there ... I expect it gets installed with the
 # i3 package, but it's easier to debug the first error than the second
