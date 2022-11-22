@@ -34,3 +34,5 @@
     stat1  = status --untracked-files=no
 [difftool "vimdiff"]
     cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
+[rerere]
+    enabled = true
