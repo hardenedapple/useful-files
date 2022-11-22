@@ -43,6 +43,9 @@ fi
 if [ -d "$HOME/repos/binutils/install/bin" ]; then
     path=(~/repos/binutils/install/bin $path)
 fi
+if [ -d "$HOME/bin/emacs/bin" ]; then
+    path=(~/bin/emacs/bin $path)
+fi
 if [ -d "$HOME/.local/bin" ]; then
     path=(~/.local/bin $path)
 fi
