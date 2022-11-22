@@ -236,8 +236,10 @@ bindsym $mod+r mode "resize"
 # finds out, if available)
 bar {
         status_command i3status --config ~/.config/i3/i3status.conf
-        position top
+        position bottom
         binding_mode_indicator yes
+        # Do not show app icons on the bar (e.g. slack telling me I have a
+        # message).
         tray_output none
 }
 
