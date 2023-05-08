@@ -37,5 +37,14 @@ set show-all-if-ambiguous on
 set mark-symlinked-directories on
 set skip-completed-text on
 $if term=dumb
+  # Disable querying when I request `possible-completions` especially inside
+  # VSH (putting a bunch of text on the screen is not a problem when it's so
+  # easily removed, and this would always let us use vim-completions to find
+  # what we wanted.  Mentioning VSH since that's when I tend to have TERM=dumb.
+  set completion-query-items -1
+  # Do not paginate completions when there are a lot of options.  Similar to
+  # above, this is the best option when in VSH since we are not directly
+  # interacting with readline but rather bringing in the list of completions to
+  # the current vim buffer.
   set page-completions off
 $endif
