@@ -57,8 +57,28 @@ updates = {
 
 def do_nothing(*args):
     pass
+# Following the below link to avoid a message on stderr even though I'm
+# catching the exception.  Principle seems to be that BrokenPipeException
+# gets caught just fine here, but on exit Python attempts to flush standard
+# streams.  At *that point* we hit BrokenPipeError again, and the internal
+# python code handles that by printing to stderr that it saw a problem
+# attempting to flush streams.  We want to avoid the exception raising here,
+# and avoid the error message at process teardown.
+# https://docs.python.org/3/library/signal.html#note-on-sigpipe
 def print_line(line):
-    print(line, end='')
+    try:
+        print(line, end='')
+        # Flush here to force BrokenPipeError happening in the try block.
+        sys.stdout.flush()
+    except BrokenPipeError:
+        import os
+        # Python flushes standard streams on exit; redirect remaining output
+        # to devnull to avoid another BrokenPipeError at shutdown
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        # Python exits with successfully, because stdout being terminated is
+        # not an error condition.
+        sys.exit(0)
 actions = {
     State.HEADER: print_line,
     State.SECTION: print_line,
