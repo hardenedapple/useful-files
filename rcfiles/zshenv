@@ -56,3 +56,7 @@ fi
 if [ -d "$HOME/.config/zsh/completion/" ]; then
     fpath=(~/.config/zsh/completion $fpath)
 fi
+
+if [ -d "$HOME/.cargo/bin/" ]; then
+    path=(~/.cargo/bin $path)
+fi

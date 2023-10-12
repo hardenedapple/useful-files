@@ -1,38 +1,38 @@
 [user]
-    name  = Matthew Malcomson
-    email = hardenedapple@gmail.com
+  name = Matthew Malcomson
+  email = matthew.malcomson@arm.com
 [core]
-    # I set the LESS environment variable, which means the git default value
-    # for LESS of 'FRX' isn't used.
-    # Hence I have to add the difference back in.
-    # Seeing as I might very well use this config somewhere that I don't set
-    # my usual LESS config I've also combined the arguments I have on my local
-    # machine.
-    pager = less -FRXS -j5
+  # I set the LESS environment variable, which means the git default value
+  # for LESS of 'FRX' isn't used.
+  # Hence I have to add the difference back in.
+  # Seeing as I might very well use this config somewhere that I don't set
+  # my usual LESS config I've also combined the arguments I have on my local
+  # machine.
+  pager = less -FRXS -j5
 [credential]
-    helper = cache
+  helper = cache
 [push]
-    default = simple
+  default = simple
 [color]
-    ui = true
+  ui = true
 [alias]
-    ex    = "!command "
-    root  = !pwd
-    graphstyle = log --abbrev-commit --graph --decorate
-    graph = log --abbrev-commit --graph --all --decorate
-    cur   = !git --no-pager graphstyle -n 1
-    head  = !git --no-pager graph -n 5
-    here  = !git --no-pager graphstyle -n 5
-    # This makes some things a little easier,
-    # e.g.     `git diff origin/$(git curbranch)`
-    curbranch = symbolic-ref --short HEAD
-    # Format is 'XY': X shows status of index, Y shows status of work tree.
-    # Mainly used for   `vim $(git modified)`
-    modified = !git shortstat | sed -n 's/^.M //p'
-    shortstat = status --porcelain=v1 --short --untracked-files=no
-    stat  = status --ignore-submodules=all --untracked-files=no
-    stat1  = status --untracked-files=no
+  ex    = "!command "
+  root  = !pwd
+  graphstyle = log --abbrev-commit --graph --decorate
+  graph = log --abbrev-commit --graph --all --decorate
+  cur   = !git --no-pager graphstyle -n 1
+  head  = !git --no-pager graph -n 5
+  here  = !git --no-pager graphstyle -n 5
+  # This makes some things a little easier,
+  # e.g.     `git diff origin/$(git curbranch)`
+  curbranch = symbolic-ref --short HEAD
+  # Format is 'XY': X shows status of index, Y shows status of work tree.
+  # Mainly used for   `vim $(git modified)`
+  modified = !git shortstat | sed -n 's/^.M //p'
+  shortstat = status --porcelain=v1 --short --untracked-files=no
+  stat  = status --ignore-submodules=all --untracked-files=no
+  stat1  = status --untracked-files=no
 [difftool "vimdiff"]
-    cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
+  cmd = /usr/bin/vimdiff \"$LOCAL\" \"$REMOTE\"
 [rerere]
-    enabled = true
+  enabled = true
