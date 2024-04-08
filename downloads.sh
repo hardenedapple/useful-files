@@ -24,7 +24,7 @@
 install-packages () {
     # Attempt to install everything I want.
     if command -v apt; then
-        sudo apt install gcc g++ clang gdb make git mercurial zsh emacs vim neovim i3 i3status ranger cmake pkg-config ninja-build autoconf automake cscope exuberant-ctags python3-neovim xsel weechat
+        sudo apt install gcc g++ clang gdb make git mercurial zsh emacs vim neovim ripgrep fd-find i3 i3status ranger cmake pkg-config ninja-build autoconf automake cscope exuberant-ctags python3-neovim xsel weechat
     elif command -v pacman; then
         sudo pacman -S base base-devel cmake unzip zsh emacs gvim i3-wm i3status ranger ninja git gdb cscope ctags python-neovim xsel weechat
     fi
@@ -58,16 +58,8 @@ ln -sf ~/repos/useful-files/rcfiles/gdbinit ~/.gdbinit
 git clone --recurse-submodules https://github.com/hardenedapple/emacs_config ~/.emacs.d
 pushd ~/.emacs.d
 git submodule foreach "(git checkout master && git pull)"
-# Have to do this other `cask-initialize` doesn't set the `load-path` correctly.
-# This is because the newer versions of `cask-initialize` tests whether it's
-# already done its work with
-# `(f-same? (epl-package-dir) (epl-default-package-dir))`
-# while older versions tested with
-# `(equal (epl-package-dir) (epl-default-package-dir))`
-# since f-same? returns `nil` if either of the two files don't exist, this
-# returns `nil` despite the two strings being identical.
-touch ~/.emacs.d/elpa
-cask/bin/cask
+cd vsh
+./emacs-tar.sh
 popd
 echo "NOTE: It's likely that the Tamsyn font isn't installed on this system."
 echo "If this is the case, then emacs will load without the majority of your config."
@@ -100,8 +92,6 @@ cat ~/repos/useful-files/xresources/base_resources ~/repos/useful-files/xresourc
 git clone --recurse-submodules https://github.com/hardenedapple/vim_repo ~/.vim
 pushd ~/.vim
 git submodule foreach "(git checkout master && git pull)"
-cd bundle/python-mode
-git checkout develop
 popd
 
 # Neovim
