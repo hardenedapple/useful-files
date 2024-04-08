@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+
+import sys
+import re
+import argparse
+
+# TODO Allow searching ignoring line breaks.
+# (i.e. for searching only have all the text in one line with single spaces in
+# between each word).
+
+def iterate_block_comments(line_iterator, min_lines):
+    '''Currently mostly ignore the possibility of ... */ /* ...
+    This is to make things simple, plus I doubt it is likely to happen.
+    However, it shouldn't be too difficult to account for it, I just
+    haven't.'''
+    block_comment = []
+    in_comment = True
+    startlinenum = 0
+    for linenum, line in enumerate(line_iterator):
+        if '/*' in line and '*/' in line:  # Ignore possibility of min_lines == 1 for now
+            continue
+        if '/*' in line:
+            block_comment.append(line)
+            in_comment = True
+            startlinenum = linenum+1
+        elif '*/' in line:
+            in_comment = False
+            block_comment.append(line)
+            if len(block_comment) > min_lines:
+                yield (startlinenum, block_comment)
+            block_comment = []
+        elif in_comment:
+            block_comment.append(line)
+
+def iterate_files_block_comments(filename, min_lines):
+    with open(filename, 'r') as infile:
+        for linenum, comment in iterate_block_comments(infile, min_lines):
+            yield (linenum, comment)
+
+def search_block_comments (files, search_pattern, min_lines):
+    '''If want DOTALL can compile the search_pattern before sending it
+    here and specify the DOTALL in that pattern.'''
+    for filename in files:
+        for linenum, comment in iterate_files_block_comments(filename, min_lines):
+            match = re.search(search_pattern, '\n'.join(comment))
+            if match:
+                yield (filename, linenum, match)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='''
+        Find location of block comments in provided files where the comment
+        matches the regular expression provided.''')
+    parser.add_argument('--min-lines', type=int, default=20,
+                        help='Minimum number of lines in a comment for it to be looked through')
+    parser.add_argument('regex', help='Regular expression to search for.')
+    parser.add_argument('files', nargs='+', help='List of filenames to search in.')
+    args = parser.parse_args()
+    for filename, linenum, match in search_block_comments(args.files, args.regex,
+                                                      args.min_lines):
+        # Print in a format similar to `grep` so that things that parse that
+        # output work nicely (e.g. vim's cexpr can populate the quickfix list).
+        print('{}:{}:{}'.format(filename, linenum, match.group()))
+
