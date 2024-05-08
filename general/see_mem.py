@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Functions to find memory usage
 
@@ -42,7 +42,8 @@ def _find_mem(pid, memtype):
             match = re.match(r'{0}:\s+(\d+)\s*kB'.format(memtype), line)
             if match:
                 ret += int(match.groups()[-1])
-    return ret
+    # smaps gives results in units of kB
+    return ret * 1000
 
 
 def _get_pname(pid):
@@ -140,13 +141,22 @@ def ram_used():
     realused = ramdict['MemTotal'] - realfree
     return realused / ramdict['MemTotal'] * 100
 
+def _human_readable(num_bytes):
+    suffixes = ['B', 'kB', 'mB', 'gB']
+    print_num = num_bytes
+    suffix_counter = 0
+    while print_num >= 1000:
+        print_num /= 1000
+        suffix_counter += 1
+    return '{:.2f} {}'.format(print_num, suffixes[suffix_counter])
 
 # Given process name - return dict of different kinds of memory it uses
 def one_program(pname):
     """Return dict - keys PID's values dicts of memtype and amount"""
     pidlist = _pypgrep(pname)
     mlist = ['Size', 'Swap', 'Rss', 'Pss']
-    _memdict = lambda pid, mem: {mem: _find_mem(pid, mem) for mem in mlist}
+    _memdict = lambda pid, mem: {mem: _human_readable(_find_mem(pid, mem))
+                                for mem in mlist}
     return {pid: _memdict(pid, mlist) for pid in pidlist}
 
 
@@ -158,7 +168,7 @@ def print_nice(indict):
         # TODO -- When running the one_program() function, this print format
         # doesn't help with the second dictionary (the dictionaries that are
         # the values of the main one).
-        # Because of this, the keys of the second dicttionary are printed all
+        # Because of this, the keys of the second dictionary are printed all
         # in one column, and in a random order, making the output from this
         # script hard to automatically parse.
         #
