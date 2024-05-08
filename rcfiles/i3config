@@ -61,16 +61,21 @@ bindsym $mod+Control+o move workspace to output right
 # workspace_layout <default|stacking|tabbed>
 
 # Put firefox on tag 2 on output VGA1
-workspace 1 output DP-2
-workspace 2 output DP-2
-workspace 3 output DP-2
-workspace 4 output DP-2
-workspace 5 output DP-2
-workspace 6 output DP-3
-workspace 7 output DP-3
-workspace 8 output DP-3
-workspace 9 output DP-3
-workspace 10 output DP-3
+workspace 1 output DP-1-8
+workspace 2 output DP-1-8
+workspace 3 output DP-1-8
+workspace 4 output DP-1-8
+workspace 5 output DP-1-8
+workspace 6 output DP-1-8
+workspace 7 output DP-1-8
+workspace 8 output DP-1-8
+workspace 9 output DP-1-8
+workspace 10 output DP-1-8
+# workspace 6 output DP-1-1-8
+# workspace 7 output DP-1-1-8
+# workspace 8 output DP-1-1-8
+# workspace 9 output DP-1-1-8
+# workspace 10 output DP-1-1-8
 
 assign [class="Thunderbird"] 9
 assign [class="Firefox"] 10
@@ -78,7 +83,7 @@ assign [class="Firefox"] 10
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below. ISO 10646 = Unicode
-font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
+font -misc-fixed-medium-r-normal--18-120-75-75-C-70-iso10646-1
 # The font above is very space-efficient, that is, it looks good, sharp and
 # clear in small sizes. However, if you need a lot of unicode glyphs or
 # right-to-left text rendering, you should instead use pango for rendering and
@@ -89,7 +94,7 @@ font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec xterm -fn -misc-tamsyn-medium-r-normal-*-15-*-*-*-*-*-iso8859-1
+bindsym $mod+Return exec xterm -fn -misc-tamsyn-medium-r-normal-*-16-*-*-*-*-*-iso8859-1
 
 # kill focused window
 bindsym $mod+Shift+q kill
