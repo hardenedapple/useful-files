@@ -99,7 +99,7 @@ ln -sf ~/.vim ~/.config/nvim
 
 # Neovim full
 git clone https://github.com/hardenedapple/neovim ~/repos/neovim
-(cd ~/repos/neovim && git checkout local-head && make)
+(cd ~/repos/neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=${HOME}/bin/neovim && make install)
 # Get helptags up
 VIMRUNTIME=~/repos/neovim/runtime ~/repos/neovim/build/bin/nvim --cmd 'helptags ~/repos/neovim/runtime/doc/' --cmd 'q'
 
@@ -166,3 +166,27 @@ Section "Files"
     FontPath "/usr/local/share/fonts"
 EndSection
 EOF
+
+# Use package source https://apt.llvm.org/ to install most recent clang
+# - Install clangd from here, plus clang-tools as a whole.
+#
+# work [17:31:39] % apt list --installed | grep clang | grep 18
+#
+# WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+#
+# clang-18/unknown,now 1:18.1.6~++20240518023231+1118c2e05e67-1~exp1~20240518143320.131 amd64 [installed]
+# clang-tools-18/unknown,now 1:18.1.6~++20240518023231+1118c2e05e67-1~exp1~20240518143320.131 amd64 [installed]
+# libclang-18-dev/unknown,now 1:18.1.6~++20240518023231+1118c2e05e67-1~exp1~20240518143320.131 amd64 [installed,automatic]
+
+# *OR* build llvm from source (with debug info) for better debugging of clang
+# tools I write.
+
+# Install `bear'
+
+# Run `bear' on binutils, gdb, gcc, builds and copy compile_commands.json to the
+# relevant directories.
+
+# Run ctags on each directory that I care about (both emacs and vim tag style).
+#   - ctags-exuberant -e -R --fields=+iaS --extra=+qf .
+#   - ctags-exuberant -R --fields=+iaS --extra=+qf .
+
