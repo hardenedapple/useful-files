@@ -37,14 +37,26 @@ export MANSECT=1:8:5:7:2:0:3:4:6
 # Declare $path to only have unique elements.
 typeset -U path
 typeset -U PATH
+# Declare infopath array variable as tied to the INFOPATH environment variable.
+# This means I can just add to an array rather than having to manage the case
+# when there is no existing INFOPATH and I end up with an erroneous extra ':' at
+# the start of the variable.  N.b. while the `info` command line utility already
+# searches directories related to PATH for anything that could be an INFO
+# directory, Emacs initilises its own internal info directory list ignoring
+# PATH.  Using INFOPATH to make the two look in the same places.
+typeset -xT INFOPATH infopath ':'
+typeset -U infopath
+infopath=(/usr/share/info)
 if [ -d "$HOME/bin" ]; then
     path=(~/bin $path)
 fi
 if [ -d "$HOME/repos/binutils/install/bin" ]; then
     path=(~/repos/binutils/install/bin $path)
+    infopath=(~/repos/binutils/install/share/info/ $infopath)
 fi
 if [ -d "$HOME/bin/emacs/bin" ]; then
     path=(~/bin/emacs/bin $path)
+    infopath=(~/bin/emacs/share/info $infopath)
 fi
 if [ -d "$HOME/.local/bin" ]; then
     path=(~/.local/bin $path)
