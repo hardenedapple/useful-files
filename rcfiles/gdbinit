@@ -1,6 +1,5 @@
 set history save on
 
-source ~/.config/gdb/gdbinit
 source ~/.vim/bundle/vsh/integration/with_gdb.py
 add-auto-load-safe-path /home/matmal01/repos/binutils-build/gdb/gdb-gdb.gdb
 add-auto-load-safe-path /home/matmal01/repos/binutils-build/gdb/gdb-gdb.py
