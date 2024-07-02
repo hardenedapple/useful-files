@@ -59,7 +59,16 @@ def _try_val(pid, memtype):
         return (_get_pname(pid), _find_mem(pid, memtype))
     except PermissionError:
         return ('not allowed', 1)
+    except FileNotFoundError:
+        return ('process closed', 1)
 
+def _try(func, *args):
+    try:
+        return func(*args)
+    except PermissionError:
+        return 'not allowed'
+    except FileNotFoundError:
+        return 'process closed'
 
 def _pidcmd(pid, inc_non=True):
     """Given pid, return commandline that spawned it, or '?' if there wasn't
@@ -76,7 +85,7 @@ def _pidcmd(pid, inc_non=True):
 
 def _is_kernel(pid, inc_non=True):
     """Tries to find out if the process pid is that of a kernel process (or at
-    least one the user doesn't care about"""
+    least one the user doesn't care about)."""
     try:
         cmdline = _pidcmd(pid, inc_non)
     except PermissionError:
@@ -97,11 +106,13 @@ def all_mem(memtype, inc_non=True):
         if _is_kernel(pid, inc_non):
             continue
         pid_info = _try_val(pid, memtype)
-        ret[(pid_info[0], pid)] = pid_info[1]
-    # remove placeholder for those processes I don't have permission for
+        ret[(pid_info[0], pid)] = _human_readable(pid_info[1])
+    # remove placeholder for those processes I don't have permission for or
+    # those that have stopped part way.
     # Have to make a list to iterate over (so don't modify dict while
     # iterating over it
-    keylist = [key for key in ret if key[0] == 'not allowed']
+    keylist = [key for key in ret
+               if key[0] in ('not allowed', 'process closed')]
     for key in keylist:
         del ret[key]
     return ret
@@ -155,8 +166,15 @@ def one_program(pname):
     """Return dict - keys PID's values dicts of memtype and amount"""
     pidlist = _pypgrep(pname)
     mlist = ['Size', 'Swap', 'Rss', 'Pss']
-    _memdict = lambda pid, mem: {mem: _human_readable(_find_mem(pid, mem))
-                                for mem in mlist}
+    def _get_mem(pid, mem):
+        return _human_readable(_find_mem(pid, mem))
+    def _memdict(pid, mem):
+        ret = {}
+        for mem in mlist:
+            v = _try(_get_mem, pid, mem)
+            if v != 'not allowed' and v != 'process closed':
+                ret[mem] = v
+        return ret
     return {pid: _memdict(pid, mlist) for pid in pidlist}
 
 
