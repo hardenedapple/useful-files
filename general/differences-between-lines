@@ -37,10 +37,13 @@ if __name__ == '__main__':
     # but don't have that problem yet.
     befores, afters = [], []
     mytext = sys.stdin.readlines()
-    for line in mytext[1:]:
-       before, after = filter_large_similar_lines(mytext[0], line)
-       befores.append(before)
-       afters.append(after)
-    print(befores[0], end='')
-    for line in afters:
-        print(line, end='')    
+    if len(mytext) > 1:
+        for line in mytext[1:]:
+           before, after = filter_large_similar_lines(mytext[0], line)
+           befores.append(before)
+           afters.append(after)
+        print(befores[0], end='')
+        for line in afters:
+            print(line, end='')
+    else:
+        print(mytext[0], end='')
