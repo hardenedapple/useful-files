@@ -24,8 +24,8 @@ def filter_large_similar_lines(a, b, context=10):
             reta.append(eq_text)
             retb.append(eq_text)
         elif x[0] == 'replace':
-            reta.append(colored_text(a[x[1]:x[2]+1], TextColors.YELLOW))
-            retb.append(colored_text(b[x[3]:x[4]+1], TextColors.YELLOW))
+            reta.append(colored_text(a[x[1]:x[2]], TextColors.YELLOW))
+            retb.append(colored_text(b[x[3]:x[4]], TextColors.YELLOW))
         elif x[0] == 'delete':
             reta.append(colored_text(a[x[1]:x[2]], TextColors.RED))
         elif x[0] == 'insert':
