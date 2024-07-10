@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+import sys
+import difflib
+
+import difflib
+import collections
+import curses
+import struct
+import enum
+
+class TextColors:
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    CLEAR = '\033[0m'
+def colored_text(text, color):
+    return f'{color}{text}{TextColors.CLEAR}'
+
+def filter_large_similar_lines(a, b, context=10):
+    seqm = difflib.SequenceMatcher(a=a, b=b)
+    reta = []
+    retb = []
+    for x in seqm.get_opcodes():
+        if x[0] == 'equal':
+            if x[2] - x[1] > 2*context+5:
+               eq_text = a[x[1]:x[1]+context] + ' ... ' + a[x[2]-context:x[2]]
+            else:
+               eq_text = a[x[1]:x[2]]
+            reta.append(eq_text)
+            retb.append(eq_text)
+        elif x[0] == 'replace':
+            reta.append(colored_text(a[x[1]:x[2]+1], TextColors.YELLOW))
+            retb.append(colored_text(b[x[3]:x[4]+1], TextColors.YELLOW))
+        elif x[0] == 'delete':
+            reta.append(colored_text(a[x[1]:x[2]], TextColors.RED))
+        elif x[0] == 'insert':
+            retb.append(colored_text(b[x[3]:x[4]], TextColors.GREEN))
+    return ''.join(reta), ''.join(retb)
+
+if __name__ == '__main__':
+    # Problem when difference from first is in different place each time,
+    # but don't have that problem yet.
+    befores, afters = [], []
+    mytext = sys.stdin.readlines()
+    for line in mytext[1:]:
+       before, after = filter_large_similar_lines(mytext[0], line)
+       befores.append(before)
+       afters.append(after)
+    print(befores[0], end='')
+    for line in afters:
+        print(line, end='')    
