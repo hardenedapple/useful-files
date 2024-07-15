@@ -21,10 +21,17 @@
 #   If you're reading this after an update has been made, then you may be able
 #   to use some version after 5.2.0
 
+# For first time around this is somewhat necessary.
+sed -i 's/^# //' ~/repos/useful-files/rcfiles/gitconfig
+
 install-packages () {
     # Attempt to install everything I want.
     if command -v apt; then
-        sudo apt install gcc g++ clang gdb make git mercurial zsh emacs vim neovim ripgrep fd-find i3 i3status ranger cmake pkg-config ninja-build autoconf automake cscope exuberant-ctags python3-neovim xsel weechat
+	sudo apt install gcc g++ clang gdb make git zsh emacs vim \
+	  neovim ripgrep fd-find i3 i3status ranger cmake pkg-config ninja-build \
+	  autoconf automake cscope exuberant-ctags python3-neovim xsel weechat \
+	  gettext tree-sitter-cli tree-sitter-c-src libtree-sitter-dev fzy \
+	  moreutils bear clang-tools clangd
     elif command -v pacman; then
         sudo pacman -S base base-devel cmake unzip zsh emacs gvim i3-wm i3status ranger ninja git gdb cscope ctags python-neovim xsel weechat
     fi
@@ -119,7 +126,7 @@ echo "e.g. Ubuntu will probably have something annoying there."
 # assume whatever settings are on the machine, if ~/bin exists then PATH will
 # include it.
 mkdir ~/bin 2>/dev/null
-for i in ~/repos/useful-files/general/{asbytes,disasbytes,dis,grep_column,searchPATH,see_mem.py,show_column,swap,xxdreverse,grep-man,get-section};
+for i in ~/repos/useful-files/general/{allow-ptrace,asbytes,disasbytes,dis,grep_column,searchPATH,see_mem.py,show_column,swap,xxdreverse,grep-man,get-section,search-block-c-comments,differences-between-lines};
 do
     ln -sf $i ~/bin/${i##*/};
 done

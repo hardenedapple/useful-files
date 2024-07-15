@@ -452,4 +452,9 @@ then
 fi
 # }}}
 
+# Avoiding some global Ubuntu things {{{
+skip_global_compinit=1
+# Exactly what this is set to doesn't matter -- just as long as it's non-null.
+DEBIAN_PREVENT_KEYBOARD_CHANGES="true"
+# }}}
 # vim: set ts=2 sw=2 foldmethod=marker:

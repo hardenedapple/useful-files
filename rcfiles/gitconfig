@@ -46,3 +46,7 @@
     driver = /usr/bin/git-merge-changelog %O %A %B
 [init]
     defaultBranch = master
+# # Need this when setting up new machine (assuming don't have ssh access to
+# # github yet set up).
+# [url "https://github.com/"]
+#     insteadOf = git@github.com:

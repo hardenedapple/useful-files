@@ -23,7 +23,7 @@ if [[ $TERM == 'dumb' ]]; then
   fi
 else
   if [ -d "$HOME/bin/neovim/bin/" ]; then
-    export EDITOR=/home/matmal01/bin/neovim/bin/nvim
+    export EDITOR=${HOME}/bin/neovim/bin/nvim
   else
     export EDITOR=vim
   fi
