@@ -27,11 +27,18 @@ sed -i 's/^# //' ~/repos/useful-files/rcfiles/gitconfig
 install-packages () {
     # Attempt to install everything I want.
     if command -v apt; then
-	sudo apt install gcc g++ clang gdb make git zsh emacs vim \
+	sudo apt install gcc g++ clang gdb make git zsh emacs vim pwgen \
 	  neovim ripgrep fd-find i3 i3status ranger cmake pkg-config ninja-build \
 	  autoconf automake cscope exuberant-ctags python3-neovim xsel weechat \
 	  gettext tree-sitter-cli tree-sitter-c-src libtree-sitter-dev fzy \
-	  moreutils bear clang-tools clangd
+	  moreutils bear clang-tools clangd python3-pylsp texinfo libxaw7-dev \
+	  libgtx-4-dev libgif-dev libgnutls28-dev
+    # N.b. also need to look into libgccjit.
+    # In a previous install I needed specifically to install libgccjit-13-dev
+    # because the default version of gcc that was run was gcc-13.
+    # Ubuntu didn't seem to have any generic libgccjit-dev package that would
+    # give the default version according to whatever the default gcc version
+    # is.
     elif command -v pacman; then
         sudo pacman -S base base-devel cmake unzip zsh emacs gvim i3-wm i3status ranger ninja git gdb cscope ctags python-neovim xsel weechat
     fi
@@ -173,6 +180,15 @@ Section "Files"
     FontPath "/usr/local/share/fonts"
 EndSection
 EOF
+
+# Installing emacs.
+# Build from source because that gives much better ability to search for things 
+cd ~/repos/
+git clone git://git.sv.gnu.org/emacs.git
+cd emacs
+git checkout emacs-30
+make configure="--prefix=${HOME}/bin/emacs CFLAGS='-O3 -g3'"
+make install
 
 # Use package source https://apt.llvm.org/ to install most recent clang
 # - Install clangd from here, plus clang-tools as a whole.
