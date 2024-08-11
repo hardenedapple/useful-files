@@ -1,11 +1,14 @@
 # This adds colors to ALL less instances, might be annoying in some cases.
-export LESS_TERMCAP_mb=$(printf "\e[1;31m")
-export LESS_TERMCAP_md=$(printf "\e[1;31m")
-export LESS_TERMCAP_me=$(printf "\e[0m")
-export LESS_TERMCAP_se=$(printf "\e[0m")
-export LESS_TERMCAP_so=$(printf "\e[1;44;33m")
-export LESS_TERMCAP_ue=$(printf "\e[0m")
-export LESS_TERMCAP_us=$(printf "\e[1;32m")
+# N.b. using escape literally rather than `printf` because `gdbserver` hangs
+# whenever used if `zshenv` forks.  Just avoid that strange bug.
+# https://sourceware.org/bugzilla/show_bug.cgi?id=26116
+export LESS_TERMCAP_mb="[1;31m"
+export LESS_TERMCAP_md="[1;31m"
+export LESS_TERMCAP_me="[0m"
+export LESS_TERMCAP_se="[0m"
+export LESS_TERMCAP_so="[1;44;33m"
+export LESS_TERMCAP_ue="[0m"
+export LESS_TERMCAP_us="[1;32m"
 
 
 export IPYTHONDIR="~/.config/ipython"
