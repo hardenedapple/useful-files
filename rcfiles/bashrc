@@ -260,6 +260,7 @@ then
   if [[ -z "$GIT_PAGER" ]]; then
     export GIT_PAGER='col -b'
   fi
+	stty tabs -onlcr icanon -echo -onlcr iexten isig -echonl -crterase
 fi
 # }}}
 
