@@ -1,8 +1,10 @@
 set history save on
+set python print-stack full
 
+source ~/.config/gdb-walkers/gdb_walker_setup.py
 source ~/.vim/bundle/vsh/integration/with_gdb.py
-add-auto-load-safe-path /home/matmal01/repos/binutils-build/gdb/gdb-gdb.gdb
-add-auto-load-safe-path /home/matmal01/repos/binutils-build/gdb/gdb-gdb.py
+add-auto-load-safe-path /home/matmal01/repos/binutils/build/gdb/gdb-gdb.gdb
+add-auto-load-safe-path /home/matmal01/repos/binutils/build/gdb/gdb-gdb.py
 
 macro define offsetof(type, member) &(((type *)0)->member)
 
@@ -11,3 +13,11 @@ macro define offsetof(type, member) &(((type *)0)->member)
 define files-functions
     shellpipe info functions ! sed -n '/^File $arg0/,/^\(File\|Non-debugging\)/p'
 end
+
+python
+if os.getenv('TERM') == 'dumb':
+    gdb.execute('set pagination off')
+    gdb.execute('set width 0')
+    gdb.execute('set max-completions 0')
+end
+
