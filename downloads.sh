@@ -32,7 +32,7 @@ install-packages () {
 	  autoconf automake cscope exuberant-ctags python3-neovim xsel weechat \
 	  gettext tree-sitter-cli tree-sitter-c-src libtree-sitter-dev fzy \
 	  moreutils bear clang-tools clangd python3-pylsp texinfo libxaw7-dev \
-	  libgtx-4-dev libgif-dev libgnutls28-dev
+	  libgtx-4-dev libgif-dev libgnutls28-dev flex bison dejagnu
     # N.b. also need to look into libgccjit.
     # In a previous install I needed specifically to install libgccjit-13-dev
     # because the default version of gcc that was run was gcc-13.
@@ -152,9 +152,9 @@ EOF
 
 cat <<EOF > /etc/X11/xorg.conf.d/11-usb-keyboard.conf
 Section "InputClass"
-	Identifier		"Erg keyboard"
+	Identifier		"Keyboardio"
 	MatchIsKeyboard		"Yes"
-    MatchProduct    "Truly Ergonomic"
+	MatchProduct		"Keyboardio"
 	Option			"XkbLayout" "us"
 EndSection
 EOF
@@ -213,3 +213,7 @@ make install
 #   - ctags-exuberant -e -R --fields=+iaS --extra=+qf .
 #   - ctags-exuberant -R --fields=+iaS --extra=+qf .
 
+# Installing lua LSP manually from source.
+# Download the binary -- description of how to proceed is given in the below
+# link.
+#     https://luals.github.io/#neovim-install
