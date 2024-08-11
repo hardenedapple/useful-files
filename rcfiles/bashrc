@@ -63,12 +63,21 @@ if [[ $TERM != 'dumb' ]]; then
 fi
 
 # add $HOME/bin to $PATH
-if [ -d "$HOME/bin" ]; then
-    PATH="$PATH:$HOME/bin"
-fi
-if [ -d "$HOME/.gem/ruby/2.0.0/bin" ]; then
-    PATH="$PATH:$HOME/.gem/ruby/2.0.0/bin"
-fi
+add_to_path () {
+  if [ -d "$1" ]; then
+    PATH="${1}:$PATH"
+    if [ -n "$2" ]; then
+      INFOPATH="${2}:$INFOPATH"
+    fi
+  fi
+}
+add_to_path "$HOME/bin"
+add_to_path "$HOME/repos/binutils/install/bin" "$HOME/repos/binutils/install/share/info"
+add_to_path "$HOME/bin/emacs/bin" "$HOME/bin/emacs/share/info"
+add_to_path "$HOME/.local/bin"
+add_to_path "$HOME/.gem/ruby/2.1.0/bin"
+add_to_path "$HOME/.cargo/bin"
+add_to_path "$HOME/bin/lua-lsp/bin"
 
 # Remove C-s and C-q (allows quite a lot of stuff) {{{
 stty -ixon

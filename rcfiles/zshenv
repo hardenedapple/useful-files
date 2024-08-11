@@ -47,28 +47,21 @@ typeset -U PATH
 typeset -xT INFOPATH infopath ':'
 typeset -U infopath
 infopath=(/usr/share/info)
-if [ -d "$HOME/bin" ]; then
-    path=(~/bin $path)
-fi
-if [ -d "$HOME/repos/binutils/install/bin" ]; then
-    path=(~/repos/binutils/install/bin $path)
-    infopath=(~/repos/binutils/install/share/info/ $infopath)
-fi
-if [ -d "$HOME/bin/emacs/bin" ]; then
-    path=(~/bin/emacs/bin $path)
-    infopath=(~/bin/emacs/share/info $infopath)
-fi
-if [ -d "$HOME/.local/bin" ]; then
-    path=(~/.local/bin $path)
-fi
-if [ -d "$HOME/.gem/ruby/2.1.0/bin/" ]; then
-    path=(~/.gem/ruby/2.1.0/bin $path)
-fi
-# Add zsh completion directory to fpath
-if [ -d "$HOME/.config/zsh/completion/" ]; then
-    fpath=(~/.config/zsh/completion $fpath)
-fi
+add_to_path () {
+  if [ -d "$1" ]; then
+    path=("$1" $path)
+    if [ -n "$2" ]; then
+      infopath=("$2" $infopath)
+    fi
+  fi
+}
+add_to_path "$HOME/bin"
 
-if [ -d "$HOME/.cargo/bin/" ]; then
-    path=(~/.cargo/bin $path)
-fi
+add_to_path "$HOME/repos/binutils/install/bin" "$HOME/repos/binutils/install/share/info"
+add_to_path "$HOME/bin/emacs/bin" "$HOME/bin/emacs/share/info"
+add_to_path "$HOME/.local/bin"
+add_to_path "$HOME/.gem/ruby/2.1.0/bin"
+# Add zsh completion directory to fpath
+add_to_path "$HOME/.config/zsh/completion"
+add_to_path "$HOME/.cargo/bin"
+add_to_path "$HOME/bin/lua-lsp/bin"
