@@ -1,6 +1,14 @@
 set history save on
 set python print-stack full
 
+# Below only really needed for when I build GDB from source.
+# However I find myself doing that more oftetn nowadays.
+# When using the system package this is built into the binary (at configure
+# time with flag --with-gdb-datadir=/usr/share/gdb).
+# However duplicating things doesn't cause any harm in that case, and when
+# built from source this adds useful things like python and libstdc++ helpers
+# that are distributed with the binaries.
+set data-directory /usr/share/gdb
 source ~/.config/gdb-walkers/gdb_walker_setup.py
 source ~/.vim/bundle/vsh/integration/with_gdb.py
 add-auto-load-safe-path /home/matmal01/repos/binutils/build/gdb/gdb-gdb.gdb
