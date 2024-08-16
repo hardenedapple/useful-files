@@ -32,7 +32,8 @@ install-packages () {
 	  autoconf automake cscope exuberant-ctags python3-neovim xsel weechat \
 	  gettext tree-sitter-cli tree-sitter-c-src libtree-sitter-dev fzy \
 	  moreutils bear clang-tools clangd python3-pylsp texinfo libxaw7-dev \
-	  libgtx-4-dev libgif-dev libgnutls28-dev flex bison dejagnu
+	  libgtx-4-dev libgif-dev libgnutls28-dev flex bison dejagnu notmuch \
+        ruby-dev ruby-notmuch
     # N.b. also need to look into libgccjit.
     # In a previous install I needed specifically to install libgccjit-13-dev
     # because the default version of gcc that was run was gcc-13.
@@ -116,6 +117,8 @@ git clone https://github.com/hardenedapple/neovim ~/repos/neovim
 (cd ~/repos/neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=${HOME}/bin/neovim && make install)
 # Get helptags up
 VIMRUNTIME=~/repos/neovim/runtime ~/repos/neovim/build/bin/nvim --cmd 'helptags ~/repos/neovim/runtime/doc/' --cmd 'q'
+# Install neovim ruby provider
+sudo gem install neovim
 
 # Ranger
 mkdir ~/.config/ranger
