@@ -193,6 +193,17 @@ git checkout emacs-30
 make configure="--prefix=${HOME}/bin/emacs CFLAGS='-O3 -g3'"
 make install
 
+mkdir -p ~/repos/binutils/build
+cd ~/repos/binutils
+git clone git://sourceware.org/git/binutils-gdb.git source
+cd build
+../source/configure --prefix=${HOME}/repos/binutils/install
+make install
+
+# Weechat commands to get it set up:
+# /server add oftc irc.oftc.net -autoconnect
+# /server add libera irc.libera.chat -autoconnect
+
 # Use package source https://apt.llvm.org/ to install most recent clang
 # - Install clangd from here, plus clang-tools as a whole.
 #
