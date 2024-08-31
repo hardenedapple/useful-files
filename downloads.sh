@@ -77,16 +77,22 @@ git submodule foreach "(git checkout master && git pull)"
 cd vsh
 ./emacs-tar.sh
 popd
-echo "NOTE: It's likely that the Tamsyn font isn't installed on this system."
-echo "If this is the case, then emacs will load without the majority of your config."
-echo -n "Simply comment out the lines setting the font in"
-echo " config/01_general_settings.el to get past that"
 
 # Emacs extra if needed/wanted
 # Follow instructions from below link to install more up-to-date version.
 # Configure with `--prefix=$HOME/bin/emacs` and install, PATH from zshenv
 # should include installed binaries.
 # https://www.gnu.org/software/emacs/manual/html_node/efaq/Installing-Emacs.html
+# Installing emacs.
+# Build from source because that gives much better ability to search for what's
+# happening in a C code function.
+cd ~/repos/
+git clone git://git.sv.gnu.org/emacs.git
+cd emacs
+git checkout emacs-30
+make configure="--prefix=${HOME}/bin/emacs CFLAGS='-O3 -g3'"
+make install
+
 
 # i3
 # Just ensure the config file is there ... I expect it gets installed with the
@@ -162,37 +168,6 @@ Section "InputClass"
 	Option			"XkbLayout" "us"
 EndSection
 EOF
-
-# Tamsyn font
-# TODO Would like to use wget to find the latest from the original authors website.
-# TODO Make this more robust against name clashes (unlikely there's a
-# tamsyn-... directory, but possible).
-#   Put fonts in a local directory and add that to the list instead of global
-#   one.
-wget http://www.fial.com/~scott/tamsyn-font/download/tamsyn-font-1.11.tar.gz
-tar -xzf tamsyn-font-1.11.tar.gz
-sudo cp tamsyn-font-1.11/* /usr/local/share/fonts
-sudo mkfontdir /usr/local/share/fonts
-
-# These are for the current session
-xset +fp /usr/local/share/fonts
-fc-cache /usr/local/share/fonts
-
-# This is for future logins.
-cat <<EOF > /usr/share/X11/xorg.conf.d/99-extra-font-dir.conf
-Section "Files"
-    FontPath "/usr/local/share/fonts"
-EndSection
-EOF
-
-# Installing emacs.
-# Build from source because that gives much better ability to search for things 
-cd ~/repos/
-git clone git://git.sv.gnu.org/emacs.git
-cd emacs
-git checkout emacs-30
-make configure="--prefix=${HOME}/bin/emacs CFLAGS='-O3 -g3'"
-make install
 
 mkdir -p ~/repos/binutils/build
 cd ~/repos/binutils
