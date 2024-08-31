@@ -78,6 +78,7 @@ add_to_path "$HOME/.local/bin"
 add_to_path "$HOME/.gem/ruby/2.1.0/bin"
 add_to_path "$HOME/.cargo/bin"
 add_to_path "$HOME/bin/lua-lsp/bin"
+add_to_path "$HOME/bin/rr/bin"
 
 # Remove C-s and C-q (allows quite a lot of stuff) {{{
 stty -ixon
@@ -260,7 +261,7 @@ then
   if [[ -z "$GIT_PAGER" ]]; then
     export GIT_PAGER='col -b'
   fi
-	stty tabs -onlcr icanon -echo -onlcr iexten isig -echonl -crterase
+  stty tabs -onlcr icanon -echo -onlcr iexten isig -echonl -crterase
 fi
 # }}}
 
