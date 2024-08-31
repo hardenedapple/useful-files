@@ -3,13 +3,17 @@
 import sys
 import difflib
 
+
 class TextColors:
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
     CLEAR = '\033[0m'
+
+
 def colored_text(text, color):
     return f'{color}{text}{TextColors.CLEAR}'
+
 
 def filter_large_similar_lines(a, b, context=10):
     seqm = difflib.SequenceMatcher(a=a, b=b)
@@ -32,18 +36,28 @@ def filter_large_similar_lines(a, b, context=10):
             retb.append(colored_text(b[x[3]:x[4]], TextColors.GREEN))
     return ''.join(reta), ''.join(retb)
 
+
 if __name__ == '__main__':
-    # Problem when difference from first is in different place each time,
-    # but don't have that problem yet.
+    with open(sys.argv[1], 'r') as infile:
+        first_file_lines = infile.readlines()
+    with open(sys.argv[2], 'r') as infile:
+        second_file_lines = infile.readlines()
+    matches = set()
     befores, afters = [], []
-    mytext = sys.stdin.readlines()
-    if len(mytext) > 1:
-        for line in mytext[1:]:
-            before, after = filter_large_similar_lines(mytext[0], line)
-            befores.append(before)
-            afters.append(after)
-        print(befores[0], end='')
-        for line in afters:
-            print(line, end='')
-    else:
-        print(mytext[0], end='')
+    max_b = 0
+    for left, right in zip(first_file_lines, second_file_lines):
+        if left == right:
+            matches.add(len(befores))
+            continue
+        # Use a context of 0 for the moment.
+        # This is what I want for the current use I wrote this script, will see
+        # what I tend to want later.
+        b, a = filter_large_similar_lines(left, right, context=0)
+        befores.append(b.strip())
+        afters.append(a.strip())
+        max_b = max(max_b, len(b))
+    for id, (left, right) in enumerate(zip(befores, afters)):
+        #if id in matches:
+        #    print(' '*(max_b-3), '......')
+        print(f'{left:{max_b}} | {right}')
+
