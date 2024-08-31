@@ -33,7 +33,8 @@ install-packages () {
 	  gettext tree-sitter-cli tree-sitter-c-src libtree-sitter-dev fzy \
 	  moreutils bear clang-tools clangd python3-pylsp texinfo libxaw7-dev \
 	  libgtx-4-dev libgif-dev libgnutls28-dev flex bison dejagnu notmuch \
-        ruby-dev ruby-notmuch
+          ruby-dev ruby-notmuch rr ccache lxappearance \
+          make-doc
     # N.b. also need to look into libgccjit.
     # In a previous install I needed specifically to install libgccjit-13-dev
     # because the default version of gcc that was run was gcc-13.
@@ -200,6 +201,23 @@ cd build
 ../source/configure --prefix=${HOME}/repos/binutils/install
 make install
 
+# Choose a dark theme from the UI of lxappearance.
+lxappearance
+# N.b. if using chrome go to `chrome://flags` in the URL and search for "dark
+# mode" to turn it on.
+
+# Ensuring notes are commiting regularly.
+# crontab -e
+# Add the line:
+#    10 0 * * * /home/mmalcomson/bin/daily-save
+# Where that script looks like the below (though modified for whatever setup one
+# uses).
+#   vshcmd: > cat ~/bin/daily-save
+#   #!/bin/bash
+#   
+#   git -C /home/mmalcomson/NOTES/ commit -a -m 'Todays State'
+#   float-atomics [16:32:55] $ 
+#   
 # Weechat commands to get it set up:
 # /server add oftc irc.oftc.net -autoconnect
 # /server add libera irc.libera.chat -autoconnect
