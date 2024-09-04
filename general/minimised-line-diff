@@ -2,7 +2,7 @@
 
 import sys
 import difflib
-
+import re
 
 class TextColors:
     GREEN = '\033[92m'
@@ -12,8 +12,12 @@ class TextColors:
 
 
 def colored_text(text, color):
-    return f'{color}{text}{TextColors.CLEAR}'
+    return text
+    #return f'{color}{text}{TextColors.CLEAR}'
 
+def escape_ansi(line):
+    ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
+    return ansi_escape.sub('', line)
 
 def filter_large_similar_lines(a, b, context=10):
     seqm = difflib.SequenceMatcher(a=a, b=b)
@@ -55,7 +59,7 @@ if __name__ == '__main__':
         b, a = filter_large_similar_lines(left, right, context=0)
         befores.append(b.strip())
         afters.append(a.strip())
-        max_b = max(max_b, len(b))
+        max_b = max(max_b, len(escape_ansi(b)))
     for id, (left, right) in enumerate(zip(befores, afters)):
         #if id in matches:
         #    print(' '*(max_b-3), '......')
