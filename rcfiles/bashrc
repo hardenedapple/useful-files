@@ -10,45 +10,44 @@
 
 # Cant get this to work with the right aligned status indicator.
 
- setprompt () {
-   if [[ "$TERM" == "dumb" ]]
-   then
-     local PR_RED=
-     local PR_GREEN=
-     local PR_YELLOW=
-     local PR_BLUE=
-     local PR_MAGENTA=
-     local PR_CYAN=
-     local PR_NO_COLOR=
-     local PR_USER_COL=
-   else
-     local PR_RED="\[\e[0;31m\]"
-     local PR_GREEN="\[\e[0;32m\]"
-     local PR_YELLOW="\[\e[0;33m\]"
-     local PR_BLUE="\[\e[0;34m\]"
-     local PR_MAGENTA="\[\e[0;35m\]"
-     local PR_CYAN="\[\e[0;36m\]"
-     local PR_NO_COLOR="\[\e[0m\]"
-     if [[ $( id -u ) -eq 0 ]]; then
-       local PR_USER_COL="${PR_RED}"
-     else
-       local PR_USER_COL="${PR_CYAN}"
-     fi
-   fi
+setprompt () {
+  if [[ "$TERM" == "dumb" ]]
+  then
+    local PR_RED=
+    local PR_GREEN=
+    local PR_YELLOW=
+    local PR_BLUE=
+    local PR_MAGENTA=
+    local PR_CYAN=
+    local PR_NO_COLOR=
+    local PR_USER_COL=
+  else
+    local PR_RED="\[\e[0;31m\]"
+    local PR_GREEN="\[\e[0;32m\]"
+    local PR_YELLOW="\[\e[0;33m\]"
+    local PR_BLUE="\[\e[0;34m\]"
+    local PR_MAGENTA="\[\e[0;35m\]"
+    local PR_CYAN="\[\e[0;36m\]"
+    local PR_NO_COLOR="\[\e[0m\]"
+    if [[ $( id -u ) -eq 0 ]]; then
+      local PR_USER_COL="${PR_RED}"
+    else
+      local PR_USER_COL="${PR_CYAN}"
+    fi
+  fi
 
-   local PR_USER="${PR_USER_COL}\$ ${PR_NO_COLOR}"
-   local PR_TIME="${PR_BLUE}[${PR_USER_COL}\D{%H:%M:%S}${PR_BLUE}]${PR_NO_COLOR}"
+  local PR_USER="${PR_USER_COL}\$ ${PR_NO_COLOR}"
+  local PR_TIME="${PR_BLUE}[${PR_USER_COL}\D{%H:%M:%S}${PR_BLUE}]${PR_NO_COLOR}"
 
-   if [[ -n "$SSH_CLIENT" || -n "$SSH2_CLIENT" ]]; then
-     local PR_HOST="${PR_YELLOW}\h${PR_BLUE}:${PR_NO_COLOR}"
-   fi
-   local PR_DIR="${PR_MAGENTA}\W${PR_NO_COLOR}"
-   # PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) "[$?,\!]" "${PR_DIR} $(PR_TIME} ${PR_USER}"'
-   local FRONT_PR="${PR_HOST}${PR_DIR} ${PR_TIME} ${PR_USER}"
-   PS1="${FRONT_PR}"
-   # local REAR_PR="[$?,\!]"
-   # PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) "${REAR_PR}" "${FRONT_PR}")'
-
+  if [[ -n "$SSH_CLIENT" || -n "$SSH2_CLIENT" ]]; then
+    local PR_HOST="${PR_YELLOW}\h${PR_BLUE}:${PR_NO_COLOR}"
+  fi
+  local PR_DIR="${PR_MAGENTA}\W${PR_NO_COLOR}"
+  # PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) "[$?,\!]" "${PR_DIR} $(PR_TIME} ${PR_USER}"'
+  local FRONT_PR="${PR_HOST}${PR_DIR} ${PR_TIME} ${PR_USER}"
+  PS1="${FRONT_PR}"
+  # local REAR_PR="[$?,\!]"
+  # PS1='$(printf "%*s\r%s" $(( COLUMNS - 1 )) "${REAR_PR}" "${FRONT_PR}")'
 }
 setprompt
 
