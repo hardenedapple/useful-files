@@ -1,0 +1,102 @@
+# Handling environment variables that I want to be shared across all logins.
+# I.e. those environment variables where I would want to include everywhere
+# (including shells, emacs, desktop managers, etc).
+
+# ssh agent certainly always want available.
+SSH_ENV="$HOME/.ssh/agent-environment"
+function start_agent {
+    /usr/bin/ssh-agent | sed 's/^echo/#echo/' >"$SSH_ENV"
+    chmod 600 "$SSH_ENV"
+    . "$SSH_ENV" >/dev/null
+}
+
+if [ -f "$SSH_ENV" ]; then
+    . "$SSH_ENV" >/dev/null
+    #ps $SSH_AGENT_PID doesn't work under Cygwin
+    ps -ef | grep $SSH_AGENT_PID | grep ssh-agent$ >/dev/null || {
+        start_agent
+    }
+else
+    start_agent
+fi
+
+# Order of loading MAN
+export MANSECT=1:8:5:7:2:0:3:4:6
+export LESSHISTFILE="/dev/null"
+export LESS="-SR -j 5"
+# For the moment.  Combined with the LESS
+export MANROFFOPT="-c"
+if [ -d "$HOME/bin/neovim/bin/" ]; then
+    export EDITOR=${HOME}/bin/neovim/bin/nvim
+else
+    export EDITOR=vim
+fi
+export PAGER=less
+# Allow git filter-branch without the warning.
+export FILTER_BRANCH_SQUELCH_WARNING=1
+
+# add directory to $PATH, but only if it is not already there.
+add_to_path () {
+  if [ -d "$1" ]; then
+    case  "$PATH" in
+        *"${1}"*)
+            ;;
+        "")
+            # This very unlikely to happen, but makes things a little more
+            # symmetrical with the INFOPATH case (where unset variable is more
+            # likely to be seen).
+            PATH="${1}"
+            ;;
+        *)
+            PATH="${1}:$PATH"
+            ;;
+    esac
+    if [ -n "$2" ] && [ -d "$2" ]; then
+        case  "$INFOPATH" in
+            *"${2}"*)
+                ;;
+            "")
+                INFOPATH="${2}"
+                ;;
+            *)
+                INFOPATH="${2}:$INFOPATH"
+                ;;
+        esac
+    fi
+  fi
+}
+add_to_path "$HOME/bin"
+add_to_path "$HOME/repos/binutils/install/bin" "$HOME/repos/binutils/install/share/info"
+add_to_path "$HOME/bin/emacs/bin" "$HOME/bin/emacs/share/info"
+add_to_path "$HOME/.local/bin"
+add_to_path "$HOME/.gem/ruby/2.1.0/bin"
+add_to_path "$HOME/.cargo/bin"
+add_to_path "$HOME/bin/lua-lsp/bin"
+add_to_path "$HOME/bin/rr/bin"
+export PATH
+
+# This adds colors to ALL less instances, might be annoying in some cases.
+# N.b. using escape literally rather than `printf` because `gdbserver` hangs
+# whenever used if `zshenv` forks.  Just avoid that strange bug.
+# https://sourceware.org/bugzilla/show_bug.cgi?id=26116
+#
+# N.b. it adds colors when seeing the specific output that MAN gives.
+# We ensure that MAN gives this output with the line of MANROFFOPT above.
+# AIUI this should be phased out eventually, but I'm sticking with it until it
+# is phased out because I need such things for vsh.
+export LESS_TERMCAP_mb="[1;31m"
+export LESS_TERMCAP_md="[1;31m"
+export LESS_TERMCAP_me="[0m"
+export LESS_TERMCAP_se="[0m"
+export LESS_TERMCAP_so="[1;44;33m"
+export LESS_TERMCAP_ue="[0m"
+export LESS_TERMCAP_us="[1;32m"
+
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+	. "$HOME/.bashrc"
+    fi
+fi
+

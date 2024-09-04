@@ -6,9 +6,6 @@
 [ -z "$PS1" ] && return
 
 
-# Stop less saving my search commands
-export LESSHISTFILE="/dev/null"
-
 # # {{{ Command Prompt
 
 # Cant get this to work with the right aligned status indicator.
@@ -58,27 +55,25 @@ setprompt
 # }}}
 
 # Default editor vim, but leave editing mode as emacs
-if [[ $TERM != 'dumb' ]]; then
-  export EDITOR=vim
-fi
-
-# add $HOME/bin to $PATH
-add_to_path () {
-  if [ -d "$1" ]; then
-    PATH="${1}:$PATH"
-    if [ -n "$2" ]; then
-      INFOPATH="${2}:$INFOPATH"
-    fi
+if [[ $TERM == 'dumb' ]]; then
+  # Usually I would want these variables set to col -b to remove wierd
+  # linefeeds and backspaces (I think -- I haven't used a `dumb` terminal very
+  # much, and hence haven't encountered many cases where this matters).
+  # If I'm running in vsh, then I've already set them to 'col -b | cat', which
+  # does the same but buffers the output so it doesn't make nvim slow.
+  if [[ -z "$PAGER" ]]; then
+    export PAGER='col -b'
   fi
-}
-add_to_path "$HOME/bin"
-add_to_path "$HOME/repos/binutils/install/bin" "$HOME/repos/binutils/install/share/info"
-add_to_path "$HOME/bin/emacs/bin" "$HOME/bin/emacs/share/info"
-add_to_path "$HOME/.local/bin"
-add_to_path "$HOME/.gem/ruby/2.1.0/bin"
-add_to_path "$HOME/.cargo/bin"
-add_to_path "$HOME/bin/lua-lsp/bin"
-add_to_path "$HOME/bin/rr/bin"
+  if [[ -z "$MANPAGER" ]]; then
+    export MANPAGER='col -b'
+  fi
+  # Do the equivalent as above but for git, because git doesn't use the PAGER
+  # environment variable.
+  if [[ -z "$GIT_PAGER" ]]; then
+    export GIT_PAGER='col -b'
+  fi
+  stty tabs -onlcr icanon -echo -onlcr iexten isig -echonl -crterase
+fi
 
 # Remove C-s and C-q (allows quite a lot of stuff) {{{
 stty -ixon
@@ -154,22 +149,6 @@ fi
 
 # }}}
 
-# {{{ Man page colors
-
-# This adds colors to ALL less instances, might be annoying in some cases.
-export LESS_TERMCAP_mb=$(printf "\e[1;31m") \
-export LESS_TERMCAP_md=$(printf "\e[1;31m") \
-export LESS_TERMCAP_me=$(printf "\e[0m") \
-export LESS_TERMCAP_se=$(printf "\e[0m") \
-export LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
-export LESS_TERMCAP_ue=$(printf "\e[0m") \
-export LESS_TERMCAP_us=$(printf "\e[1;32m")
-
-export MANSECT=1:8:5:7:2:0:3:4:6
-
-# }}}
-# }}}
-
 # Alias's  {{{
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$( dircolors -b ~/.dircolors )" || eval "$( dircolors -b )"
@@ -239,30 +218,6 @@ enable_completion () {
 }
 
 enable_completion
-# }}}
-
-# {{{ Other
-export LESS='-SR -j 5'
-if [[ "$TERM" == "dumb" ]]
-then
-  # Usually I would want these variables set to col -b to remove wierd
-  # linefeeds and backspaces (I think -- I haven't used a `dumb` terminal very
-  # much, and hence haven't encountered many cases where this matters).
-  # If I'm running in vsh, then I've already set them to 'col -b | cat', which
-  # does the same but buffers the output so it doesn't make nvim slow.
-  if [[ -z "$PAGER" ]]; then
-    export PAGER='col -b'
-  fi
-  if [[ -z "$MANPAGER" ]]; then
-    export MANPAGER='col -b'
-  fi
-  # Do the equivalent as above but for git, because git doesn't use the PAGER
-  # environment variable.
-  if [[ -z "$GIT_PAGER" ]]; then
-    export GIT_PAGER='col -b'
-  fi
-  stty tabs -onlcr icanon -echo -onlcr iexten isig -echonl -crterase
-fi
 # }}}
 
 # vim: set ts=2 sw=2 foldmethod=marker:
