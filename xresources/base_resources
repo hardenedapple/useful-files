@@ -9,13 +9,16 @@ UXTerm*termName:   xterm-256color
 ! font4 -> medium
 ! font5 -> large
 ! font6 -> huge
-UXTerm*font:       -misc-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
-! UXTerm*font1:       -misc-tamsyn-medium-r-normal-*-0-*-*-*-*-*-iso8859-1
-UXTerm*font2:       -misc-tamsyn-medium-r-normal-*-9-*-*-*-*-*-iso8859-1
-UXTerm*font3:       -misc-tamsyn-medium-r-normal-*-14-*-*-*-*-*-iso8859-1
-UXTerm*font4:       -misc-tamsyn-medium-r-normal-*-16-*-*-*-*-*-iso8859-1
-UXTerm*font5:       -misc-tamsyn-medium-r-normal-*-20-*-*-*-*-*-iso8859-1
-UXTerm*boldFont:   -misc-tamsyn-bold-r-normal-*-12-*-*-*-*-*-iso8859-1
+UXTerm*faceName:       Liberation Mono
+UXTerm*faceSize:       8
+UXTerm*faceSize1:       4
+UXTerm*faceSize2:       6
+UXTerm*faceSize3:       8
+UXTerm*faceSize4:       10
+UXTerm*faceSize5:       11
+UXTerm*faceSize6:       14
+UXTerm*faceSize7:       16
+UXTerm*renderFont:     true
 UXTerm*iconName:   Apples_Terminal
 UXTerm*title:      Apples_Terminal
 UXTerm*utf8:       2
@@ -53,13 +56,16 @@ XTerm*termName:   xterm-256color
 ! font4 -> medium
 ! font5 -> large
 ! font6 -> huge
-XTerm*font:       -misc-tamsyn-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
-! XTerm*font1:       -misc-tamsyn-medium-r-normal-*-0-*-*-*-*-*-iso8859-1
-XTerm*font2:       -misc-tamsyn-medium-r-normal-*-9-*-*-*-*-*-iso8859-1
-XTerm*font3:       -misc-tamsyn-medium-r-normal-*-14-*-*-*-*-*-iso8859-1
-XTerm*font4:       -misc-tamsyn-medium-r-normal-*-16-*-*-*-*-*-iso8859-1
-XTerm*font5:       -misc-tamsyn-medium-r-normal-*-20-*-*-*-*-*-iso8859-1
-XTerm*boldFont:   -misc-tamsyn-bold-r-normal-*-12-*-*-*-*-*-iso8859-1
+XTerm*faceName:       Liberation Mono
+XTerm*faceSize:       8
+XTerm*faceSize1:       4
+XTerm*faceSize2:       6
+XTerm*faceSize3:       8
+XTerm*faceSize4:       10
+XTerm*faceSize5:       11
+XTerm*faceSize6:       14
+XTerm*faceSize7:       16
+XTerm*renderFont:     true
 XTerm*iconName:   Apples_Terminal
 XTerm*title:      Apples_Terminal
 XTerm*utf8:       2
