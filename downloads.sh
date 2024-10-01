@@ -143,7 +143,7 @@ echo "e.g. Ubuntu will probably have something annoying there."
 # assume whatever settings are on the machine, if ~/bin exists then PATH will
 # include it.
 mkdir ~/bin 2>/dev/null
-for i in ~/repos/useful-files/general/{allow-ptrace,asbytes,disasbytes,dis,grep_column,searchPATH,see_mem.py,show_column,swap,xxdreverse,grep-man,get-section,search-block-c-comments,differences-between-lines};
+for i in ~/repos/useful-files/general/{allow-ptrace,asbytes,disasbytes,dis,grep_column,searchPATH,see_mem.py,show_column,swap,xxdreverse,grep-man,get-section,search-block-c-comments,differences-between-lines,html-to-text};
 do
     ln -sf $i ~/bin/${i##*/};
 done
@@ -180,6 +180,13 @@ make install
 lxappearance
 # N.b. if using chrome go to `chrome://flags` in the URL and search for "dark
 # mode" to turn it on.
+
+# To ensure debugging and performance tracing is nicely available.
+# N.b. the `sudo` will not work -- have to do this in a root shell.
+sudo cat <<EOF >> /etc/sysctl.conf
+kernel.perf_event_paranoid=-1
+kernel.yama.ptrace_scope=0
+EOF
 
 # Ensuring notes are commiting regularly.
 # crontab -e
