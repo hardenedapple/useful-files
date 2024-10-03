@@ -1,6 +1,6 @@
 [user]
     name  = Matthew Malcomson
-    email = matthew.malcomson@arm.com
+    email = hardenedapple@gmail.com
 [core]
     # I set the LESS environment variable, which means the git default value
     # for LESS of 'FRX' isn't used.
@@ -46,6 +46,15 @@
     driver = /usr/bin/git-merge-changelog %O %A %B
 [init]
     defaultBranch = master
+[sendemail]
+    smtpserver = <whatever>
+    smtpencryption = <whatever>
+    smtpserverport = <whatever>
+    smtpuser = <whatever>
+    from = <whatever>
+    thread = true
+    chainReplyTo = false
+    confirm = never
 # # Need this when setting up new machine (assuming don't have ssh access to
 # # github yet set up).
 # [url "https://github.com/"]
