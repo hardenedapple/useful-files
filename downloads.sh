@@ -34,7 +34,7 @@ install-packages () {
 	  moreutils bear clang-tools clangd python3-pylsp texinfo libxaw7-dev \
 	  libgtx-4-dev libgif-dev libgnutls28-dev flex bison dejagnu notmuch \
           ruby-dev ruby-notmuch rr ccache lxappearance librsvg2-dev \
-          make-doc
+          make-doc git-email
     # N.b. also need to look into libgccjit.
     # In a previous install I needed specifically to install libgccjit-13-dev
     # because the default version of gcc that was run was gcc-13.
@@ -231,3 +231,32 @@ EOF
 # Download the binary -- description of how to proceed is given in the below
 # link.
 #     https://luals.github.io/#neovim-install
+# I downloaded latest release (choice `B` at the time of writing) into ~/bin,
+# then added ~/bin/lua-lsp/bin to my PATH.
+
+# Installing asm LSP:
+# Following instructions from https://github.com/bergercookie/asm-lsp
+# Install with `cargo` (n.b. I had to use cargo-1.80 for versioning).
+# Used the following config so far and that seems to be working.
+cat <<EOF > ~/.config/asm-lsp/.asm-lsp.toml
+version = "0.1"
+
+[assemblers]
+gas = true
+go = false
+z80 = false
+masm = false
+nasm = false
+
+[instruction_sets]
+x86 = false
+x86_64 = false
+z80 = false
+arm = true
+riscv = false
+
+[opts]
+#compiler = "gcc"
+diagnostics = true
+default_diagnostics = true
+EOF
