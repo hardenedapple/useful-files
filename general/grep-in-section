@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+
+from argparse import ArgumentParser
+import re
+import sys
+from enum import Enum
+import logging
+import collections
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
+class State(Enum):
+    INTERESTING_HEADER = 1
+    INTERESTING_SECTION = 2
+    OUTSIDE = 3
+    MATCHED_SECTION = 4
+
+# Transitions I want to allow:
+# 1) interesting_header -> interesting_section
+# 2) interesting_section -> matched_section
+# 3) interesting_header -> outside
+# 4) interesting_section -> outside
+# 5) outside -> interesting_header
+# 6) matched_section -> interesting_header
+# 7) matched_section -> outside
+# 8) interesting_header -> matched_section
+
+# How to identify what transition to make:
+# 1) Always make this transition *unless* we match start of header pattern or a
+#    search pattern.
+# 2) Match of search pattern (and not of header pattern).
+# 3) Match of header pattern (and not of interesting-header pattern).
+# 4) Match of header pattern (and not of interesting-header pattern).
+# 5) Match of interesting header pattern.
+# 6) Match of interesting header pattern.
+# 7) Match of header pattern (and not of interesting-header pattern)
+# 8) Match of search pattern (and not of header pattern).
+
+# Actions for each of these transitions (when printing just matches):
+# 1) Do nothing.
+# 2) Print header, print line -- clear records.  => SavedInfo.print
+# 3) Do nothing.
+# 4) Do nothing.
+# 5) Do nothing.
+# 6) Do nothing.
+# 7) Do nothing.
+# 8) Print header, print line -- clear records.  => SavedInfo.print
+
+# Action to perform on every line for a given state (when printing just matches).
+# 1) matched_section => if line matches, print line.
+# 2) interesting_header => Save Header (as start of thing).
+# 3) interesting_section => do nothing.
+# 4) outside => do nothing
+
+
+# Actions for transitions (when printing entire section on match):
+# 1) Do nothing.
+# 2) Print header, print all saved lines, print current line -- clear records.
+#    => SavedInfo.print
+# 3) Do nothing.
+# 4) Do nothing.
+# 5) Do nothing.
+# 6) Do nothing.
+# 7) Do nothing.
+# 8) Print header, print all saved lines, print current line -- clear records.
+#    => SavedInfo.print
+
+# Actions to perform on every line for a given state (when printing entire
+# section on match):
+# 1) matched_section => print line
+# 2) interesting_header => record current header.
+# 3) interesting_section => append this line to save.
+# 4) outside => do nothing
+
+def gen_update_interesting_header(args):
+    def update_interesting_header(line):
+        if re.match(args.interesting, line):
+            return State.INTERESTING_HEADER
+        if re.match(args.header, line):
+            return State.OUTSIDE
+        if re.search(args.pattern, line):
+            return State.MATCHED_SECTION
+        return State.INTERESTING_SECTION
+    return update_interesting_header
+
+def gen_update_interesting_section(args):
+    return gen_update_interesting_header(args)
+
+def gen_update_outside(args):
+    def update_outside(line):
+        if re.match(args.interesting, line):
+            return State.INTERESTING_HEADER
+        return State.OUTSIDE
+    return update_outside
+
+def gen_update_matched_section(args):
+    def update_matched_section(line):
+        if re.match(args.interesting, line):
+            return State.INTERESTING_HEADER
+        if re.match(args.header, line):
+            return State.OUTSIDE
+        return State.MATCHED_SECTION
+    return update_matched_section
+
+def create_updates(args):
+    return {
+        State.INTERESTING_HEADER: gen_update_interesting_header(args),
+        State.INTERESTING_SECTION: gen_update_interesting_section(args),
+        State.OUTSIDE: gen_update_outside(args),
+        State.MATCHED_SECTION: gen_update_matched_section(args)
+    }
+
+# Following the below link to avoid a message on stderr even though I'm
+# catching the exception.  Principle seems to be that BrokenPipeException
+# gets caught just fine here, but on exit Python attempts to flush standard
+# streams.  At *that point* we hit BrokenPipeError again, and the internal
+# python code handles that by printing to stderr that it saw a problem
+# attempting to flush streams.  We want to avoid the exception raising here,
+# and avoid the error message at process teardown.
+# https://docs.python.org/3/library/signal.html#note-on-sigpipe
+def flushed_print(line):
+    try:
+        print(line, end='')
+        # Flush here to force BrokenPipeError happening in the try block.
+        sys.stdout.flush()
+    except BrokenPipeError:
+        import os
+        # Python flushes standard streams on exit; redirect remaining output
+        # to devnull to avoid another BrokenPipeError at shutdown
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        # Python exits with successfully, because stdout being terminated is
+        # not an error condition.
+        sys.exit(0)
+
+class SavedInfo:
+    def __init__(self):
+        self.val = None
+    def clear(self):
+        self.val = None
+    def save(self, v):
+        assert (type(v) is str)
+        if self.val is not None:
+            self.val.append(v)
+        else:
+            self.val = [v]
+    def print(self):
+        assert (type(self.val) is list)
+        flushed_print(''.join(self.val))
+
+def do_nothing(*args):
+    pass
+
+def create_transition_action(SaveState):
+    retdict = collections.defaultdict(
+        lambda: collections.defaultdict(lambda: do_nothing))
+    retdict[State.INTERESTING_HEADER][State.MATCHED_SECTION] = lambda x: SaveState.print()
+    retdict[State.INTERESTING_SECTION][State.MATCHED_SECTION] = lambda x: SaveState.print()
+    retdict[State.MATCHED_SECTION] = collections.defaultdict(lambda: lambda x: print())
+    return retdict
+
+def gen_always_matched(args):
+    if args.entire_section:
+        return lambda x: flushed_print(x)
+    def retfunc(line):
+        if re.search(args.pattern, line):
+            flushed_print(line)
+    return retfunc
+def gen_always_interesting_header(SaveState):
+    def retfunc(line):
+        SaveState.clear()
+        SaveState.save(line)
+    return retfunc
+def gen_always_interesting_section(args, SaveState):
+    if args.entire_section:
+        return lambda x: SaveState.save(x)
+    return do_nothing
+def create_always_actions(args, SaveState):
+    return {
+        State.INTERESTING_HEADER: gen_always_interesting_header(SaveState),
+        State.INTERESTING_SECTION: gen_always_interesting_section(args, SaveState),
+        State.OUTSIDE: do_nothing,
+        State.MATCHED_SECTION: gen_always_matched(args)
+    }
+
+# class TriState:
+#     def __init__(self):
+#         self.val = None
+#     def clear(self):
+#         if self.val is True:
+#             print()
+#         self.val = None
+#     def save(self, v):
+#         assert (type(v) is str)
+#         self.val = v
+#     def print(self):
+#         if type(self.val) is str:
+#             print(self.val, end='')
+#         self.val = True
+
+# HEADER = TriState()
+# def switch_to_header(line, *args):
+#     HEADER.clear()
+#     HEADER.save(line)
+#     switch_header(line, *args)
+# def switch_to_outside(line, *args):
+#     HEADER.clear()
+#     switch_outside(line, *args)
+# transition_action[State.HEADER] = switch_to_header
+# transition_action[State.OUTSIDE] = switch_to_outside
+
+def interesting_transition(state, new_state):
+    first_kind = ((new_state, state) !=
+                  (State.INTERESTING_SECTION, State.INTERESTING_HEADER))
+    second_kind = ((new_state, state) !=
+                   (State.INTERESTING_HEADER, State.INTERESTING_SECTION))
+    return not first_kind and not second_kind
+
+def main():
+    parser = ArgumentParser('Print sections from some input.\n'
+                            '''
+Example use to print matching lines in a given function from the disassembly of
+a large binary.
+''')
+    parser.add_argument('--header', required=True,
+                        help='Pattern marking start of sections.')
+    parser.add_argument('--interesting', required=True,
+                        help='Pattern marking the start of the interesting section.')
+    parser.add_argument('--pattern', required=True,
+                        help='Pattern matching interesting lines.')
+    parser.add_argument('--all', action='store_true',
+                        help='Whether to print all matching sections.')
+    parser.add_argument('--entire-section', action='store_true',
+                        help='Whether to print entire section that contains match.')
+    args = parser.parse_args()
+    SaveState = SavedInfo()
+    updates = create_updates(args)
+    transition_actions = create_transition_action(SaveState)
+    actions = create_always_actions(args, SaveState)
+    state = State.OUTSIDE
+    for line in sys.stdin.readlines():
+        new_state = updates[state](line)
+        if new_state != state:
+            if interesting_transition(state, new_state):
+                logger.debug(f'{line} transitioning from {state} to {new_state}')
+            transition_actions[state][new_state](line)
+        state = new_state
+        actions[state](line)
+
+if __name__ == "__main__":
+    main()
