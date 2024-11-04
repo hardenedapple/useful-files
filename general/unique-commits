@@ -1,0 +1,31 @@
+#!/bin/env python3
+'''
+Take a list of commit hashes on stdin, print a list of commit hashes with
+unique patch-id's on stdout.
+
+Useful for filtering on the command line (use-case I had is below for example)
+    vshcmd: > for i in $(git reflog -n 300 | cut -d' ' -f1 | unique-commits)
+    vshcmd: > do
+    vshcmd: >   if git log --format=%B -n 1 $i | grep -qE '(whatever)';
+    vshcmd: >   then
+    vshcmd: >     echo
+    vshcmd: >     git log -n1 $i
+    vshcmd: >   fi
+    vshcmd: > done
+
+'''
+import subprocess as sp
+import sys
+
+commits = [x.strip() for x in sys.stdin.readlines()]
+assoc = {}
+for c in commits:
+    patch_bytes = sp.check_output(['git', 'show', '-p', c])
+    patch_id = sp.check_output(['git', 'patch-id'], input=patch_bytes)
+    # Always choose earliest one (which is usually latest commit for my
+    # use-cases)
+    key = patch_id.decode('utf8').split()[0]
+    if key in assoc:
+        continue
+    assoc[key] = c
+    print(c)
