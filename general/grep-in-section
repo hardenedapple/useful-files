@@ -161,7 +161,7 @@ def create_transition_action(SaveState):
     return retdict
 
 def gen_always_matched(args):
-    if args.entire_section:
+    if not args.only_match:
         return lambda x: flushed_print(x)
     def retfunc(line):
         if re.search(args.pattern, line):
@@ -173,7 +173,7 @@ def gen_always_interesting_header(SaveState):
         SaveState.save(line)
     return retfunc
 def gen_always_interesting_section(args, SaveState):
-    if args.entire_section:
+    if not args.only_match:
         return lambda x: SaveState.save(x)
     return do_nothing
 def create_always_actions(args, SaveState):
@@ -183,32 +183,6 @@ def create_always_actions(args, SaveState):
         State.OUTSIDE: do_nothing,
         State.MATCHED_SECTION: gen_always_matched(args)
     }
-
-# class TriState:
-#     def __init__(self):
-#         self.val = None
-#     def clear(self):
-#         if self.val is True:
-#             print()
-#         self.val = None
-#     def save(self, v):
-#         assert (type(v) is str)
-#         self.val = v
-#     def print(self):
-#         if type(self.val) is str:
-#             print(self.val, end='')
-#         self.val = True
-
-# HEADER = TriState()
-# def switch_to_header(line, *args):
-#     HEADER.clear()
-#     HEADER.save(line)
-#     switch_header(line, *args)
-# def switch_to_outside(line, *args):
-#     HEADER.clear()
-#     switch_outside(line, *args)
-# transition_action[State.HEADER] = switch_to_header
-# transition_action[State.OUTSIDE] = switch_to_outside
 
 def interesting_transition(state, new_state):
     first_kind = ((new_state, state) !=
@@ -225,15 +199,16 @@ a large binary.
 ''')
     parser.add_argument('--header', required=True,
                         help='Pattern marking start of sections.')
-    parser.add_argument('--interesting', required=True,
-                        help='Pattern marking the start of the interesting section.')
+    parser.add_argument('--interesting',
+                        help=('Pattern marking the start of the interesting section.\n'
+                              + 'Only needed if different to --header.'))
     parser.add_argument('--pattern', required=True,
                         help='Pattern matching interesting lines.')
-    parser.add_argument('--all', action='store_true',
-                        help='Whether to print all matching sections.')
-    parser.add_argument('--entire-section', action='store_true',
-                        help='Whether to print entire section that contains match.')
+    parser.add_argument('--only-match', action='store_true',
+                        help='Print only lines that contains match in section.')
     args = parser.parse_args()
+    if not args.interesting:
+        args.interesting = args.header
     SaveState = SavedInfo()
     updates = create_updates(args)
     transition_actions = create_transition_action(SaveState)
