@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+r'''
+Given a list of commits, find which commits are the "tips" of branches.
+E.g. if we have a git history looking like:
+    --- A (base) --- B --- C (master)
+     \- D        --- E (feature)
+then `git find-tips base master feature` should give `master feature`.
+
+`git find-tips` on its own is the equivalent of the below (uses all branches
+shown by default `git branch`).
+  `git find-tips $(git branch | sed 's/..//')`
+
+'''
+import subprocess as sp
+from argparse import ArgumentParser
+import itertools as itt
+
+parser = ArgumentParser('git find-tips', usage=__doc__)
+parser.add_argument('commits', nargs='*')
+args = parser.parse_args()
+
+if not args.commits:
+    output = sp.check_output(['git', 'branch']).decode('utf8')
+    args.commits = [x[2:] for x in output.splitlines()]
+
+def subproc_output(x):
+    return sp.check_output(x).decode('utf8').strip()
+hashed_commits = [
+        subproc_output(['git', 'rev-parse', i])
+        for i in args.commits]
+hash_to_commit_mapping = {h: c for h, c in zip(hashed_commits, args.commits)}
+
+known_less_than = {c: set() for c in hashed_commits}
+known_greater_than = {c: set() for c in hashed_commits}
+known_different_branch = {c: set() for c in hashed_commits}
+for left, right in itt.combinations(hashed_commits, 2):
+    if known_greater_than[left] or known_greater_than[right]:
+        continue
+    least = subproc_output(['git', 'merge-base', left, right])
+    if least == left:
+        known_less_than[right].add(left)
+        known_greater_than[left].add(right)
+    elif least == right:
+        known_less_than[left].add(right)
+        known_greater_than[right].add(left)
+
+for h, v in known_less_than.items():
+    for lt in v:
+        known_greater_than[lt].add(h)
+
+for h, v in known_greater_than.items():
+    if not v:
+        print(hash_to_commit_mapping[h])
