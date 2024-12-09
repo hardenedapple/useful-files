@@ -2,14 +2,13 @@
 
 import sys
 import difflib
+import argparse
 
 class TextColors:
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
     CLEAR = '\033[0m'
-def colored_text(text, color):
-    return f'{color}{text}{TextColors.CLEAR}'
 
 def filter_large_similar_lines(a, b, context=10):
     seqm = difflib.SequenceMatcher(a=a, b=b)
@@ -33,6 +32,16 @@ def filter_large_similar_lines(a, b, context=10):
     return ''.join(reta), ''.join(retb)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser('Convert lines to highlight differences from first')
+    parser.add_argument('--no-color', help='Disable colorizing output',
+                        default=False, action='store_true', required=False)
+    args = parser.parse_args()
+    def with_color(text, color):
+        return f'{color}{text}{TextColors.CLEAR}'
+    def without_color(text, _):
+        return text
+    colored_text = without_color if args.no_color else with_color
+
     # Problem when difference from first is in different place each time,
     # but don't have that problem yet.
     befores, afters = [], []
