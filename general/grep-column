@@ -42,7 +42,7 @@ def find_column_number(title, line, sep):
         if cur_index == index:
             return index, (start_alignment, i)
         cur_index += 1
-        start_alignment = i - 1
+        start_alignment = i
     return None, (None, None)
 
 # Decisions:
@@ -133,9 +133,9 @@ desc = '\n'.join([
 ])
 parser = ArgumentParser('grep-column', description=desc)
 parser.add_argument('--aligned', action='store_true',
-                    help=' '.join(['Identify columns by alignment with'
-                                    'header rather than a column'
-                                    'separator.']))
+                    help=' '.join(['Identify columns by alignment with',
+                                   'header rather than a column',
+                                   'separator.']))
 parser.add_argument('--column-num', help='Index of the column to search.',
                     type=int, default=None)
 parser.add_argument('--column-title', help=' '.join([
@@ -264,6 +264,25 @@ if __name__ == '__main__':
             input_file = io.StringIO(example_pmap_output)
             args = parser.parse_args(['--aligned', '--column-title=Mapping',
                                       'heap'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, [
+                '         Address Perm   Offset Device    Inode   Size KernelPageSize MMUPageSize    Rss    Pss Pss_Dirty Shared_Clean Shared_Dirty Private_Clean Private_Dirty Referenced Anonymous KSM LazyFree AnonHugePages ShmemPmdMapped FilePmdMapped Shared_Hugetlb Private_Hugetlb Swap SwapPss Locked THPeligible ProtectionKey                                VmFlags Mapping\n',
+                '    6439eb91f000 rw-p 00000000  00:00        0 473340              4           4 472972 472972    472972            0            0             0        472972     375432    472972   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd [heap]\n'])
+
+        def test_aligned_columns2(self):
+            input_file = io.StringIO(example_pmap_output)
+            args = parser.parse_args(['--aligned', '--column-title=Mapping',
+                                      r'^\s+\[heap\]'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, [
+                '         Address Perm   Offset Device    Inode   Size KernelPageSize MMUPageSize    Rss    Pss Pss_Dirty Shared_Clean Shared_Dirty Private_Clean Private_Dirty Referenced Anonymous KSM LazyFree AnonHugePages ShmemPmdMapped FilePmdMapped Shared_Hugetlb Private_Hugetlb Swap SwapPss Locked THPeligible ProtectionKey                                VmFlags Mapping\n',
+                '    6439eb91f000 rw-p 00000000  00:00        0 473340              4           4 472972 472972    472972            0            0             0        472972     375432    472972   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd [heap]\n'])
+
+        def test_aligned_columns3(self):
+            input_file = io.StringIO(example_pmap_output)
+            args = parser.parse_args(['--aligned', '--column-title=Size', r'^ 47'])
             errmsg, ret = main(args, input_file)
             self.assertEqual(errmsg, None)
             self.assertEqual(ret, [
