@@ -1,0 +1,598 @@
+#!/usr/bin/env python
+
+from argparse import ArgumentParser
+import re
+import sys
+import logging
+import string
+logger = logging.getLogger(__name__)
+logging.basicConfig(stream=sys.stderr, level=logging.ERROR)
+# logger.setLevel(logging.DEBUG)
+
+
+def find_column_number(title, line, sep):
+    # This ignores multiple whitespaces between column titles if `sep` is None,
+    # but does not ignore multiple occurances of other characters.
+    # This "feels" right, will see on usage.   I.e. if my columns are separated
+    # by a '|' character then seeing '||' feels like a column without a
+    # specified title.  However if separated by whitespace seeing 'x   y' feels
+    # like two columns 'x' and 'y'.
+    columns = line.split(sep)
+    index = None
+    try:
+        index = columns.index(title)
+    except ValueError:
+        for i, v in enumerate(columns):
+            if re.match(title, v):
+                index = i
+    start_alignment = 0
+    cur_index = 0
+    in_whitespace = line[0] in string.whitespace
+    for i, char in enumerate(line):
+        column_whitespace_end = (
+                sep is None and char in string.whitespace and not
+                in_whitespace)
+        in_whitespace = (char in string.whitespace)
+        column_end = (char == sep or column_whitespace_end)
+        if not column_end:
+            assert (cur_index <= index)
+            if cur_index == index and index == len(columns) - 1:
+                return index, (start_alignment, -1)
+            continue
+        if cur_index == index:
+            return index, (start_alignment, i)
+        cur_index += 1
+        start_alignment = i
+    return None, (None, None)
+
+# Decisions:
+# 1) Which regexps should be re.match, which should be re.search?
+#    Currently going with:
+#    - column-title    assumed exact, if no match uses re.match
+#    - header-pattern  re.search
+
+def separator_splitter(separator, colnum):
+    def ret(line):
+        columns = line.split(separator)
+        return columns[colnum]
+    return ret
+def separator_bychar(start, end):
+    return lambda line: line[start:end]
+
+def main(args, input_file):
+    ret = []
+    if args.column_title is None and args.column_num is None:
+        return 'Require either column title or column number.', None
+
+    if args.column_title:
+        header_pattern = (args.header_pattern if args.header_pattern
+                          else args.column_title)
+
+    if args.aligned and not header_pattern:
+        return ('Require regexp identifying header to use "aligned" option.',
+                None)
+
+    header_line = None
+    startchar, endchar = None, None
+    if args.column_num is None or args.aligned:
+        for line in input_file:
+            if re.search(header_pattern, line):
+                # N.b. Must assume that titles have a known separator.
+                # Otherwise can simply not tell the difference between a
+                # multi-word column title and the titles of two separate
+                # columns.
+                column_num, (startchar, endchar) = find_column_number(
+                        args.column_title, line, args.column_separator)
+                msg = ' '.join([f'Header identified as {line}',
+                                f'title {args.column_title}',
+                                f'is num {column_num}',
+                                f'from characters {startchar} to {endchar}'])
+                logger.debug(msg)
+                if args.column_num is not None and column_num != args.column_num:
+                    return ' '.join(['Column number specified does not match',
+                                     'that found via regexp.']), None
+                args.column_num = column_num
+                header_line = line
+                break
+    if args.column_num is None:
+        return 'Given column title not found in table header.', None
+    if args.aligned and startchar is None:
+        return ' '.join(['Could not find column title in table header, hence',
+                         'could not find alignment to use as requested by ',
+                         '--aligned flag.']), None
+
+    # Remainder now we have the column number etc.
+    if not args.aligned:
+        splitter = separator_splitter(args.column_separator, args.column_num)
+    else:
+        splitter = separator_bychar(startchar, endchar)
+
+    for line in input_file:
+        try:
+            column_entry = splitter(line)
+            logger.debug(f'Column entry to match: {column_entry}')
+        except:
+            continue
+        ret.append(column_entry)
+    return None, ret
+
+desc = '\n'.join([
+    'Print entries in a given column.',
+    'Difference from something like `awk` is that can specify column by title',
+    'and/or can determine columns based on alignment with title instead of',
+    'by whitespace separation (useful when some tables are printed for',
+    'human consumption).'
+])
+parser = ArgumentParser('show-column', description=desc)
+parser.add_argument('--aligned', action='store_true',
+                    help=' '.join(['Identify columns by alignment with',
+                                   'header rather than a column',
+                                   'separator.']))
+parser.add_argument('--column-num', help='Index of the column to search.',
+                    type=int, default=None)
+parser.add_argument('--column-title', help=' '.join([
+    'Title of the column to search.',
+    'Used if --column-num is not specified.']))
+desc = ' '.join([
+    'Regexp to identify the header pattern.',
+    'Only relevant when using --column-title.',
+    'First line seen with this pattern in it is considered the header.',
+    'If not specified then --column-title is used as the regexp to',
+    'identify the header.'])
+parser.add_argument('--header-pattern', help=desc)
+parser.add_argument('--column-separator',
+                    help='String to split lines into columns by.',
+                    default=None)
+parser.add_argument('--run-tests', action='store_true', help='Run tests.')
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    if not args.run_tests:
+        errmsg, ret = main(args, sys.stdin)
+        if errmsg:
+            print(errmsg, file=sys.stderr)
+        else:
+            print('\n'.join(ret))
+        sys.exit(0)
+
+    sys.argv = ['/home/mmalcomson/bin/grep-column']
+    # Testing kept at end so doesn't make it hard to read the script.
+    import unittest
+    import io
+    # logger.setLevel(logging.DEBUG)
+
+    class BasicTests(unittest.TestCase):
+        ls_function_names = [
+                '__ctype_toupper_loc@GLIBC_2.3', 'getenv@GLIBC_2.2.5',
+                '__progname@GLIBC_2.2.5', 'sigprocmask@GLIBC_2.2.5',
+                '__snprintf_chk@GLIBC_2.3.4', 'raise@GLIBC_2.2.5',
+                '__libc_start_main@GLIBC_2.34', '__mempcpy_chk@GLIBC_2.3.4',
+                'abort@GLIBC_2.2.5', '__errno_location@GLIBC_2.2.5',
+                'strncmp@GLIBC_2.2.5', '_ITM_deregisterTMCloneTable',
+                'stdout@GLIBC_2.2.5', 'localtime_r@GLIBC_2.2.5',
+                '_exit@GLIBC_2.2.5', '__mbstowcs_chk@GLIBC_2.4',
+                '__fpending@GLIBC_2.2.5', 'isatty@GLIBC_2.2.5',
+                'sigaction@GLIBC_2.2.5', 'iswcntrl@GLIBC_2.2.5',
+                'reallocarray@GLIBC_2.26', 'wcswidth@GLIBC_2.2.5',
+                'localeconv@GLIBC_2.2.5', 'mbstowcs@GLIBC_2.2.5',
+                'readlink@GLIBC_2.2.5', 'clock_gettime@GLIBC_2.17',
+                'setenv@GLIBC_2.2.5', 'textdomain@GLIBC_2.2.5',
+                'fclose@GLIBC_2.2.5', 'optind@GLIBC_2.2.5',
+                'opendir@GLIBC_2.2.5', 'getpwuid@GLIBC_2.2.5',
+                'bindtextdomain@GLIBC_2.2.5', 'listxattr@GLIBC_2.3',
+                'dcgettext@GLIBC_2.2.5', '__ctype_get_mb_cur_max@GLIBC_2.2.5',
+                'strlen@GLIBC_2.2.5', '__stack_chk_fail@GLIBC_2.4',
+                'getopt_long@GLIBC_2.2.5', 'mbrtowc@GLIBC_2.2.5',
+                'freecon@LIBSELINUX_1.0', 'strchr@GLIBC_2.2.5',
+                'getgrgid@GLIBC_2.2.5', 'snprintf@GLIBC_2.2.5',
+                '__overflow@GLIBC_2.2.5', 'strrchr@GLIBC_2.2.5',
+                'gmtime_r@GLIBC_2.2.5', 'lseek@GLIBC_2.2.5',
+                '__assert_fail@GLIBC_2.2.5', 'fnmatch@GLIBC_2.2.5',
+                'memset@GLIBC_2.2.5', 'ioctl@GLIBC_2.2.5',
+                'getcwd@GLIBC_2.2.5', 'mbrtoc32@GLIBC_2.16',
+                'closedir@GLIBC_2.2.5', 'memcmp@GLIBC_2.2.5',
+                '_setjmp@GLIBC_2.2.5', 'fputs_unlocked@GLIBC_2.2.5',
+                'rawmemchr@GLIBC_2.2.5', 'calloc@GLIBC_2.2.5',
+                '__readlink_chk@GLIBC_2.4', 'signal@GLIBC_2.2.5',
+                'dirfd@GLIBC_2.2.5', 'fputc_unlocked@GLIBC_2.2.5',
+                'optarg@GLIBC_2.2.5', '__memcpy_chk@GLIBC_2.3.4',
+                'sigemptyset@GLIBC_2.2.5', '__gmon_start__', 'stat@GLIBC_2.33',
+                'memcpy@GLIBC_2.14', '__isoc23_strtoumax@GLIBC_2.38',
+                'program_invocation_name@GLIBC_2.2.5', 'tzset@GLIBC_2.2.5',
+                'fileno@GLIBC_2.2.5', 'tcgetpgrp@GLIBC_2.2.5',
+                'readdir@GLIBC_2.2.5', 'wcwidth@GLIBC_2.2.5',
+                'fflush@GLIBC_2.2.5', 'nl_langinfo@GLIBC_2.2.5',
+                'strcoll@GLIBC_2.2.5', 'mktime@GLIBC_2.2.5',
+                '__freading@GLIBC_2.2.5', 'fwrite_unlocked@GLIBC_2.2.5',
+                'realloc@GLIBC_2.2.5', '__strcpy_chk@GLIBC_2.3.4',
+                'setlocale@GLIBC_2.2.5', '__printf_chk@GLIBC_2.3.4',
+                'statx@GLIBC_2.28', 'timegm@GLIBC_2.2.5',
+                'strftime@GLIBC_2.2.5', 'mempcpy@GLIBC_2.2.5',
+                'memmove@GLIBC_2.2.5', 'error@GLIBC_2.2.5',
+                '__progname_full@GLIBC_2.2.5', 'fseeko@GLIBC_2.2.5',
+                'unsetenv@GLIBC_2.2.5', '__cxa_atexit@GLIBC_2.2.5',
+                'wcstombs@GLIBC_2.2.5', 'getxattr@GLIBC_2.3',
+                'gethostname@GLIBC_2.2.5', 'sigismember@GLIBC_2.2.5',
+                'exit@GLIBC_2.2.5', 'fwrite@GLIBC_2.2.5',
+                '__fprintf_chk@GLIBC_2.3.4', '_ITM_registerTMCloneTable',
+                'getfilecon@LIBSELINUX_1.0',
+                'fflush_unlocked@GLIBC_2.2.5', 'mbsinit@GLIBC_2.2.5',
+                'lgetfilecon@LIBSELINUX_1.0',
+                'program_invocation_short_name@GLIBC_2.2.5',
+                'iswprint@GLIBC_2.2.5', 'sigaddset@GLIBC_2.2.5',
+                '__ctype_tolower_loc@GLIBC_2.3',
+                '__ctype_b_loc@GLIBC_2.3', 'stderr@GLIBC_2.2.5',
+                '__sprintf_chk@GLIBC_2.3.4', 'obstack_alloc_failed_handler',
+                '_obstack_newchunk', '_obstack_begin_1',
+                '_obstack_allocated_p', '__cxa_finalize@GLIBC_2.2.5',
+                'free@GLIBC_2.2.5', '_obstack_begin', 'malloc@GLIBC_2.2.5',
+                '_obstack_memory_used', 'strcmp@GLIBC_2.2.5', '_obstack_free']
+        ls_bindings = [
+                'LOCAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'WEAK', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'WEAK', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'WEAK', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'WEAK', 'GLOBAL', 'GLOBAL', 'GLOBAL', 'GLOBAL',
+                'GLOBAL', 'GLOBAL']
+
+        def test_header_pattern(self):
+            input_file = io.StringIO(example_readelf_output)
+            args = parser.parse_args(['--header-pattern=Value',
+                                      '--column-title=Bind'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, self.ls_bindings)
+
+        def test_assumed_header(self):
+            input_file = io.StringIO(example_readelf_output)
+            args = parser.parse_args(['--column-title=Bind'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, self.ls_bindings)
+
+        def test_pattern_regexp(self):
+            input_file = io.StringIO(example_readelf_output)
+            args = parser.parse_args(['--column-title=Name'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, self.ls_function_names)
+
+        def test_specified_as_num(self):
+            input_file = io.StringIO(example_readelf_output)
+            args = parser.parse_args(['--column-num=7'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, ['Name'] + self.ls_function_names)
+
+        def test_aligned_columns(self):
+            input_file = io.StringIO(example_pmap_output)
+            args = parser.parse_args(['--aligned', '--column-title=Mapping'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, [
+                ' nvim', ' nvim', ' nvim', ' nvim', ' nvim', ' ', ' ',
+                ' [heap]', ' ', ' ', ' ', ' ', ' ', ' ', ' rust.so',
+                ' rust.so', ' rust.so', ' rust.so', ' rust.so', ' ',
+                ' vimdoc.so', ' vimdoc.so', ' vimdoc.so', ' vimdoc.so',
+                ' vimdoc.so', ' ', ' ',
+                ' cpp.so', ' cpp.so', ' cpp.so', ' cpp.so', ' cpp.so', ' ',
+                ' vim.so', ' vim.so', ' vim.so', ' vim.so', ' vim.so',
+                ' c.so', ' c.so', ' c.so', ' c.so', ' c.so',
+                ' ', ' ', ' ',
+                ' lua.so', ' lua.so', ' lua.so', ' lua.so', ' lua.so',
+                ' ', ' python.so', ' python.so', ' python.so', ' python.so',
+                ' python.so', ' ', ' ',
+                ' org.so', ' org.so', ' org.so', ' org.so', ' org.so', ' ',
+                ' locale-archive',
+                ' ', ' libc.so.6', ' libc.so.6', ' libc.so.6', ' libc.so.6',
+                ' libc.so.6', ' ', ' ', ' libgcc_s.so.1', ' libgcc_s.so.1',
+                ' libgcc_s.so.1', ' libgcc_s.so.1', ' libgcc_s.so.1',
+                ' libm.so.6', ' libm.so.6', ' libm.so.6', ' libm.so.6',
+                ' libm.so.6',
+                ' libfzy-linux-x86_64.so', ' libfzy-linux-x86_64.so',
+                ' libfzy-linux-x86_64.so', ' libfzy-linux-x86_64.so',
+                ' libfzy-linux-x86_64.so',
+                ' anon_inode:[io_uring]', ' anon_inode:[io_uring]',
+                ' anon_inode:[io_uring]', ' anon_inode:[io_uring]',
+                ' ',
+                ' ld-linux-x86-64.so.2', ' ld-linux-x86-64.so.2',
+                ' ld-linux-x86-64.so.2', ' ld-linux-x86-64.so.2',
+                ' ld-linux-x86-64.so.2',
+                ' [stack]', ' [vvar]', ' [vdso]', ' [vsyscall]', '', ''])
+
+        def test_aligned_columns2(self):
+            input_file = io.StringIO(example_pmap_output)
+            args = parser.parse_args(['--aligned', '--column-title=Referenced'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, [
+                '        612', '       3504', '        976', '         96',
+                '         84', '         92', '        364', '     375432',
+                '       4268', '        360', '         68', '        384',
+                '      10236', '       3200', '          0', '          0',
+                '          4', '          4', '          0', '        256',
+                '          0', '        116', '         28', '          4',
+                '          0', '       1152', '       1412', '          0',
+                '          0', '          4', '          4', '          0',
+                '        256', '          8', '        300', '        532',
+                '         12', '          4', '          0', '          0',
+                '          4', '          4', '          0', '        512',
+                '       6396', '        256', '          0', '          8',
+                '         40', '          4', '          4', '       3328',
+                '          8', '         20', '        412', '          4',
+                '         12', '       5440', '       1016', '          8',
+                '        152', '        232', '          4', '          4',
+                '       1024', '        448', '        512', '        160',
+                '       1440', '        192', '         12', '          8',
+                '         20', '       1032', '         16', '        136',
+                '         16', '          4', '          4', '         64',
+                '        352', '        164', '          4', '          0',
+                '          4', '          4', '         12', '          4',
+                '          4', '          0', '          0', '          0',
+                '          0', '          8', '          4', '        172',
+                '         40', '          8', '          8', '         68',
+                '          0', '          4', '          0', ' ==========',
+                '     427588'])
+
+    # Taken from ``readelf --symbols --wide $(which ls)` on my laptop.
+    example_readelf_output = ''.join([
+            '\n',
+            'Symbol table \'.dynsym\' contains 128 entries:\n',
+            '   Num:    Value          Size Type    Bind   Vis      Ndx Name\n',
+            '     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND \n',
+            '     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __ctype_toupper_loc@GLIBC_2.3 (2)\n',
+            '     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getenv@GLIBC_2.2.5 (3)\n',
+            '     3: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND __progname@GLIBC_2.2.5 (3)\n',
+            '     4: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigprocmask@GLIBC_2.2.5 (3)\n',
+            '     5: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __snprintf_chk@GLIBC_2.3.4 (4)\n',
+            '     6: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND raise@GLIBC_2.2.5 (3)\n',
+            '     7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.34 (5)\n',
+            '     8: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __mempcpy_chk@GLIBC_2.3.4 (4)\n',
+            '     9: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@GLIBC_2.2.5 (3)\n',
+            '    10: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.2.5 (3)\n',
+            '    11: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strncmp@GLIBC_2.2.5 (3)\n',
+            '    12: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable\n',
+            '    13: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND stdout@GLIBC_2.2.5 (3)\n',
+            '    14: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND localtime_r@GLIBC_2.2.5 (3)\n',
+            '    15: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _exit@GLIBC_2.2.5 (3)\n',
+            '    16: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __mbstowcs_chk@GLIBC_2.4 (6)\n',
+            '    17: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __fpending@GLIBC_2.2.5 (3)\n',
+            '    18: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND isatty@GLIBC_2.2.5 (3)\n',
+            '    19: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigaction@GLIBC_2.2.5 (3)\n',
+            '    20: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iswcntrl@GLIBC_2.2.5 (3)\n',
+            '    21: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND reallocarray@GLIBC_2.26 (7)\n',
+            '    22: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND wcswidth@GLIBC_2.2.5 (3)\n',
+            '    23: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND localeconv@GLIBC_2.2.5 (3)\n',
+            '    24: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mbstowcs@GLIBC_2.2.5 (3)\n',
+            '    25: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND readlink@GLIBC_2.2.5 (3)\n',
+            '    26: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND clock_gettime@GLIBC_2.17 (8)\n',
+            '    27: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND setenv@GLIBC_2.2.5 (3)\n',
+            '    28: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND textdomain@GLIBC_2.2.5 (3)\n',
+            '    29: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fclose@GLIBC_2.2.5 (3)\n',
+            '    30: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND optind@GLIBC_2.2.5 (3)\n',
+            '    31: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND opendir@GLIBC_2.2.5 (3)\n',
+            '    32: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getpwuid@GLIBC_2.2.5 (3)\n',
+            '    33: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND bindtextdomain@GLIBC_2.2.5 (3)\n',
+            '    34: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND listxattr@GLIBC_2.3 (2)\n',
+            '    35: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dcgettext@GLIBC_2.2.5 (3)\n',
+            '    36: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __ctype_get_mb_cur_max@GLIBC_2.2.5 (3)\n',
+            '    37: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strlen@GLIBC_2.2.5 (3)\n',
+            '    38: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __stack_chk_fail@GLIBC_2.4 (6)\n',
+            '    39: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getopt_long@GLIBC_2.2.5 (3)\n',
+            '    40: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mbrtowc@GLIBC_2.2.5 (3)\n',
+            '    41: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND freecon@LIBSELINUX_1.0 (9)\n',
+            '    42: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strchr@GLIBC_2.2.5 (3)\n',
+            '    43: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getgrgid@GLIBC_2.2.5 (3)\n',
+            '    44: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND snprintf@GLIBC_2.2.5 (3)\n',
+            '    45: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __overflow@GLIBC_2.2.5 (3)\n',
+            '    46: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strrchr@GLIBC_2.2.5 (3)\n',
+            '    47: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND gmtime_r@GLIBC_2.2.5 (3)\n',
+            '    48: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND lseek@GLIBC_2.2.5 (3)\n',
+            '    49: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __assert_fail@GLIBC_2.2.5 (3)\n',
+            '    50: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fnmatch@GLIBC_2.2.5 (3)\n',
+            '    51: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memset@GLIBC_2.2.5 (3)\n',
+            '    52: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND ioctl@GLIBC_2.2.5 (3)\n',
+            '    53: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getcwd@GLIBC_2.2.5 (3)\n',
+            '    54: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mbrtoc32@GLIBC_2.16 (10)\n',
+            '    55: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND closedir@GLIBC_2.2.5 (3)\n',
+            '    56: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memcmp@GLIBC_2.2.5 (3)\n',
+            '    57: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _setjmp@GLIBC_2.2.5 (3)\n',
+            '    58: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fputs_unlocked@GLIBC_2.2.5 (3)\n',
+            '    59: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND rawmemchr@GLIBC_2.2.5 (3)\n',
+            '    60: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND calloc@GLIBC_2.2.5 (3)\n',
+            '    61: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __readlink_chk@GLIBC_2.4 (6)\n',
+            '    62: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND signal@GLIBC_2.2.5 (3)\n',
+            '    63: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dirfd@GLIBC_2.2.5 (3)\n',
+            '    64: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fputc_unlocked@GLIBC_2.2.5 (3)\n',
+            '    65: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND optarg@GLIBC_2.2.5 (3)\n',
+            '    66: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __memcpy_chk@GLIBC_2.3.4 (4)\n',
+            '    67: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigemptyset@GLIBC_2.2.5 (3)\n',
+            '    68: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__\n',
+            '    69: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND stat@GLIBC_2.33 (11)\n',
+            '    70: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memcpy@GLIBC_2.14 (12)\n',
+            '    71: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __isoc23_strtoumax@GLIBC_2.38 (13)\n',
+            '    72: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND program_invocation_name@GLIBC_2.2.5 (3)\n',
+            '    73: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND tzset@GLIBC_2.2.5 (3)\n',
+            '    74: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fileno@GLIBC_2.2.5 (3)\n',
+            '    75: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND tcgetpgrp@GLIBC_2.2.5 (3)\n',
+            '    76: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND readdir@GLIBC_2.2.5 (3)\n',
+            '    77: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND wcwidth@GLIBC_2.2.5 (3)\n',
+            '    78: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fflush@GLIBC_2.2.5 (3)\n',
+            '    79: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND nl_langinfo@GLIBC_2.2.5 (3)\n',
+            '    80: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strcoll@GLIBC_2.2.5 (3)\n',
+            '    81: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mktime@GLIBC_2.2.5 (3)\n',
+            '    82: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __freading@GLIBC_2.2.5 (3)\n',
+            '    83: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fwrite_unlocked@GLIBC_2.2.5 (3)\n',
+            '    84: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND realloc@GLIBC_2.2.5 (3)\n',
+            '    85: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __strcpy_chk@GLIBC_2.3.4 (4)\n',
+            '    86: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND setlocale@GLIBC_2.2.5 (3)\n',
+            '    87: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __printf_chk@GLIBC_2.3.4 (4)\n',
+            '    88: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND statx@GLIBC_2.28 (14)\n',
+            '    89: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND timegm@GLIBC_2.2.5 (3)\n',
+            '    90: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strftime@GLIBC_2.2.5 (3)\n',
+            '    91: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mempcpy@GLIBC_2.2.5 (3)\n',
+            '    92: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memmove@GLIBC_2.2.5 (3)\n',
+            '    93: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND error@GLIBC_2.2.5 (3)\n',
+            '    94: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND __progname_full@GLIBC_2.2.5 (3)\n',
+            '    95: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fseeko@GLIBC_2.2.5 (3)\n',
+            '    96: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND unsetenv@GLIBC_2.2.5 (3)\n',
+            '    97: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __cxa_atexit@GLIBC_2.2.5 (3)\n',
+            '    98: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND wcstombs@GLIBC_2.2.5 (3)\n',
+            '    99: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getxattr@GLIBC_2.3 (2)\n',
+            '   100: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND gethostname@GLIBC_2.2.5 (3)\n',
+            '   101: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigismember@GLIBC_2.2.5 (3)\n',
+            '   102: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND exit@GLIBC_2.2.5 (3)\n',
+            '   103: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@GLIBC_2.2.5 (3)\n',
+            '   104: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __fprintf_chk@GLIBC_2.3.4 (4)\n',
+            '   105: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable\n',
+            '   106: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getfilecon@LIBSELINUX_1.0 (9)\n',
+            '   107: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fflush_unlocked@GLIBC_2.2.5 (3)\n',
+            '   108: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mbsinit@GLIBC_2.2.5 (3)\n',
+            '   109: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND lgetfilecon@LIBSELINUX_1.0 (9)\n',
+            '   110: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND program_invocation_short_name@GLIBC_2.2.5 (3)\n',
+            '   111: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iswprint@GLIBC_2.2.5 (3)\n',
+            '   112: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigaddset@GLIBC_2.2.5 (3)\n',
+            '   113: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __ctype_tolower_loc@GLIBC_2.3 (2)\n',
+            '   114: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __ctype_b_loc@GLIBC_2.3 (2)\n',
+            '   115: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND stderr@GLIBC_2.2.5 (3)\n',
+            '   116: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __sprintf_chk@GLIBC_2.3.4 (4)\n',
+            '   117: 00000000000230a0     8 OBJECT  GLOBAL DEFAULT   26 obstack_alloc_failed_handler\n',
+            '   118: 000000000000dca0   320 FUNC    GLOBAL DEFAULT   16 _obstack_newchunk\n',
+            '   119: 000000000000dc80    25 FUNC    GLOBAL DEFAULT   16 _obstack_begin_1\n',
+            '   120: 000000000000de30    55 FUNC    GLOBAL DEFAULT   16 _obstack_allocated_p\n',
+            '   121: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@GLIBC_2.2.5 (3)\n',
+            '   122: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@GLIBC_2.2.5 (3)\n',
+            '   123: 000000000000dc60    21 FUNC    GLOBAL DEFAULT   16 _obstack_begin\n',
+            '   124: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc@GLIBC_2.2.5 (3)\n',
+            '   125: 000000000000df10    38 FUNC    GLOBAL DEFAULT   16 _obstack_memory_used\n',
+            '   126: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strcmp@GLIBC_2.2.5 (3)\n',
+            '   127: 000000000000de70   158 FUNC    GLOBAL DEFAULT   16 _obstack_free\n'])
+
+    # Taken from `pmap -XX <pid-of-neovim>` on my laptop.
+    example_pmap_output = ''.join([
+        '1902771:   /home/mmalcomson/bin/neovim/bin/nvim --embed NOTES/Today.org general.vsh Documents/gnu-work/general.vsh\n',
+        '         Address Perm   Offset Device    Inode   Size KernelPageSize MMUPageSize    Rss    Pss Pss_Dirty Shared_Clean Shared_Dirty Private_Clean Private_Dirty Referenced Anonymous KSM LazyFree AnonHugePages ShmemPmdMapped FilePmdMapped Shared_Hugetlb Private_Hugetlb Swap SwapPss Locked THPeligible ProtectionKey                                VmFlags Mapping\n',
+        '    6439afac7000 r--p 00000000  fc:01 61373155    612              4           4    612    152         0          612            0             0             0        612         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd nvim\n',
+        '    6439afb60000 r-xp 00099000  fc:01 61373155   3504              4           4   3504   1028         0         3420            0            84             0       3504         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd nvim\n',
+        '    6439afecc000 r--p 00405000  fc:01 61373155   1464              4           4   1016    333         0          992            0            24             0        976         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd nvim\n',
+        '    6439b003a000 r--p 00573000  fc:01 61373155    112              4           4    112    112       112            0            0             0           112         96       112   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd nvim\n',
+        '    6439b0056000 rw-p 0058f000  fc:01 61373155     84              4           4     84     80        76            8            0             0            76         84        76   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd nvim\n',
+        '    6439b006b000 rw-p 00000000  00:00        0    116              4           4    100    100       100            0            0             0           100         92       100   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    6439d7990000 r-xp 00000000  00:00        0    384              4           4    364    364       364            0            0             0           364        364       364   0        0             0              0             0              0               0    0       0      0           0             0                   rd ex mr mw me ac sd \n',
+        '    6439eb91f000 rw-p 00000000  00:00        0 473340              4           4 472972 472972    472972            0            0             0        472972     375432    472972   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd [heap]\n',
+        '    777267600000 rw-p 00000000  00:00        0   4356              4           4   4268   4268      4268            0            0             0          4268       4268      4268   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    777267d41000 rw-p 00000000  00:00        0    360              4           4    360    360       360            0            0             0           360        360       360   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    777267e00000 rw-p 00000000  00:00        0     68              4           4     68     68        68            0            0             0            68         68        68   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    777268740000 rw-p 00000000  00:00        0    384              4           4    384    384       384            0            0             0           384        384       384   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    777268800000 rw-p 00000000  00:00        0  10240              4           4  10240  10240     10240            0            0             0         10240      10236     10240   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    7772693de000 rw-p 00000000  00:00        0   3200              4           4   3200   3200      3200            0            0             0          3200       3200      3200   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    7772696fe000 r--p 00000000  fc:01  7485467     12              4           4     12     12         0            0            0            12             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd rust.so\n',
+        '    777269701000 r-xp 00003000  fc:01  7485467     16              4           4     16     16         0            0            0            16             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd rust.so\n',
+        '    777269705000 r--p 00007000  fc:01  7485467    988              4           4    988    988         0            0            0           988             0          4         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd rust.so\n',
+        '    7772697fc000 r--p 000fe000  fc:01  7485467      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd rust.so\n',
+        '    7772697fd000 rw-p 000ff000  fc:01  7485467     12              4           4     12     12         8            0            0             4             8          0         8   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd rust.so\n',
+        '    777269af9000 rw-p 00000000  00:00        0    256              4           4    256    256       256            0            0             0           256        256       256   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    777269b39000 r--p 00000000  fc:01  7507017      4              4           4      4      4         0            0            0             4             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd vimdoc.so\n',
+        '    777269b3a000 r-xp 00001000  fc:01  7507017    120              4           4    120    120         0            0            0           120             0        116         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd vimdoc.so\n',
+        '    777269b58000 r--p 0001f000  fc:01  7507017     28              4           4     28     28         0            0            0            28             0         28         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd vimdoc.so\n',
+        '    777269b5f000 r--p 00025000  fc:01  7507017      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd vimdoc.so\n',
+        '    777269b60000 rw-p 00026000  fc:01  7507017      4              4           4      4      4         4            0            0             0             4          0         4   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd vimdoc.so\n',
+        '    777269b61000 rw-p 00000000  00:00        0   1152              4           4   1152   1152      1152            0            0             0          1152       1152      1152   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    777269c9f000 rw-p 00000000  00:00        0   1412              4           4   1412   1412      1412            0            0             0          1412       1412      1412   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    777269e00000 r--p 00000000  fc:01  7506644     20              4           4     20     20         0            0            0            20             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd cpp.so\n',
+        '    777269e05000 r-xp 00005000  fc:01  7506644     92              4           4     92     92         0            0            0            92             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd cpp.so\n',
+        '    777269e1c000 r--p 0001c000  fc:01  7506644   3224              4           4   3224   3224         0            0            0          3224             0          4         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd cpp.so\n',
+        '    77726a142000 r--p 00341000  fc:01  7506644      8              4           4      8      8         8            0            0             0             8          4         8   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd cpp.so\n',
+        '    77726a144000 rw-p 00343000  fc:01  7506644     12              4           4     12     12         8            0            0             4             8          0         8   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd cpp.so\n',
+        '    77726a165000 rw-p 00000000  00:00        0    256              4           4    256    256       256            0            0             0           256        256       256   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726a1a5000 r--p 00000000  fc:01  7501107     32              4           4     32     32         0            0            0            32             0          8         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd vim.so\n',
+        '    77726a1ad000 r-xp 00008000  fc:01  7501107    444              4           4    440    440         0            0            0           440             0        300         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd vim.so\n',
+        '    77726a21c000 r--p 00077000  fc:01  7501107    536              4           4    536    536         0            0            0           536             0        532         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd vim.so\n',
+        '    77726a2a2000 r--p 000fc000  fc:01  7501107     12              4           4     12     12        12            0            0             0            12         12        12   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd vim.so\n',
+        '    77726a2a5000 rw-p 000ff000  fc:01  7501107      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd vim.so\n',
+        '    77726a2a6000 r--p 00000000  fc:01  7506642     12              4           4     12     12         0            0            0            12             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd c.so\n',
+        '    77726a2a9000 r-xp 00003000  fc:01  7506642     48              4           4     48     48         0            0            0            48             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd c.so\n',
+        '    77726a2b5000 r--p 0000f000  fc:01  7506642    532              4           4    532    532         0            0            0           532             0          4         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd c.so\n',
+        '    77726a33a000 r--p 00094000  fc:01  7506642      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd c.so\n',
+        '    77726a33b000 rw-p 00095000  fc:01  7506642     12              4           4     12     12         8            0            0             4             8          0         8   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd c.so\n',
+        '    77726a33e000 rw-p 00000000  00:00        0    512              4           4    512    512       512            0            0             0           512        512       512   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726a3c0000 rw-p 00000000  00:00        0   8448              4           4   8448   8448      8448            0            0             0          8448       6396      8448   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726ac13000 rw-p 00000000  00:00        0    256              4           4    256    256       256            0            0             0           256        256       256   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726ac53000 r--p 00000000  fc:01  7506641      8              4           4      8      8         0            0            0             8             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd lua.so\n',
+        '    77726ac55000 r-xp 00002000  fc:01  7506641      8              4           4      8      8         0            0            0             8             0          8         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd lua.so\n',
+        '    77726ac57000 r--p 00004000  fc:01  7506641     40              4           4     40     40         0            0            0            40             0         40         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd lua.so\n',
+        '    77726ac61000 r--p 0000d000  fc:01  7506641      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd lua.so\n',
+        '    77726ac62000 rw-p 0000e000  fc:01  7506641      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd lua.so\n',
+        '    77726ac63000 rw-p 00000000  00:00        0   3328              4           4   3328   3328      3328            0            0             0          3328       3328      3328   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726afb2000 r--p 00000000  fc:01  7506643     12              4           4     12     12         0            0            0            12             0          8         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd python.so\n',
+        '    77726afb5000 r-xp 00003000  fc:01  7506643     20              4           4     20     20         0            0            0            20             0         20         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd python.so\n',
+        '    77726afba000 r--p 00008000  fc:01  7506643    412              4           4    412    412         0            0            0           412             0        412         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd python.so\n',
+        '    77726b021000 r--p 0006f000  fc:01  7506643      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd python.so\n',
+        '    77726b022000 rw-p 00070000  fc:01  7506643     12              4           4     12     12         8            0            0             4             8         12         8   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd python.so\n',
+        '    77726b025000 rw-p 00000000  00:00        0   5492              4           4   5492   5492      5492            0            0             0          5492       5440      5492   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726b583000 rw-p 00000000  00:00        0   1024              4           4   1024   1024      1024            0            0             0          1024       1016      1024   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726b683000 r--p 00000000  fc:01 61375212      8              4           4      8      8         0            0            0             8             0          8         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd org.so\n',
+        '    77726b685000 r-xp 00002000  fc:01 61375212    248              4           4    248    248         0            0            0           248             0        152         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd org.so\n',
+        '    77726b6c3000 r--p 00040000  fc:01 61375212    236              4           4    236    236         0            0            0           236             0        232         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd org.so\n',
+        '    77726b6fe000 r--p 0007a000  fc:01 61375212      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd org.so\n',
+        '    77726b6ff000 rw-p 0007b000  fc:01 61375212      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd org.so\n',
+        '    77726b700000 rw-p 00000000  00:00        0   1024              4           4   1024   1024      1024            0            0             0          1024       1024      1024   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726b800000 r--p 00000000  fc:01 58720312   5588              4           4    448      6         0          448            0             0             0        448         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd locale-archive\n',
+        '    77726bd80000 rw-p 00000000  00:00        0    512              4           4    512    512       512            0            0             0           512        512       512   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726be00000 r--p 00000000  fc:01 58773070    160              4           4    160      0         0          160            0             0             0        160         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libc.so.6\n',
+        '    77726be28000 r-xp 00028000  fc:01 58773070   1568              4           4   1440      9         0         1440            0             0             0       1440         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd libc.so.6\n',
+        '    77726bfb0000 r--p 001b0000  fc:01 58773070    316              4           4    192      1         0          192            0             0             0        192         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libc.so.6\n',
+        '    77726bfff000 r--p 001fe000  fc:01 58773070     16              4           4     16     16        16            0            0             0            16         12        16   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd libc.so.6\n',
+        '    77726c003000 rw-p 00202000  fc:01 58773070      8              4           4      8      8         8            0            0             0             8          8         8   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd libc.so.6\n',
+        '    77726c005000 rw-p 00000000  00:00        0     52              4           4     24     24        24            0            0             0            24         20        24   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726c018000 rw-p 00000000  00:00        0   1032              4           4   1032   1032      1032            0            0             0          1032       1032      1032   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726c11a000 r--p 00000000  fc:01 58728160     16              4           4     16      0         0           16            0             0             0         16         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libgcc_s.so.1\n',
+        '    77726c11e000 r-xp 00004000  fc:01 58728160    144              4           4    136     15         0          136            0             0             0        136         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd libgcc_s.so.1\n',
+        '    77726c142000 r--p 00028000  fc:01 58728160     16              4           4     16      0         0           16            0             0             0         16         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libgcc_s.so.1\n',
+        '    77726c146000 r--p 0002b000  fc:01 58728160      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd libgcc_s.so.1\n',
+        '    77726c147000 rw-p 0002c000  fc:01 58728160      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd libgcc_s.so.1\n',
+        '    77726c148000 r--p 00000000  fc:01 58773073     64              4           4     64      0         0           64            0             0             0         64         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libm.so.6\n',
+        '    77726c158000 r-xp 00010000  fc:01 58773073    508              4           4    352      4         0          352            0             0             0        352         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd libm.so.6\n',
+        '    77726c1d7000 r--p 0008f000  fc:01 58773073    352              4           4    164      5         0          164            0             0             0        164         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libm.so.6\n',
+        '    77726c22f000 r--p 000e7000  fc:01 58773073      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd libm.so.6\n',
+        '    77726c230000 rw-p 000e8000  fc:01 58773073      4              4           4      4      4         4            0            0             0             4          0         4   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd libm.so.6\n',
+        '    77726c23c000 r--p 00000000  fc:01  2097315      4              4           4      4      4         0            0            0             4             0          4         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libfzy-linux-x86_64.so\n',
+        '    77726c23d000 r-xp 00001000  fc:01  2097315      4              4           4      4      4         0            0            0             4             0          4         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd libfzy-linux-x86_64.so\n',
+        '    77726c23e000 r--p 00002000  fc:01  2097315     12              4           4     12     12         0            0            0            12             0         12         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd libfzy-linux-x86_64.so\n',
+        '    77726c241000 r--p 00004000  fc:01  2097315      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd libfzy-linux-x86_64.so\n',
+        '    77726c242000 rw-p 00005000  fc:01  2097315      4              4           4      4      4         4            0            0             0             4          4         4   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd libfzy-linux-x86_64.so\n',
+        '    77726c243000 rw-s 10000000  00:0f 17179572     16              4           4      0      0         0            0            0             0             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0 rd wr sh mr mw me ms pf io de ar dd sd anon_inode:[io_uring]\n',
+        '    77726c247000 rw-s 00000000  00:0f 17179572     12              4           4      0      0         0            0            0             0             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0 rd wr sh mr mw me ms pf io de ar dd sd anon_inode:[io_uring]\n',
+        '    77726c24a000 rw-s 10000000  00:0f 17179571      4              4           4      0      0         0            0            0             0             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0 rd wr sh mr mw me ms pf io de ar dd sd anon_inode:[io_uring]\n',
+        '    77726c24b000 rw-s 00000000  00:0f 17179571      4              4           4      0      0         0            0            0             0             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0 rd wr sh mr mw me ms pf io de ar dd sd anon_inode:[io_uring]\n',
+        '    77726c24c000 rw-p 00000000  00:00        0      8              4           4      8      8         8            0            0             0             8          8         8   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd \n',
+        '    77726c24e000 r--p 00000000  fc:01 58773067      4              4           4      4      0         0            4            0             0             0          4         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd ld-linux-x86-64.so.2\n',
+        '    77726c24f000 r-xp 00001000  fc:01 58773067    172              4           4    172      0         0          172            0             0             0        172         0   0        0             0              0             0              0               0    0       0      0           0             0                      rd ex mr mw me sd ld-linux-x86-64.so.2\n',
+        '    77726c27a000 r--p 0002c000  fc:01 58773067     40              4           4     40      0         0           40            0             0             0         40         0   0        0             0              0             0              0               0    0       0      0           0             0                         rd mr mw me sd ld-linux-x86-64.so.2\n',
+        '    77726c284000 r--p 00036000  fc:01 58773067      8              4           4      8      8         8            0            0             0             8          8         8   0        0             0              0             0              0               0    0       0      0           0             0                      rd mr mw me ac sd ld-linux-x86-64.so.2\n',
+        '    77726c286000 rw-p 00038000  fc:01 58773067      8              4           4      8      8         8            0            0             0             8          8         8   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me ac sd ld-linux-x86-64.so.2\n',
+        '    7ffdf6483000 rw-p 00000000  00:00        0    136              4           4     68     68        68            0            0             0            68         68        68   0        0             0              0             0              0               0    0       0      0           0             0                   rd wr mr mw me gd ac [stack]\n',
+        '    7ffdf64c8000 r--p 00000000  00:00        0     16              4           4      0      0         0            0            0             0             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                   rd mr pf io de dd sd [vvar]\n',
+        '    7ffdf64cc000 r-xp 00000000  00:00        0      8              4           4      4      0         0            4            0             0             0          4         0   0        0             0              0             0              0               0    0       0      0           0             0                   rd ex mr mw me de sd [vdso]\n',
+        'ffffffffff600000 --xp 00000000  00:00        0      4              4           4      0      0         0            0            0             0             0          0         0   0        0             0              0             0              0               0    0       0      0           0             0                                     ex [vsyscall]\n',
+        '                                               ====== ============== =========== ====== ====== ========= ============ ============ ============= ============= ========== ========= === ======== ============= ============== ============= ============== =============== ==== ======= ====== =========== ============= \n',
+        '                                               539428            412         412 532584 526444    517104         7856            0          7624        517104     427588    517104   0        0             0              0             0              0               0    0       0      0           0             0 KB \n'])
+
+    unittest.main()
+
