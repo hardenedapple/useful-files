@@ -95,7 +95,7 @@ def main(args, input_file):
                 args.column_num = column_num
                 ret.append(line)
                 break
-            elif args.extra_prints and re.search(args.extra_prints, line):
+            elif args.extra_prints and any(re.search(x, line) for x in args.extra_prints):
                 ret.append(line)
     if args.column_num is None:
         return 'Given column title not found in table header.', None
@@ -111,7 +111,7 @@ def main(args, input_file):
         splitter = separator_bychar(startchar, endchar)
 
     for line in input_file:
-        if args.extra_prints and re.search(args.extra_prints, line):
+        if args.extra_prints and any(re.search(x, line) for x in args.extra_prints):
             ret.append(line)
             continue
         try:
@@ -141,8 +141,9 @@ parser.add_argument('--column-num', help='Index of the column to search.',
 parser.add_argument('--column-title', help=' '.join([
     'Title of the column to search.',
     'Used if --column-num is not specified.']))
-desc = 'Regexp found in lines that should always be printed'
-parser.add_argument('--extra-prints', help=desc)
+desc = ' '.join(['Regexp found in lines that should always be printed.',
+                  'Can provide multiple entries for multiple patterns.'])
+parser.add_argument('--extra-prints', help=desc, nargs='+')
 desc = ' '.join([
     'Regexp to identify the header pattern.',
     'Only relevant when using --column-title.',
@@ -229,6 +230,32 @@ if __name__ == '__main__':
             self.assertEqual(errmsg, None)
             self.assertEqual(ret, [
                 '   Num:    Value          Size Type    Bind   Vis      Ndx Name\n',
+                '     3: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND __progname@GLIBC_2.2.5 (3)\n',
+                '    12: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable\n',
+                '    13: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND stdout@GLIBC_2.2.5 (3)\n',
+                '    30: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND optind@GLIBC_2.2.5 (3)\n',
+                '    65: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND optarg@GLIBC_2.2.5 (3)\n',
+                '    68: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__\n',
+                '    72: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND program_invocation_name@GLIBC_2.2.5 (3)\n',
+                '    94: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND __progname_full@GLIBC_2.2.5 (3)\n',
+                '   105: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable\n',
+                '   110: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND program_invocation_short_name@GLIBC_2.2.5 (3)\n',
+                '   115: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND stderr@GLIBC_2.2.5 (3)\n',
+                '   117: 00000000000230a0     8 OBJECT  GLOBAL DEFAULT   26 obstack_alloc_failed_handler\n',
+                '   121: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@GLIBC_2.2.5 (3)\n'])
+
+        def test_extra_prints2(self):
+            input_file = io.StringIO(example_readelf_output)
+            args = parser.parse_args(['--extra-prints',
+                                      'OBJECT',
+                                      'NOTYPE',
+                                      '--column-title=Bind',
+                                      'WEAK'])
+            errmsg, ret = main(args, input_file)
+            self.assertEqual(errmsg, None)
+            self.assertEqual(ret, [
+                '   Num:    Value          Size Type    Bind   Vis      Ndx Name\n',
+                '     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND \n',
                 '     3: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND __progname@GLIBC_2.2.5 (3)\n',
                 '    12: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable\n',
                 '    13: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND stdout@GLIBC_2.2.5 (3)\n',
