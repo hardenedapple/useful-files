@@ -8,7 +8,7 @@ import logging
 import collections
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
 class State(Enum):
     INTERESTING_HEADER = 1
@@ -72,6 +72,9 @@ class State(Enum):
 # 2) interesting_header => record current header.
 # 3) interesting_section => append this line to save.
 # 4) outside => do nothing
+def line_matches(args, line):
+    re_matches = re.search(args.pattern, line)
+    return re_matches if not args.invert_match else not re_matches
 
 def gen_update_interesting_header(args):
     def update_interesting_header(line):
@@ -152,19 +155,26 @@ class SavedInfo:
 def do_nothing(*args):
     pass
 
-def create_transition_action(SaveState):
+def create_transition_action(args, SaveState):
     retdict = collections.defaultdict(
         lambda: collections.defaultdict(lambda: do_nothing))
-    retdict[State.INTERESTING_HEADER][State.MATCHED_SECTION] = lambda x: SaveState.print()
-    retdict[State.INTERESTING_SECTION][State.MATCHED_SECTION] = lambda x: SaveState.print()
-    retdict[State.MATCHED_SECTION] = collections.defaultdict(lambda: lambda x: print())
+    if not args.invert_match:
+        retdict[State.INTERESTING_HEADER][State.MATCHED_SECTION] = lambda x: SaveState.print()
+        retdict[State.INTERESTING_SECTION][State.MATCHED_SECTION] = lambda x: SaveState.print()
+        retdict[State.MATCHED_SECTION] = collections.defaultdict(lambda: lambda x: print())
+    else:
+        retdict[State.INTERESTING_SECTION][State.INTERESTING_HEADER] = lambda x: SaveState.print()
+        retdict[State.INTERESTING_SECTION][State.OUTSIDE] = lambda x: SaveState.print()
+        retdict[State.INTERESTING_HEADER][State.OUTSIDE] = lambda x: SaveState.print()
     return retdict
 
 def gen_always_matched(args):
     if not args.only_match:
-        return lambda x: flushed_print(x)
+        if not args.invert_match:
+            return lambda x: flushed_print(x)
+        return do_nothing
     def retfunc(line):
-        if re.search(args.pattern, line):
+        if line_matches(args, line):
             flushed_print(line)
     return retfunc
 def gen_always_interesting_header(SaveState):
@@ -206,12 +216,14 @@ a large binary.
                         help='Pattern matching interesting lines.')
     parser.add_argument('--only-match', action='store_true',
                         help='Print only lines that contains match in section.')
+    parser.add_argument('--invert-match', '-v', action='store_true',
+                        help='Invert logic; sections without a match are printed')
     args = parser.parse_args()
     if not args.interesting:
         args.interesting = args.header
     SaveState = SavedInfo()
     updates = create_updates(args)
-    transition_actions = create_transition_action(SaveState)
+    transition_actions = create_transition_action(args, SaveState)
     actions = create_always_actions(args, SaveState)
     state = State.OUTSIDE
     for line in sys.stdin.readlines():
