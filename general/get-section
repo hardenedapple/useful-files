@@ -67,7 +67,7 @@ def do_nothing(*args):
 # https://docs.python.org/3/library/signal.html#note-on-sigpipe
 def print_line(line):
     try:
-        print(line, end='')
+        print(line)
         # Flush here to force BrokenPipeError happening in the try block.
         sys.stdout.flush()
     except BrokenPipeError:
@@ -104,6 +104,7 @@ objdump -d bar | get-section --interesting='^0.*<foo>:' --header='^0'
     header = re.compile(args.header)
     state = State.OUTSIDE
     for line in sys.stdin.readlines():
+        line = line.strip('\n')
         new_state = updates[state](line, interesting, header)
         if new_state != state:
             transition_action[new_state](line, interesting, header, args.all)
