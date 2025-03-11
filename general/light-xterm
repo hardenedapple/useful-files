@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Most of the time I use a black background & white foreground xterm.
+# When in the sun I need to change my vim colorscheme in order to be able to
+# see what I'm doing.
+# The best colorscheme I found in that situation is a white one and running it
+# in a light xterm works best.
+# Since I run the vim session inside tmux, I can simply attach from the new
+# xterm and carry on in my existing session.
+exec xterm -bg white -fg black
