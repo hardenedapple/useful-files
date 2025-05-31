@@ -2,6 +2,9 @@
 # Usage
 #   man -k <something> | cut -d' ' -f1 | grep-man-pages -i <grep-pattern>
 #
+#
+#  N.b. a more thorough search could be via using zgrep.
+#     find /usr/share/man/ -name '*.gz' -exec zgrep -l -nH -e 'XLIB FUNCTIONS' {} +
 if [[ -t 0 ]]; then
     echo "Usage: man -k <something> | cut -d' ' -f1 | $0 <grep-arguments>"
 else
