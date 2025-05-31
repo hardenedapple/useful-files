@@ -31,7 +31,6 @@ BEGIN {
         filter = 0;
     else
         filter = 1;
-
 }
 
 # I don't really know whether this should work or if it does by some
@@ -43,9 +42,7 @@ column {
         print $0;
 }
 
-extra_prints && $0 ~ extra_prints {
-  print $0;
-}
+extra_prints && $0 ~ extra_prints { print $0; }
 
 header_pattern && $0 ~ header_pattern && !column {
     for (i = 1; i < NF + 1; ++i) {
@@ -55,5 +52,3 @@ header_pattern && $0 ~ header_pattern && !column {
         }
     }
 }
-
-
