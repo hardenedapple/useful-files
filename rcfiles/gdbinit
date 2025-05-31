@@ -11,6 +11,8 @@ set python print-stack full
 set data-directory /usr/share/gdb
 source ~/.config/gdb-walkers/gdb_walker_setup.py
 source ~/.vim/bundle/vsh/integration/with_gdb.py
+# set share-usage-statistics licensing-only
+set debuginfod enabled off
 add-auto-load-safe-path /home/matmal01/repos/binutils/build/gdb/gdb-gdb.gdb
 add-auto-load-safe-path /home/matmal01/repos/binutils/build/gdb/gdb-gdb.py
 
@@ -26,6 +28,6 @@ python
 if os.getenv('TERM') == 'dumb':
     gdb.execute('set pagination off')
     gdb.execute('set width 0')
-    gdb.execute('set max-completions 0')
+    gdb.execute('set max-completions unlimited')
 end
 
