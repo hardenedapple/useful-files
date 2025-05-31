@@ -21,7 +21,8 @@ args = parser.parse_args()
 
 if not args.commits:
     output = sp.check_output(['git', 'branch']).decode('utf8')
-    args.commits = [x[2:] for x in output.splitlines()]
+    args.commits = [x[2:] for x in output.splitlines()
+                    if 'detached at' not in x]
 
 def subproc_output(x):
     return sp.check_output(x).decode('utf8').strip()
@@ -30,9 +31,9 @@ hashed_commits = [
         for i in args.commits]
 hash_to_commit_mapping = {h: c for h, c in zip(hashed_commits, args.commits)}
 
-known_less_than = {c: set() for c in hashed_commits}
-known_greater_than = {c: set() for c in hashed_commits}
-known_different_branch = {c: set() for c in hashed_commits}
+known_less_than: dict[str, set[str]] = {c: set() for c in hashed_commits}
+known_greater_than: dict[str, set[str]] = {c: set() for c in hashed_commits}
+known_different_branch: dict[str, set[str]] = {c: set() for c in hashed_commits}
 for left, right in itt.combinations(hashed_commits, 2):
     if known_greater_than[left] or known_greater_than[right]:
         continue
