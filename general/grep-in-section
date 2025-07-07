@@ -234,6 +234,21 @@ a large binary.
             transition_actions[state][new_state](line)
         state = new_state
         actions[state](line)
+    # Do something about the "last" section.  Only have to be concerned here for
+    # the "invert match" choice.  With actual matches the end of input doesn't
+    # tell us anything extra about whether we've matched (would have already
+    # seen a matching line). With invert match and printing the whole section
+    # the end of input could tell us that the last section doesn't have the line
+    # we're interested in and hence we have to print it.
+    # Simulate this with an artificial switch from <current state> to
+    # State.INTERESTING_HEADER.
+    # TODO Have noticed another bug here with `invert_match`.  Transitioning
+    # from `INTERESTING_HEADER` to `INTERESTING_HEADER` doesn't do anything.  I
+    # think that for `invert_match` that should count as a matching section.
+    if args.invert_match and state != State.MATCHED_SECTION:
+        # N.b. can use SaveState.print without checking whether args.only_match
+        # because if args.only_match is true we would not have saved any state.
+        SaveState.print()
 
 if __name__ == "__main__":
     main()
