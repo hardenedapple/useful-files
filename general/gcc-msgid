@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+
+import urllib.request
+import urllib.parse
+from html.parser import HTMLParser
+import argparse
+
+parser = argparse.ArgumentParser(
+    description="Find the messageID needed as an argument for `b4` from a link to gcc-patches archive."
+                "E.g. `b4 shazam https://gcc.gnu.org/pipermail/gcc-patches/2025-July/688838.html`"
+)
+parser.add_argument(
+    "url",
+    help="URL of the mailing list archive HTML message (e.g. https://gcc.gnu.org/pipermail/gcc-patches/<month>/<id>.html)"
+)
+args = parser.parse_args()
+url = args.url
+
+response = urllib.request.urlopen(url)
+html = response.read().decode('utf-8')
+
+class HeadMadeLinkParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.in_head = False
+        self.made_link = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "head":
+            self.in_head = True
+        if self.in_head and tag == "link":
+            attr_dict = dict(attrs)
+            if attr_dict.get("rel") == "made" and "href" in attr_dict:
+                self.made_link = attr_dict["href"]
+
+    def handle_endtag(self, tag):
+        if tag == "head":
+            self.in_head = False
+
+parser = HeadMadeLinkParser()
+parser.feed(html)
+
+if parser.made_link:
+    parsed = urllib.parse.urlparse(parser.made_link)
+    query = urllib.parse.parse_qs(parsed.query)
+    in_reply_to = query.get('In-Reply-To', [None])[0]
+    if in_reply_to:
+        in_reply_to_decoded = urllib.parse.unquote(in_reply_to)
+        print(in_reply_to_decoded)
+    else:
+        print("No In-Reply-To parameter found in the link.")
+else:
+    print("No link with rel='made' found in head.")
