@@ -7,7 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser(
     description="Find the messageID needed as an argument for `b4` from a link to gcc-patches archive."
-                "E.g. `b4 shazam https://gcc.gnu.org/pipermail/gcc-patches/2025-July/688838.html`"
+                "E.g. `b4 shazam $(gcc-msgid https://gcc.gnu.org/pipermail/gcc-patches/2025-July/688838.html)`"
 )
 parser.add_argument(
     "url",
@@ -37,11 +37,11 @@ class HeadMadeLinkParser(HTMLParser):
         if tag == "head":
             self.in_head = False
 
-parser = HeadMadeLinkParser()
-parser.feed(html)
+htmlparser = HeadMadeLinkParser()
+htmlparser.feed(html)
 
-if parser.made_link:
-    parsed = urllib.parse.urlparse(parser.made_link)
+if htmlparser.made_link:
+    parsed = urllib.parse.urlparse(htmlparser.made_link)
     query = urllib.parse.parse_qs(parsed.query)
     in_reply_to = query.get('In-Reply-To', [None])[0]
     if in_reply_to:
