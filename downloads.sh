@@ -33,8 +33,8 @@ install-packages () {
 	  gettext tree-sitter-cli tree-sitter-c-src libtree-sitter-dev fzy \
 	  moreutils bear clang-tools clangd python3-pylsp texinfo libxaw7-dev \
 	  libgtx-4-dev libgif-dev libgnutls28-dev flex bison dejagnu notmuch \
-          ruby-dev ruby-notmuch rr ccache lxappearance librsvg2-dev \
-          make-doc git-email mypy mypy-doc python3-pylsp-mypy
+      ruby-dev ruby-notmuch rr ccache lxappearance librsvg2-dev \
+      make-doc git-email mypy mypy-doc python3-pylsp-mypy perl-doc xbanish
     # N.b. also need to look into libgccjit.
     # In a previous install I needed specifically to install libgccjit-13-dev
     # because the default version of gcc that was run was gcc-13.
