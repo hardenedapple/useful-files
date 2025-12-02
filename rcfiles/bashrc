@@ -72,6 +72,8 @@ if [[ $TERM == 'dumb' ]]; then
     export GIT_PAGER='col -b'
   fi
   stty tabs -onlcr icanon -echo -onlcr iexten isig -echonl -crterase
+  alias fdfind='fdfind --color never'
+  alias rg='rg --color=never'
 fi
 
 # Remove C-s and C-q (allows quite a lot of stuff) {{{
