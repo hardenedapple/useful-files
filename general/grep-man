@@ -3,10 +3,26 @@
 #   man -k <something> | cut -d' ' -f1 | grep-man-pages -i <grep-pattern>
 #
 #
-#  N.b. a more thorough search could be via using zgrep.
+#  N.b. A search *without formatting* could be made using `zgrep`.
 #     find /usr/share/man/ -name '*.gz' -exec zgrep -l -nH -e 'XLIB FUNCTIONS' {} +
+#  Or ripgrep and fdfind (using fdfind rather than tricks with MANPATH to find
+#  any manual mentioning what we're interested in).
+#     rg --search-zip <grep-arguments> $(fdfind '^man([0-9]+)?' / --type d)
+#
+#  However, the formatting (including removal of special formatting characters)
+#  is very useful for actually finding what you're looking for.
+#
+#  TODO It's probably best if we wrap this up in a easy-to-use script.
+#  Something with `man -k` automatically used, and having a default of searching
+#  all man pages.
 if [[ -t 0 ]]; then
-    echo "Usage: man -k <something> | cut -d' ' -f1 | $0 <grep-arguments>"
+    echo "Usage: man -k <something> | sed -E 's/([^ ]*) \(([^)]*)\).*/\2 \1/' | $0 <grep-arguments>"
 else
+    # Suppression of errors is to suppress `troff` warnings.
+    # Things like `warning cannot select font 'C'`, and
+    # `error: expected identifier, got a special character; treated as missing`
+    # Could use MANWIDTH=400 to avoid most complaints about wrapping, but since
+    # there are others and they are noisy enough we still have to suppress other
+    # warnings and hence there's little point in avoiding these.
     xargs -I{} sh -c "output=\$( man {} 2>/dev/null | grep $* ) && echo \"###  {}\n\$output\""
 fi
