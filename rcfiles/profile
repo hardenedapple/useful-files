@@ -73,6 +73,7 @@ add_to_path "$HOME/.gem/ruby/2.1.0/bin"
 add_to_path "$HOME/.cargo/bin"
 add_to_path "$HOME/bin/lua-lsp/bin"
 add_to_path "$HOME/bin/rr/bin"
+add_to_path "$HOME/.local/bin"
 # Surprisingly important to export `PATH`.  Turns out that in some cases PATH is
 # indeed not already in the environment when sourcing personal files.
 export PATH
